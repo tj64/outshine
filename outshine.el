@@ -70,6 +70,9 @@
                      outshine-level-5 outshine-level-6 outshine-level-7
                      outshine-level-8))
 
+(defconst outshine-outline-heading-end-regexp "\n"
+  "Global default value of `outline-heading-end-regexp'.
+Used to override any major-mode specific file-local settings")
 
 ;; ** Vars
 
@@ -95,6 +98,11 @@ them set by set, separated by a nil element.  See the example for
   "Comment-start regexp without leading and trailing whitespace")
 (make-variable-buffer-local
  'outshine-normalized-comment-start)
+
+(defvar outshine-normalized-comment-end ""
+  "Comment-end regexp without leading and trailing whitespace")
+(make-variable-buffer-local
+ 'outshine-normalized-comment-end)
 
 (defvar outshine-normalized-outline-regexp-base ""
   "Outline-regex-base without leading and trailing whitespace")
@@ -316,7 +324,7 @@ t      Everywhere except in headlines"
 
 ;; * Defuns
 ;; ** Functions
-;; *** Normalize `comment-start' and `outline-regexp-base'
+;; *** Normalize regexps
 
 ;; from http://emacswiki.org/emacs/ElispCookbook#toc6
 (defun outshine-chomp (str)
@@ -334,6 +342,9 @@ t      Everywhere except in headlines"
   (and comment-start
        (setq outshine-normalized-comment-start
              (outshine-chomp comment-start)))
+  (and comment-end
+       (setq outshine-normalized-comment-end
+             (outshine-chomp comment-end)))
   (and outshine-outline-regexp-base
        (setq outshine-normalized-outline-regexp-base
              (outshine-chomp outshine-outline-regexp-base))))
@@ -372,7 +383,7 @@ Based on `comment-start' and `comment-add'."
    (and outshine-outline-regexp-outcommented-p
         ;; regexp-base outcommented, but no 'comment-start' defined
         (or comment-start
-            (error (concat
+            (message (concat
                     "Cannot calculate outcommented outline-regexp\n"
                     "without 'comment-start' character defined!")))
         (concat 
@@ -391,23 +402,38 @@ Based on `comment-start' and `comment-add'."
     (save-match-data
       (and
        (looking-at (outshine-calc-outline-regexp))
-       (length
-        (mapconcat
-         'identity
-         (split-string
-          (match-string-no-properties 0)
-          (format "[ %s]" outshine-normalized-comment-start)
-          'OMIT-NULLS) ""))))))
+       (let ((m-strg (match-string-no-properties 0)))
+         (setq m-strg
+               (split-string
+                m-strg
+                (format "%s" outshine-normalized-comment-start)
+                'OMIT-NULLS))
+         (length
+          (mapconcat
+           (lambda (str)
+             (car
+              (split-string
+               str
+               " "
+               'OMIT-NULLS)))
+           m-strg
+           "")))))))
 
 ;; *** Set outline-regexp und outline-level
 
-(defun outshine-set-local-outline-regexp-and-level (regexp &optional fun)
-   "Set `outline-regexp' locally to REGEXP and `outline-level' to FUN."
+(defun outshine-set-local-outline-regexp-and-level
+  (start-regexp &optional fun end-regexp)
+   "Set `outline-regexp' locally to START-REGEXP.
+Set optionally `outline-level' to FUN and
+`outline-heading-end-regexp' to END-REGEXP."
 	(make-local-variable 'outline-regexp)
-	(setq outline-regexp regexp)
+	(setq outline-regexp start-regexp)
 	(and fun
              (make-local-variable 'outline-level)
-             (setq outline-level fun)))
+             (setq outline-level fun))
+      	(and end-regexp
+             (make-local-variable 'outline-heading-end-regexp)
+             (setq outline-heading-end-regexp end-regexp)))
 
 ;; *** Return outline-string at given level
 
@@ -510,10 +536,12 @@ top-level heading first."
   (outshine-normalize-regexps)
   (let ((out-regexp (outshine-calc-outline-regexp)))
     (outshine-set-local-outline-regexp-and-level
-     out-regexp 'outshine-calc-outline-level)
+     out-regexp
+     'outshine-calc-outline-level
+     outshine-outline-heading-end-regexp)
     (outshine-fontify-headlines out-regexp)
     (setq outline-promotion-headings
-      (outshine-make-promotion-headings-list 8))))
+          (outshine-make-promotion-headings-list 8))))
 
 ;; ;; add this to your .emacs
 ;; (add-hook 'outline-minor-mode-hook 'outshine-hook-function)
@@ -905,13 +933,15 @@ This function takes `comment-end' into account."
 				   (concat head " "))))
       (setq head (concat head " ")))
     (unless (or (not comment-end) (string-equal "" comment-end))
-      (setq head (concat head " " comment-end))
+      (setq head (concat head " " outshine-normalized-comment-end))
       (setq com-end-p t))
     (unless (bolp) (end-of-line) (newline))
     (insert head)
     (unless (eolp)
       (save-excursion (newline-and-indent)))
-    (and com-end-p (re-search-backward comment-end) (forward-char -1))
+    (and com-end-p
+         (re-search-backward outshine-normalized-comment-end)
+         (forward-char -1))
     (run-hooks 'outline-insert-heading-hook)))
 
 ;; * Keybindings.

@@ -13,6 +13,20 @@
   [2013-02-19 Di 23:29]
 
 
+** TODO fix outline-end-of-heading (html-mode)
+   [2013-02-20 Mi 06:08]
+
+outline-heading-end-regexp is a variable defined in `outline.el'.
+Its value is "</[Hh][1-6]>"
+Original value was "\n"
+Local in buffer refA-test.html; global value is "\n"
+
+** DONE normalize 'comment-end' in 'outshine-insert-heading'
+   CLOSED: [2013-02-20 Mi 14:43]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2013-02-20 Mi 14:43]
+   :END:
+   [2013-02-20 Mi 05:58]
 ** TODO make custom vars alists with one entry per major-mode
    [2013-02-20 Mi 00:12]
 ** DONE merge renamed outxxtra and outline-magic
