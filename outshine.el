@@ -86,6 +86,21 @@ them set by set, separated by a nil element.  See the example for
 `texinfo-mode' in the file commentary.") 
 (make-variable-buffer-local 'outline-promotion-headings)
 
+(defvar outshine-delete-leading-whitespace-from-outline-regexp-base-p nil
+  "If non-nil, delete leading whitespace from outline-regexp-base.")
+(make-variable-buffer-local
+ 'outshine-delete-leading-whitespace-from-outline-regexp-base-p)
+
+(defvar outshine-normalized-comment-start ""
+  "Comment-start regexp without leading and trailing whitespace")
+(make-variable-buffer-local
+ 'outshine-normalized-comment-start)
+
+(defvar outshine-normalized-outline-regexp-base ""
+  "Outline-regex-base without leading and trailing whitespace")
+(make-variable-buffer-local
+ 'outshine-normalized-outline-regexp-base)
+
 ;; ** Hooks
 
 (defvar outshine-hook nil
@@ -249,7 +264,7 @@ any other entries, and any resulting duplicates will be removed entirely."
 
 (defgroup outshine-faces nil
   "Faces in Outshine."
-  :tag "Outxxtry Faces"
+  :tag "Outshine Faces"
   :group 'outshine)
 
 
@@ -281,18 +296,6 @@ certain level is calculated. "
   :group 'outshine
   :type 'regexp)
 
-(defcustom outshine-calc-outline-base-string-at-level-function
-  '(lambda (level str char)
-     (let ((outline-string str))
-       (dotimes (i (1- level) outline-string)
-         (setq outline-string (concat outline-string char)))))
-   "Function with 3 args used to calc 'outline-regexp-base' at a certain level.
-1st arg: outline-level as Integer
-2nd arg: return-value of 'outshine-transform-outline-regexp-base-to-string
-3rd arg: return-value of 'outshine-calc-outline-level-defining-string"
-  :group 'outshine
-  :type 'function)
-
 ;; from `outline-magic'
 (defcustom outline-cycle-emulate-tab nil
   "Where should `outline-cycle' emulate TAB.
@@ -304,6 +307,7 @@ t      Everywhere except in headlines"
 		 (const :tag "Only in completely white lines" white)
 		 (const :tag "Everywhere except in headlines" t)
 		 ))
+
 ;; from `outline-magic'
 (defcustom outline-structedit-modifiers '(meta)
   "List of modifiers for outline structure editing with the arrow keys."
@@ -312,69 +316,73 @@ t      Everywhere except in headlines"
 
 ;; * Defuns
 ;; ** Functions
+;; *** Normalize `comment-start' and `outline-regexp-base'
+
+;; from http://emacswiki.org/emacs/ElispCookbook#toc6
+(defun outshine-chomp (str)
+  "Chomp leading and trailing whitespace from STR."
+  (save-excursion
+    (save-match-data
+      (while (string-match
+              "\\`\n+\\|^\\s-+\\|\\s-+$\\|\n+\\'"
+              str)
+        (setq str (replace-match "" t t str)))
+      str)))
+
+(defun outshine-normalize-regexps ()
+  "Chomp leading and trailing whitespace from outline regexps."
+  (and comment-start
+       (setq outshine-normalized-comment-start
+             (outshine-chomp comment-start)))
+  (and outshine-outline-regexp-base
+       (setq outshine-normalized-outline-regexp-base
+             (outshine-chomp outshine-outline-regexp-base))))
+
 ;; *** Calculate outline-regexp and outline-level
 
 (defun outshine-calc-comment-region-starter ()
   "Return comment-region starter as string.
 Based on `comment-start' and `comment-add'."
   (if (or (not comment-add) (eq comment-add 0))
-      comment-start
-    (let ((comment-add-string comment-start))
+      outshine-normalized-comment-start
+    (let ((comment-add-string outshine-normalized-comment-start))
       (dotimes (i comment-add comment-add-string)
         (setq comment-add-string
-              (concat comment-add-string comment-start))))))
+              (concat comment-add-string outshine-normalized-comment-start))))))
 
 (defun outshine-calc-comment-padding ()
   "Return comment-padding as string"
-  ;; outline-regexp-base does not start with space
-  (unless
-      (string-equal                     ; a tad naive?
-       " "
-       (char-to-string
-        (elt outshine-outline-regexp-base 0)))
-    ;; comment-padding is nil
-    (if (not comment-padding)
-        " "
-      (cond
-       ;; comment-padding is integer
-       ((integer-or-marker-p comment-padding)
-        (dotimes (i comment-padding comment-padding-string)
-          (let ((comment-padding-string ""))
-            (setq comment-padding-string
-                  (concat comment-padding-string " ")))))
-       ;; comment-padding is string
-       ((stringp comment-padding)
-        comment-padding)
-       (t (error "No valid comment-padding"))))))
-
+  (cond
+   ;; comment-padding is nil
+   ((not comment-padding) " ")
+   ;; comment-padding is integer
+   ((integer-or-marker-p comment-padding)
+    (let ((comment-padding-string ""))
+      (dotimes (i comment-padding comment-padding-string)
+        (setq comment-padding-string
+              (concat comment-padding-string " ")))))
+   ;; comment-padding is string
+   ((stringp comment-padding)
+    comment-padding)
+   (t (error "No valid comment-padding"))))
 
 (defun outshine-calc-outline-regexp ()
   "Calculate the outline regexp for the current mode."
-  (cond
-   ;; just return the regexp-base
-   ((not outshine-outline-regexp-outcommented-p)
-    outshine-outline-regexp-base)
-   ;; regexp-base outcommented, but no 'comment-start' defined
-   ((not comment-start)
-    (error (concat
-            "Cannot calculate outcommented outline-regexp\n"
-            "without 'comment-start' character defined!")))
-   ;; build outcommented regexp with padding
-   (t (concat
-       ;; comment-start
-       (outshine-calc-comment-region-starter)
-       ;; comment-padding
-       (outshine-calc-comment-padding)
-       ;; regexp-base
-       outshine-outline-regexp-base
-       ;; regexp-base does not end with space
-       (unless                          ; a tad naive?
-           (string-equal
-            " "
-            (char-to-string
-             (elt outshine-outline-regexp-base
-                  (1- (length outshine-outline-regexp-base)))))
-         " ")))))
+  (concat
+   (and outshine-outline-regexp-outcommented-p
+        ;; regexp-base outcommented, but no 'comment-start' defined
+        (or comment-start
+            (error (concat
+                    "Cannot calculate outcommented outline-regexp\n"
+                    "without 'comment-start' character defined!")))
+        (concat 
+         ;; comment-start
+         (outshine-calc-comment-region-starter)
+         ;; comment-padding
+         (outshine-calc-comment-padding)))
+   ;; regexp-base
+   outshine-normalized-outline-regexp-base
+   " "))
 
 ;; TODO how is this called (match-data?) 'looking-at' necessary?
 (defun outshine-calc-outline-level ()
@@ -388,7 +396,7 @@ Based on `comment-start' and `comment-add'."
          'identity
          (split-string
           (match-string-no-properties 0)
-          (format "[ %s]" comment-start)
+          (format "[ %s]" outshine-normalized-comment-start)
           'OMIT-NULLS) ""))))))
 
 ;; *** Set outline-regexp und outline-level
@@ -400,6 +408,7 @@ Based on `comment-start' and `comment-add'."
 	(and fun
              (make-local-variable 'outline-level)
              (setq outline-level fun)))
+
 ;; *** Return outline-string at given level
 
 (defun outshine-calc-outline-string-at-level (level)
@@ -409,34 +418,22 @@ Based on `comment-start' and `comment-add'."
         base-string
       (concat (outshine-calc-comment-region-starter)
               (outshine-calc-comment-padding)
-              base-string))))
+              base-string
+              " "))))
 
 (defun outshine-calc-outline-base-string-at-level (level)
   "Return outline-base-string at level LEVEL."
-  (let* ((star (outshine-calc-outline-level-defining-string))
+  (let* ((star (outshine-transform-normalized-outline-regexp-base-to-string))
          (stars star))
-    (setq stars
-          (funcall
-           outshine-calc-outline-base-string-at-level-function
-           level stars star))
-    (replace-regexp-in-string
-     star
-     stars
-     (outshine-transform-outline-regexp-base-to-string))))
+       (dotimes (i (1- level) stars)
+         (setq stars (concat stars star)))))
 
-(defun outshine-transform-outline-regexp-base-to-string ()
+(defun outshine-transform-normalized-outline-regexp-base-to-string ()
   "Transform 'outline-regexp-base' to string by stripping off special chars."
   (replace-regexp-in-string
    outshine-outline-regexp-special-chars
    ""
-   outshine-outline-regexp-base))
-
-(defun outshine-calc-outline-level-defining-string ()
-  "Calc string that defines outline level in outline-regexp."
-  (replace-regexp-in-string
-   " "
-   ""
-   (outshine-transform-outline-regexp-base-to-string)))
+   outshine-normalized-outline-regexp-base))
 
 ;; make demote/promote from `outline-magic' work
 (defun outshine-make-promotion-headings-list (max-level)
@@ -510,6 +507,7 @@ top-level heading first."
 ;; TODO coordinate outshine, outorg and orgstruct
 (defun outshine-hook-function ()
   "Add this function to outline-minor-mode-hook"
+  (outshine-normalize-regexps)
   (let ((out-regexp (outshine-calc-outline-regexp)))
     (outshine-set-local-outline-regexp-and-level
      out-regexp 'outshine-calc-outline-level)
