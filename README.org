@@ -1,0 +1,8 @@
+/[Emacs] outline with outshine outshines outline/
+
+* outshine.el
+
+*outshine* is an extension to the Emacs (minor) mode 'outline.el'. It is
+based on, and a merge of, 'outline-magic.el' from /Carsten Dominik/ and
+'outxxtra.el', which is itself a modified extension of 'out-xtra.el' from
+/Per Abrahamsen/. 

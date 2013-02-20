@@ -1,0 +1,56 @@
+* TODO Version 1.0
+  [2013-02-19 Di 23:29]
+
+** TODO announce in org-mode mailing-list
+  [2013-02-19 Di 23:36]
+** TODO announce in emacs-user mailing-list
+  [2013-02-19 Di 23:36]
+** TODO set version number
+ [2013-02-19 Di 23:29]
+
+
+* NEXT Version 0.9
+  [2013-02-19 Di 23:29]
+
+
+** TODO make custom vars alists with one entry per major-mode
+   [2013-02-20 Mi 00:12]
+** DONE merge renamed outxxtra and outline-magic
+   CLOSED: [2013-02-20 Mi 02:49]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2013-02-20 Mi 02:49]
+   :END:
+   [2013-02-19 Di 23:41]
+** DONE comment-header for outshine.el
+   CLOSED: [2013-02-20 Mi 02:49]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2013-02-20 Mi 02:49]
+   :END:
+   [2013-02-19 Di 23:41]
+** DONE outline structure for outshine.el
+   CLOSED: [2013-02-20 Mi 02:49]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2013-02-20 Mi 02:49]
+   :END:
+   [2013-02-19 Di 23:40]
+** CANCELLED rename outline-magic defs to outshine                :CANCELLED:
+   CLOSED: [2013-02-20 Mi 02:48]
+   :LOGBOOK:
+   - State "CANCELLED"  from "TODO"       [2013-02-20 Mi 02:48] \\
+     not necessary
+   :END:
+   [2013-02-19 Di 23:40]
+** DONE rename outxxtra defs to outshine
+   CLOSED: [2013-02-20 Mi 02:48]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2013-02-20 Mi 02:48]
+   :END:
+   [2013-02-19 Di 23:37]
+** TODO Emacs Wiki article
+   [2013-02-19 Di 23:37]
+** TODO announce in org-mode mailing-list
+   [2013-02-19 Di 23:36]
+** TODO announce in emacs-user mailing-list
+   [2013-02-19 Di 23:36]
+** TODO set version number
+  [2013-02-19 Di 23:29]
