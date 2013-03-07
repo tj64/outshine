@@ -15,12 +15,17 @@ Use this in your .emacs:
 (add-hook 'outline-minor-mode-hook 'outshine-hook-function)
 
 ;; maybe this:
+
 (add-hook 'outline-minor-mode-hook
+
           (lambda ()
+
             (define-key outline-minor-mode-map
+
               (kbd "<tab>") 'outline-cycle)))
 
 ;; and maybe, just as an example, this too:
+
 (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode)
 #+end_example
 
