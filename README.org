@@ -16,13 +16,7 @@ Use this in your .emacs:
 
 ;; maybe this:
 
-(add-hook 'outline-minor-mode-hook
-
-          (lambda ()
-
-            (define-key outline-minor-mode-map
-
-              (kbd "<tab>") 'outline-cycle)))
+(add-hook 'outline-minor-mode-hook (lambda () (define-key outline-minor-mode-map (kbd "<tab>") 'outline-cycle)))
 
 ;; and maybe, just as an example, this too:
 
