@@ -52,6 +52,14 @@
 ;; Org-mode buffers) and `navi-mode.el' (fast navigation and remote-control via
 ;; modified occur-buffers).
 
+;; ** Emacs Version
+ 
+;; `outshine.el' works with [GNU Emacs 24.2.1 (x86_64-unknown-linux-gnu, GTK+
+;; Version 3.6.4) of 2013-01-20 on eric]. No attempts of testing with older
+;; versions or other types of Emacs have been made (yet).
+
+;; ** Installation
+
 ;; Download `outshine.el' and copy it to a location where Emacs can find it, and
 ;; use this in your '.emacs' to get started: 
 
@@ -68,21 +76,12 @@
 ;; ;; add this if, e.g., you always want outshine for emacs-lisp buffers
 ;; (add-hook ‘emacs-lisp-mode-hook ‘outline-minor-mode)  
 
-;; ** Emacs Version
- 
-;; `outshine.el' works with [GNU Emacs 24.2.1 (x86_64-unknown-linux-gnu, GTK+
-;; Version 3.6.4) of 2013-01-20 on eric]. No attempts of testing with older
-;; versions or other types of Emacs have be made (yet).
+;; If you want a different prefix key for outline-minor-mode, insert first
 
-;; ** Installation
+;; (defvar outline-minor-mode-prefix "\C-c") 
 
-;; Insert
-;; (require 'outshine)
-;; in your .emacs file to install.  If you want a different prefix
-;; key, insert first
-;; (defvar outline-minor-mode-prefix "\C-c")
-;; or whatever.  The prefix can only be changed before outline (minor)
-;; mode is loaded.
+;; or whatever. The prefix can only be changed before outline (minor) mode is
+;; loaded.
 
 ;; ** ChangeLog
 
