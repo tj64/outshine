@@ -4,8 +4,9 @@
 
 ;; Copyright (C) 2013  Thorsten Jolitz
 
-;; Author: Thorsten Jolitz <tjolitz AT gmail DOT com>
-;; Version:
+;; Authors: Thorsten Jolitz, Carsten Dominik, Per Abrahamsen
+;; Contact: Thorsten Jolitz <tjolitz AT gmail DOT com>
+;; Version: 0.9
 ;; Homepage: https://github.com/tj64/outshine
 ;; Keywords: outlines
 
@@ -40,14 +41,32 @@
 ;; functionality of `outline-magic' (with some tiny changes) and parts of the
 ;; functionality of `out-xtra', together with some new features and ideas. 
 
-;; Its main purpose is to make `outline-minor-mode' more similar to
-;; outline-navigation and structure-editing with (the one-and-only) `Org-mode',
-;; and to enable editing of (comment-) sections of buffers in arbitrary Emacs
-;; major-modes in temporary Org-mode buffers (via `outorg.el').
-
 ;; See `outline-magic.el' (https://github.com/tj64/outline-magic) for detailled
 ;; instructions on usage of the additional outline functions introduced by
 ;; `outline-magic'. 
+
+;; Outshines main purpose is to make `outline-minor-mode' more similar to
+;; outline-navigation and structure-editing with (the one-and-only) `Org-mode'.
+;; Furthermore, as additional but quite useful features, correctly structured
+;; outshine-buffers enable the use of `outorg.el' (subtree editing in temporary
+;; Org-mode buffers) and `navi-mode.el' (fast navigation and remote-control via
+;; modified occur-buffers).
+
+;; Download `outshine.el' and copy it to a location where Emacs can find it, and
+;; use this in your '.emacs' to get started: 
+
+;; (require 'outshine)
+;; (add-hook ‘outline-minor-mode-hook ‘outshine-hook-function)
+
+;; ;; add this for Org-mode style visibility-cycling with TAB
+;; (add-hook ‘outline-minor-mode-hook
+;;            (lambda ()
+;;              (define-key
+;;                outline-minor-mode-map
+;;                (kbd “<tab>”) ‘outline-cycle)))
+
+;; ;; add this if, e.g., you always want outshine for emacs-lisp buffers
+;; (add-hook ‘emacs-lisp-mode-hook ‘outline-minor-mode)  
 
 ;; ** Emacs Version
  
