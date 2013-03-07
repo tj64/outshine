@@ -6,3 +6,20 @@
 based on, and a merge of, 'outline-magic.el' from /Carsten Dominik/ and
 'outxxtra.el', which is itself a modified extension of 'out-xtra.el' from
 /Per Abrahamsen/. 
+
+Use this in your .emacs:
+
+#+begin_src emacs-lisp
+(require 'outshine)
+(add-hook 'outline-minor-mode-hook 'outshine-hook-function)
+
+;; maybe this:
+(add-hook 'outline-minor-mode-hook
+          (lambda ()
+            (define-key outline-minor-mode-map
+              (kbd "<tab>") 'outline-cycle)))
+
+;; and maybe, just as an example, this too:
+(add-hook 'emacs-lisp-mode-hook 'outline-minor-mode)
+#+end_src
+

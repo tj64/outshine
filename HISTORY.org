@@ -13,7 +13,11 @@
   [2013-02-19 Di 23:29]
 
 
-** TODO fix outline-end-of-heading (html-mode)
+** DONE fix outline-end-of-heading (html-mode)
+   CLOSED: [2013-02-20 Mi 14:45]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2013-02-20 Mi 14:45]
+   :END:
    [2013-02-20 Mi 06:08]
 
 outline-heading-end-regexp is a variable defined in `outline.el'.
