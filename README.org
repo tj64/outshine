@@ -9,8 +9,9 @@ based on, and a merge of, 'outline-magic.el' from /Carsten Dominik/ and
 
 Use this in your .emacs:
 
-#+begin_src emacs-lisp
+#+begin_example
 (require 'outshine)
+
 (add-hook 'outline-minor-mode-hook 'outshine-hook-function)
 
 ;; maybe this:
@@ -21,5 +22,5 @@ Use this in your .emacs:
 
 ;; and maybe, just as an example, this too:
 (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode)
-#+end_src
+#+end_example
 
