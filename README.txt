@@ -96,7 +96,7 @@ _________________
   #+end_src
 
   add this for Org-mode style visibility-cycling with TAB and arrow-key
-  navigation:
+  structure-editing:
 
   #+begin_src emacs-lisp
      (add-hook ‘outline-minor-mode-hook
@@ -143,4 +143,4 @@ _________________
 
    date            author(s)          version 
   -------------------------------------------------
-   2013-03-20 Mi   Thorsten Jolitz      0.9 
+   2013-02-20 Mi   Thorsten Jolitz      0.9 
