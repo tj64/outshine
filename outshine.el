@@ -5,10 +5,11 @@
 ;; Copyright (C) 2013  Thorsten Jolitz
 
 ;; Authors: Thorsten Jolitz, Carsten Dominik, Per Abrahamsen
-;; Contact: Thorsten Jolitz <tjolitz AT gmail DOT com>
+;; Maintainer: Thorsten Jolitz <tjolitz AT gmail DOT com>
 ;; Version: 0.9
-;; Homepage: https://github.com/tj64/outshine
-;; Keywords: outlines
+;; Keywords: outlines, file structuring
+
+;; ** License
 
 ;; This file is not (yet) part of GNU Emacs
 
@@ -36,6 +37,8 @@
 
 ;; ** Commentary
 
+;; *** About outshine
+
 ;; This library merges, modifies and extends two existing extension-libraries
 ;; for `outline' (minor) mode: `outline-magic' and `out-xtra'. It offers all the
 ;; functionality of `outline-magic' (with some tiny changes) and parts of the
@@ -52,36 +55,55 @@
 ;; Org-mode buffers) and `navi-mode.el' (fast navigation and remote-control via
 ;; modified occur-buffers).
 
-;; ** Emacs Version
+;; *** Installation
+
+;; Download `outshine.el' and copy it to a location where Emacs can find it, and
+;; use this in your '.emacs' to get started: 
+
+;; ;; #+begin_src emacs-lisp
+;; ;; (require 'outshine)
+;; ;; (add-hook ‘outline-minor-mode-hook ‘outshine-hook-function)
+;; ;; #+end_src
+
+;; add this for Org-mode style visibility-cycling with TAB and arrow-key
+;; navigation:
+
+;; ;; #+begin_src emacs-lisp
+;; ;; (add-hook ‘outline-minor-mode-hook
+;; ;;             (lambda ()
+;; ;;             (define-key outline-minor-mode-map
+;; ;;               (kbd "<tab>") 'outline-cycle)
+;; ;;             (define-key outline-minor-mode-map
+;; ;;               (kbd "<M-left>") 'outline-promote)
+;; ;;             (define-key outline-minor-mode-map
+;; ;;               (kbd "<M-right>") 'outline-demote)
+;; ;;             (define-key outline-minor-mode-map
+;; ;;               (kbd "<M-up>") 'outline-move-subtree-up)
+;; ;;             (define-key outline-minor-mode-map
+;; ;;               (kbd "<M-down>") 'outline-move-subtree-down)))
+;; ;; #+end_src
+
+;; add this if, e.g., you always want outshine for emacs-lisp buffers:
+
+;; ;; #+begin_src emacs-lisp
+;; ;; (add-hook ‘emacs-lisp-mode-hook ‘outline-minor-mode)  
+;; ;; #+end_src
+
+;; If you want a different prefix key for outline-minor-mode, insert first:
+
+;; ;; #+begin_src emacs-lisp
+;; ;;  (defvar outline-minor-mode-prefix "\C-c") 
+;; ;; #+end_src
+
+;; or whatever. The prefix can only be changed before outline (minor) mode is
+;; loaded.
+
+;; *** Emacs Version
  
 ;; `outshine.el' works with [GNU Emacs 24.2.1 (x86_64-unknown-linux-gnu, GTK+
 ;; Version 3.6.4) of 2013-01-20 on eric]. No attempts of testing with older
 ;; versions or other types of Emacs have been made (yet).
 
-;; ** Installation
-
-;; Download `outshine.el' and copy it to a location where Emacs can find it, and
-;; use this in your '.emacs' to get started: 
-
-;; (require 'outshine)
-;; (add-hook ‘outline-minor-mode-hook ‘outshine-hook-function)
-
-;; ;; add this for Org-mode style visibility-cycling with TAB
-;; (add-hook ‘outline-minor-mode-hook
-;;            (lambda ()
-;;              (define-key
-;;                outline-minor-mode-map
-;;                (kbd “<tab>”) ‘outline-cycle)))
-
-;; ;; add this if, e.g., you always want outshine for emacs-lisp buffers
-;; (add-hook ‘emacs-lisp-mode-hook ‘outline-minor-mode)  
-
-;; If you want a different prefix key for outline-minor-mode, insert first
-
-;; (defvar outline-minor-mode-prefix "\C-c") 
-
-;; or whatever. The prefix can only be changed before outline (minor) mode is
-;; loaded.
 
 ;; ** ChangeLog
 
