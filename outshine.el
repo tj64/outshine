@@ -1034,7 +1034,7 @@ This function takes `comment-end' into account."
 ;; ** From `out-xtra'
 
 ;; We provide bindings for all keys.
-;; FIXME: very old stuff from `out-xtra' - still necesary?
+;; old stuff from `out-xtra' - still up-to-date?
 
 (if (fboundp 'eval-after-load)
     ;; FSF Emacs 19.
@@ -1049,9 +1049,7 @@ This function takes `comment-end' into account."
 	 (define-key map "\C-k" 'show-branches)
 	 (define-key map "\C-q" 'outline-hide-sublevels)
 	 (define-key map "\C-o" 'outline-hide-other)
-      	 ;; (define-key map "<RET>" 'outshine-insert-heading) ; FIXME 
-         ;; TODO move this to outorg.el
-         ;; TODO differentiate between called in code or edit buffer
+      	 (define-key map "<RET>" 'outshine-insert-heading)
          (define-key map "'" 'outorg-edit-as-org)
 
 	 (define-key outline-minor-mode-map [menu-bar hide hide-sublevels]
