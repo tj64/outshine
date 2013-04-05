@@ -1,54 +1,33 @@
 ;; * outshine.el --- outline with outshine outshines outline
-
-;; ** Copyright
-
-;; Copyright (C) 2013  Thorsten Jolitz
-
-;; Authors: Thorsten Jolitz, Carsten Dominik, Per Abrahamsen
-;; Maintainer: Thorsten Jolitz <tjolitz AT gmail DOT com>
-;; Version: 0.9
-;; Keywords: outlines, file structuring
-
-;; ** License
-
-;; This file is not (yet) part of GNU Emacs
-
-;; This file is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
-
-;; This file is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
-
-;; For a full copy of the GNU General Public License
-;; see <http://www.gnu.org/licenses/>.
-
-;; ** Credits
-
-;; This library is based on, or rather an extension of, Carsten Dominik's
-;; `outline-magic' (https://github.com/tj64/outline-magic) and my own
-;; `outxxtra' (https://github.com/tj64/outxxtra), which is itself a modified
-;; extension of Per Abrahamsen's `out-xtra.el' (http://tinyurl.com/aql9p97).
-;; Some ideas were taken from Fabrice Niessen's '`.emacs'
-;; (http://www.mygooglest.com/fni/dot-emacs.html#sec-2).
+;;   :PROPERTIES:
+;;   :copyright: Thorsten Jolitz
+;;   :copyright-years: 2013
+;;   :version:  0.9
+;;   :licence:  GPL 2 or later (free software)
+;;   :licence-url: http://www.gnu.org/licenses/
+;;   :part-of-emacs: no
+;;   :authors: Thorsten_Jolitz Carsten_Dominik Per_Abrahamsen
+;;   :author_email: tjolitz AT gmail DOT com
+;;   :credits:  Fabrice Niessen
+;;   :inspiration: outline-magic outxxtra out-xtra
+;;   :keywords: emacs outlines file_structuring
+;;   :END:
 
 ;; ** Commentary
 
 ;; *** About outshine
 
-;; This library merges, modifies and extends two existing extension-libraries
-;; for `outline' (minor) mode: `outline-magic' and `out-xtra'. It offers all the
-;; functionality of `outline-magic' (with some tiny changes) and parts of the
-;; functionality of `out-xtra', together with some new features and ideas. 
+;; This library merges, modifies and extends two existing extension-libraries for
+;; `outline' (minor) mode: `outline-magic' (by Carsten Dominik) and `out-xtra'
+;; (by Per Abrahamsen). It offers all the functionality of `outline-magic' (with
+;; some tiny changes) and parts of the functionality of `out-xtra', together with
+;; some new features and ideas.
 
 ;; See `outline-magic.el' (https://github.com/tj64/outline-magic) for detailled
 ;; instructions on usage of the additional outline functions introduced by
 ;; `outline-magic'. 
 
-;; Outshines main purpose is to make `outline-minor-mode' more similar to
+;; Outshine's main purpose is to make `outline-minor-mode' more similar to
 ;; outline-navigation and structure-editing with (the one-and-only) `Org-mode'.
 ;; Furthermore, as additional but quite useful features, correctly structured
 ;; outshine-buffers enable the use of `outorg.el' (subtree editing in temporary
@@ -57,43 +36,54 @@
 
 ;; *** Installation
 
-;; Download `outshine.el' and copy it to a location where Emacs can find it, and
-;; use this in your '.emacs' to get started: 
+;; Download `outshine.el' and copy it to a location where Emacs can find it,
+;; and use this in your '.emacs' to get started:
 
-;; ;; #+begin_src emacs-lisp
-;; ;; (require 'outshine)
-;; ;; (add-hook ‘outline-minor-mode-hook ‘outshine-hook-function)
-;; ;; #+end_src
+;; # #+begin_src emacs-lisp
+;; #  (require 'outshine)
+;; #  (add-hook ‘outline-minor-mode-hook ‘outshine-hook-function)
+;; # #+end_src
 
-;; add this for Org-mode style visibility-cycling with TAB and arrow-key
-;; structure-editing:
+;; Download
+;; [[https://raw.github.com/andreas-marschke/dotfiles/master/elisp/outline-mode-easy-bindings.el][outline-mode-easy-bindings.el]]
+;; and put it in a place where Emacs can find it. `outshine' loads this
+;; library if it is able to successfully require it. The functions and
+;; keybindings (for 'M -<<arrow-key>>' navigation and visibility cycling)
+;; defined there are so convenient that I put the following code into my Emacs
+;; init file to have the same functionality/keybindings available in
+;; Org-mode too:
 
-;; ;; #+begin_src emacs-lisp
-;; ;; (add-hook ‘outline-minor-mode-hook
-;; ;;             (lambda ()
-;; ;;             (define-key outline-minor-mode-map
-;; ;;               (kbd "<tab>") 'outline-cycle)
-;; ;;             (define-key outline-minor-mode-map
-;; ;;               (kbd "<M-left>") 'outline-promote)
-;; ;;             (define-key outline-minor-mode-map
-;; ;;               (kbd "<M-right>") 'outline-demote)
-;; ;;             (define-key outline-minor-mode-map
-;; ;;               (kbd "<M-up>") 'outline-move-subtree-up)
-;; ;;             (define-key outline-minor-mode-map
-;; ;;               (kbd "<M-down>") 'outline-move-subtree-down)))
-;; ;; #+end_src
+;; # #+begin_src emacs-lisp
+;; #   (add-hook 'org-mode-hook
+;; #             (lambda ()
+;; #               ;; Redefine arrow keys, since promoting/demoting and moving
+;; #               ;; subtrees up and down are less frequent tasks then
+;; #               ;; navigation and visibility cycling
+;; #               (when (try-require 'outline-mode-easy-bindings)
+;; #                 (org-defkey org-mode-map
+;; #                             (kbd "M-<left>") 'outline-hide-more)
+;; #                 (org-defkey org-mode-map
+;; #                             (kbd "M-<right>") 'outline-show-more)
+;; #                 (org-defkey org-mode-map
+;; #                             (kbd "M-<up>") 'outline-previous-visible-heading)
+;; #                 (org-defkey org-mode-map
+;; #                             (kbd "M-<down>") 'outline-next-visible-heading)))
+;; #             'append)
+;; # #+end_src
 
-;; add this if, e.g., you always want outshine for emacs-lisp buffers:
 
-;; ;; #+begin_src emacs-lisp
-;; ;; (add-hook ‘emacs-lisp-mode-hook ‘outline-minor-mode)  
-;; ;; #+end_src
+;; Add this to your .emacs if, e.g., you always want outshine for emacs-lisp
+;; buffers (recommended):
+
+;; # #+begin_src emacs-lisp
+;; #  (add-hook ‘emacs-lisp-mode-hook ‘outline-minor-mode)
+;; # #+end_src
 
 ;; If you want a different prefix key for outline-minor-mode, insert first:
 
-;; ;; #+begin_src emacs-lisp
-;; ;;  (defvar outline-minor-mode-prefix "\C-c") 
-;; ;; #+end_src
+;; # #+begin_src emacs-lisp
+;; #  (defvar outline-minor-mode-prefix "\C-c")
+;; # #+end_src
 
 ;; or whatever. The prefix can only be changed before outline (minor) mode is
 ;; loaded.
@@ -1033,18 +1023,6 @@ This function takes `comment-end' into account."
 ;; keybindings like Org-mode
 (define-key outline-minor-mode-map (kbd "TAB") 'outshine-cycle-subtree)
 (define-key outline-minor-mode-map (kbd "<backtab>") 'outshine-cycle-buffer)
-
-;; (define-key outline-mode-map [(tab)] 'outline-cycle)
-;; (let ((keys '((left . outline-promote)
-;; 	      (right . outline-demote)
-;; 	      (up . outline-move-subtree-up)
-;; 	      (down . outline-move-subtree-down)))
-;;       key)
-;;   (while (setq key (pop keys))
-;;     (apply 'define-key outline-mode-map
-;; 	   (list
-;; 	    (vector (append outline-structedit-modifiers (list (car key))))
-;; 	    (cdr key)))))
 
 ;; Menu entries
 
