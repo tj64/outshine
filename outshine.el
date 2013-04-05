@@ -1002,19 +1002,34 @@ This function takes `comment-end' into account."
     (run-hooks 'outline-insert-heading-hook)))
 
 ;; * Keybindings.
+;; ** Easy bindings
+
+;; Explorer-like bindings (`M-left/right/up/down' to navigate outlines)
+(if (not (locate-library "outline-mode-easy-bindings.el"))
+    (message
+     (concat
+      "Consider installing 'outline-mode-easy-bindings.el' "
+      "for easy outline-mode keybindings"))
+  (add-hook 'outline-mode-hook
+            '(lambda ()
+               (require 'outline-mode-easy-bindings)))
+  (add-hook 'outline-minor-mode-hook
+            '(lambda ()
+               (require 'outline-mode-easy-bindings))))
+ 
 ;; ** From `outline-magic'
 
 (define-key outline-mode-map [(tab)] 'outline-cycle)
-(let ((keys '((left . outline-promote)
-	      (right . outline-demote)
-	      (up . outline-move-subtree-up)
-	      (down . outline-move-subtree-down)))
-      key)
-  (while (setq key (pop keys))
-    (apply 'define-key outline-mode-map
-	   (list
-	    (vector (append outline-structedit-modifiers (list (car key))))
-	    (cdr key)))))
+;; (let ((keys '((left . outline-promote)
+;; 	      (right . outline-demote)
+;; 	      (up . outline-move-subtree-up)
+;; 	      (down . outline-move-subtree-down)))
+;;       key)
+;;   (while (setq key (pop keys))
+;;     (apply 'define-key outline-mode-map
+;; 	   (list
+;; 	    (vector (append outline-structedit-modifiers (list (car key))))
+;; 	    (cdr key)))))
 
 ;;; Menu entries
 
