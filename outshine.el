@@ -965,6 +965,17 @@ may have changed."
       ;; Not at a headline: Do indent-relative
       (outline-back-to-heading))))))
 
+(defun outshine-cycle-subtree ()
+  "Cycle the visibility state of subtree at point."
+  (interactive)
+  (if (outline-on-heading-p)
+      (outline-cycle 1)
+    (message "Not on subtree - cannot cycle subtree visibility state.")))
+
+(defun outshine-cycle-buffer ()
+  "Cycle the visibility state of buffer."
+  (interactive)
+  (outline-cycle '(4)))
 
 ;; *** Overridden outline commands 
 
@@ -1019,7 +1030,11 @@ This function takes `comment-end' into account."
  
 ;; ** From `outline-magic'
 
-(define-key outline-mode-map [(tab)] 'outline-cycle)
+;; keybindings like Org-mode
+(define-key outline-minor-mode-map (kbd "TAB") 'outshine-cycle-subtree)
+(define-key outline-minor-mode-map (kbd "<backtab>") 'outshine-cycle-buffer)
+
+;; (define-key outline-mode-map [(tab)] 'outline-cycle)
 ;; (let ((keys '((left . outline-promote)
 ;; 	      (right . outline-demote)
 ;; 	      (up . outline-move-subtree-up)
@@ -1031,7 +1046,7 @@ This function takes `comment-end' into account."
 ;; 	    (vector (append outline-structedit-modifiers (list (car key))))
 ;; 	    (cdr key)))))
 
-;;; Menu entries
+;; Menu entries
 
 (define-key outline-mode-menu-bar-map [headings outline-move-subtree-down]
   '("Move subtree down" . outline-move-subtree-down))
