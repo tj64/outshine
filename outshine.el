@@ -17,22 +17,22 @@
 
 ;; *** About outshine
 
-;; This library merges, modifies and extends two existing extension-libraries for
-;; `outline' (minor) mode: `outline-magic' (by Carsten Dominik) and `out-xtra'
-;; (by Per Abrahamsen). It offers all the functionality of `outline-magic' (with
-;; some tiny changes) and parts of the functionality of `out-xtra', together with
-;; some new features and ideas.
+;; This library merges, modifies and extends two existing extension-libraries
+;; for `outline' (minor) mode: `outline-magic' (by Carsten Dominik) and
+;; `out-xtra' (by Per Abrahamsen). It offers all the functionality of
+;; `outline-magic' (with some tiny changes) and parts of the functionality of
+;; `out-xtra', together with some new features and ideas.
 
-;; See `outline-magic.el' (https://github.com/tj64/outline-magic) for detailled
-;; instructions on usage of the additional outline functions introduced by
-;; `outline-magic'. 
+;; See `outline-magic.el' (https://github.com/tj64/outline-magic) for
+;; detailled instructions on usage of the additional outline functions
+;; introduced by `outline-magic'.
 
 ;; Outshine's main purpose is to make `outline-minor-mode' more similar to
-;; outline-navigation and structure-editing with (the one-and-only) `Org-mode'.
-;; Furthermore, as additional but quite useful features, correctly structured
-;; outshine-buffers enable the use of `outorg.el' (subtree editing in temporary
-;; Org-mode buffers) and `navi-mode.el' (fast navigation and remote-control via
-;; modified occur-buffers).
+;; outline-navigation and structure-editing with (the one-and-only)
+;; `Org-mode'. Furthermore, as additional but quite useful features, correctly
+;; structured outshine-buffers enable the use of `outorg.el' (subtree editing
+;; in temporary Org-mode buffers) and `navi-mode.el' (fast navigation and
+;; remote-control via modified occur-buffers).
 
 ;; *** Installation
 
@@ -50,8 +50,8 @@
 ;; library if it is able to successfully require it. The functions and
 ;; keybindings (for 'M -<<arrow-key>>' navigation and visibility cycling)
 ;; defined there are so convenient that I put the following code into my Emacs
-;; init file to have the same functionality/keybindings available in
-;; Org-mode too:
+;; init file to have the same functionality/keybindings available in Org-mode
+;; too:
 
 ;; # #+begin_src emacs-lisp
 ;; #   (add-hook 'org-mode-hook
@@ -71,7 +71,6 @@
 ;; #             'append)
 ;; # #+end_src
 
-
 ;; Add this to your .emacs if, e.g., you always want outshine for emacs-lisp
 ;; buffers (recommended):
 
@@ -89,7 +88,7 @@
 ;; loaded.
 
 ;; *** Emacs Version
- 
+
 ;; `outshine.el' works with [GNU Emacs 24.2.1 (x86_64-unknown-linux-gnu, GTK+
 ;; Version 3.6.4) of 2013-01-20 on eric]. No attempts of testing with older
 ;; versions or other types of Emacs have been made (yet).
@@ -1057,7 +1056,7 @@ This function takes `comment-end' into account."
 	 (define-key map "\C-k" 'show-branches)
 	 (define-key map "\C-q" 'outline-hide-sublevels)
 	 (define-key map "\C-o" 'outline-hide-other)
-      	 (define-key map "<RET>" 'outshine-insert-heading)
+      	 (define-key map (kbd "RET") 'outshine-insert-heading)
          (define-key map "'" 'outorg-edit-as-org)
 
 	 (define-key outline-minor-mode-map [menu-bar hide hide-sublevels]

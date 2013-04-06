@@ -95,27 +95,35 @@ _________________
    (add-hook  ‘outline-minor-mode-hook ‘outshine-hook-function)
   #+end_src
 
-  add this for Org-mode style visibility-cycling with TAB and arrow-key
-  structure-editing:
+  Download [[https://raw.github.com/andreas-marschke/dotfiles/master/elisp/outline-mode-easy-bindings.el][outline-mode-easy-bindings.el]] and put it in a place where Emacs can
+  find it. `outshine' loads this library if it is able to successfully require
+  it. The functions and keybindings (for 'M -<<arrow-key>>' navigation and
+  visibility cycling) defined there are so convenient that I put the following
+  code into my Emacs init file to have the same functionality/keybindings
+  available in Org-mode too:
 
   #+begin_src emacs-lisp
-     (add-hook ‘outline-minor-mode-hook
-       (lambda ()
-          (define-key outline-minor-mode-map
-            (kbd "<tab>") 'outline-cycle)
-          (define-key outline-minor-mode-map
-            (kbd "<M-left>") 'outline-promote)
-          (define-key outline-minor-mode-map
-            (kbd "<M-right>") 'outline-demote)
-          (define-key outline-minor-mode-map
-            (kbd "<M-up>") 'outline-move-subtree-up)
-          (define-key outline-minor-mode-map
-             (kbd "<M-down>") 'outline-move-subtree-down)))
+    (add-hook 'org-mode-hook
+            (lambda ()
+              ;; Redefine arrow keys, since promoting/demoting and moving
+              ;; subtrees up and down are less frequent tasks then
+              ;; navigation and visibility cycling
+              (when (try-require 'outline-mode-easy-bindings)
+                (org-defkey org-mode-map
+                            (kbd "M-<left>") 'outline-hide-more)
+                (org-defkey org-mode-map
+                            (kbd "M-<right>") 'outline-show-more)
+                (org-defkey org-mode-map
+                            (kbd "M-<up>") 'outline-previous-visible-heading)
+                (org-defkey org-mode-map
+                            (kbd "M-<down>") 'outline-next-visible-heading)))
+            'append)
   #+end_src
 
-  add this if, e.g., you always want outshine for emacs-lisp buffers:
+  Add this to your .emacs if, e.g., you always want outshine for emacs-lisp
+  buffers (recommended):
 
-  f#+begin_src emacs-lisp
+  #+begin_src emacs-lisp
    (add-hook ‘emacs-lisp-mode-hook ‘outline-minor-mode)
   #+end_src
 
