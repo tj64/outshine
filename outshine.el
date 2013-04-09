@@ -40,8 +40,8 @@
 ;; and use this in your '.emacs' to get started:
 
 ;; # #+begin_src emacs-lisp
-;; #  (require 'outshine)
-;; #  (add-hook ‘outline-minor-mode-hook ‘outshine-hook-function)
+;; #   (require 'outshine)
+;; #   (add-hook 'outline-minor-mode-hook 'outshine-hook-function)
 ;; # #+end_src
 
 ;; Download
@@ -75,7 +75,7 @@
 ;; buffers (recommended):
 
 ;; # #+begin_src emacs-lisp
-;; #  (add-hook ‘emacs-lisp-mode-hook ‘outline-minor-mode)
+;; #   (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode)
 ;; # #+end_src
 
 ;; If you want a different prefix key for outline-minor-mode, insert first:

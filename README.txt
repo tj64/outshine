@@ -92,7 +92,7 @@ _________________
 
   #+begin_src emacs-lisp
    (require 'outshine)
-   (add-hook  ‘outline-minor-mode-hook ‘outshine-hook-function)
+   (add-hook  'outline-minor-mode-hook 'outshine-hook-function)
   #+end_src
 
   Download [[https://raw.github.com/andreas-marschke/dotfiles/master/elisp/outline-mode-easy-bindings.el][outline-mode-easy-bindings.el]] and put it in a place where Emacs can
