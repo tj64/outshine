@@ -351,7 +351,7 @@ certain level is calculated. "
   :type 'regexp)
 
 ;; from `outline-magic'
-(defcustom outline-cycle-emulate-tab nil
+(defcustom outline-cycle-emulate-tab t
   "Where should `outline-cycle' emulate TAB.
 nil    Never
 white  Only in completely white lines
