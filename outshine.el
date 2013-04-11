@@ -123,7 +123,11 @@ Used to override any major-mode specific file-local settings")
 ;; ** Vars
 
 (defvar outline-minor-mode-prefix "\C-c"
-  "New outline-minor-mode prefix.")
+  "New outline-minor-mode prefix.
+Does not really take effect when set in the `outshine' library.
+Instead, it must be set in your init file *before* the `outline'
+library is loaded, see the installation tips in the comment
+section of `outshine'.")
 
 ;; from `outline-magic'
 (defvar outline-promotion-headings nil
@@ -351,6 +355,7 @@ certain level is calculated. "
   :type 'regexp)
 
 ;; from `outline-magic'
+;; FIXME reset to nil, if TAB inserts space instead of doing completion
 (defcustom outline-cycle-emulate-tab t
   "Where should `outline-cycle' emulate TAB.
 nil    Never
