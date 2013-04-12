@@ -208,7 +208,8 @@ any other entries, and any resulting duplicates will be removed entirely."
 (put 'outshine-compatible-face 'lisp-indent-function 1)
 
 ;; The following face definitions are from `org-faces.el'
-(defface outshine-level-1 ;; originally copied from font-lock-function-name-face
+;; originally copied from font-lock-function-name-face
+(defface outshine-level-1 
   (outshine-compatible-face 'outline-1
     '((((class color) (min-colors 88)
         (background light)) (:foreground "Blue1"))
@@ -223,7 +224,8 @@ any other entries, and any resulting duplicates will be removed entirely."
   "Face used for level 1 headlines."
   :group 'outshine-faces)
 
-(defface outshine-level-2 ;; originally copied from font-lock-variable-name-face
+;; originally copied from font-lock-variable-name-face
+(defface outshine-level-2 
   (outshine-compatible-face 'outline-2
     '((((class color) (min-colors 16)
         (background light)) (:foreground "DarkGoldenrod"))
@@ -237,7 +239,8 @@ any other entries, and any resulting duplicates will be removed entirely."
   "Face used for level 2 headlines."
   :group 'outshine-faces)
 
-(defface outshine-level-3 ;; originally copied from font-lock-keyword-face
+;; originally copied from font-lock-keyword-face
+(defface outshine-level-3 
   (outshine-compatible-face 'outline-3
     '((((class color) (min-colors 88)
         (background light)) (:foreground "Purple"))
@@ -255,7 +258,8 @@ any other entries, and any resulting duplicates will be removed entirely."
   "Face used for level 3 headlines."
   :group 'outshine-faces)
 
-(defface outshine-level-4   ;; originally copied from font-lock-comment-face
+   ;; originally copied from font-lock-comment-face
+(defface outshine-level-4
   (outshine-compatible-face 'outline-4
     '((((class color) (min-colors 88)
         (background light)) (:foreground "Firebrick"))
@@ -273,7 +277,8 @@ any other entries, and any resulting duplicates will be removed entirely."
   "Face used for level 4 headlines."
   :group 'outshine-faces)
 
-(defface outshine-level-5 ;; originally copied from font-lock-type-face
+ ;; originally copied from font-lock-type-face
+(defface outshine-level-5
   (outshine-compatible-face 'outline-5
     '((((class color) (min-colors 16)
         (background light)) (:foreground "ForestGreen"))
@@ -283,7 +288,8 @@ any other entries, and any resulting duplicates will be removed entirely."
   "Face used for level 5 headlines."
   :group 'outshine-faces)
 
-(defface outshine-level-6 ;; originally copied from font-lock-constant-face
+ ;; originally copied from font-lock-constant-face
+(defface outshine-level-6
   (outshine-compatible-face 'outline-6
     '((((class color) (min-colors 16)
         (background light)) (:foreground "CadetBlue"))
@@ -292,7 +298,8 @@ any other entries, and any resulting duplicates will be removed entirely."
       (((class color) (min-colors 8)) (:foreground "magenta")))) "Face used for level 6 headlines."
   :group 'outshine-faces)
 
-(defface outshine-level-7 ;; originally copied from font-lock-builtin-face
+ ;; originally copied from font-lock-builtin-face
+(defface outshine-level-7
   (outshine-compatible-face 'outline-7
     '((((class color) (min-colors 16)
         (background light)) (:foreground "Orchid"))
@@ -302,7 +309,8 @@ any other entries, and any resulting duplicates will be removed entirely."
   "Face used for level 7 headlines."
   :group 'outshine-faces)
 
-(defface outshine-level-8 ;; originally copied from font-lock-string-face
+ ;; originally copied from font-lock-string-face
+(defface outshine-level-8
   (outshine-compatible-face 'outline-8
     '((((class color) (min-colors 16)
         (background light)) (:foreground "RosyBrown"))
