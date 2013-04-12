@@ -44,11 +44,9 @@
 ;; #   (add-hook 'outline-minor-mode-hook 'outshine-hook-function)
 ;; # #+end_src
 
-;; Download
-;; [[https://raw.github.com/andreas-marschke/dotfiles/master/elisp/outline-mode-easy-bindings.el][outline-mode-easy-bindings.el]]
-;; and put it in a place where Emacs can find it. `outshine' loads this
-;; library if it is able to successfully require it. The functions and
-;; keybindings (for 'M -<<arrow-key>>' navigation and visibility cycling)
+;; Download XXX and put it in a place where Emacs can find it. `outshine'
+;; loads this library if it is able to successfully require it. The functions
+;; and keybindings (for 'M -<<arrow-key>>' navigation and visibility cycling)
 ;; defined there are so convenient that I put the following code into my Emacs
 ;; init file to have the same functionality/keybindings available in Org-mode
 ;; too:
@@ -59,7 +57,7 @@
 ;; #               ;; Redefine arrow keys, since promoting/demoting and moving
 ;; #               ;; subtrees up and down are less frequent tasks then
 ;; #               ;; navigation and visibility cycling
-;; #               (when (try-require 'outline-mode-easy-bindings)
+;; #               (when (require 'outline-mode-easy-bindings nil 'NOERROR)
 ;; #                 (org-defkey org-mode-map
 ;; #                             (kbd "M-<left>") 'outline-hide-more)
 ;; #                 (org-defkey org-mode-map
@@ -401,6 +399,15 @@ t      Everywhere except in headlines"
              (outshine-chomp outshine-outline-regexp-base))))
 
 ;; *** Calculate outline-regexp and outline-level
+
+;; ;; TODO implement
+;; (defun outshine-header-style-p (&optional buffer)
+;;   "Return nil if not outshine headers are found in current buffer or BUFFER."
+;;   (let ((buf (or buffer (current-buffer))))
+;;     (with-current-buffer buf
+;;       (save-excursion
+;;         (goto-char (point-min))
+;;         (re-search-forward ...)))))
 
 (defun outshine-calc-comment-region-starter ()
   "Return comment-region starter as string.
