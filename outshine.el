@@ -44,12 +44,14 @@
 ;; #   (add-hook 'outline-minor-mode-hook 'outshine-hook-function)
 ;; # #+end_src
 
-;; Download XXX and put it in a place where Emacs can find it. `outshine'
-;; loads this library if it is able to successfully require it. The functions
-;; and keybindings (for 'M -<<arrow-key>>' navigation and visibility cycling)
-;; defined there are so convenient that I put the following code into my Emacs
-;; init file to have the same functionality/keybindings available in Org-mode
-;; too:
+;; Download
+;; https://raw.github.com/tj64/outshine/master/outline-mode-easy-bindings.el
+;; (or do 'git clone git@github.com:tj64/outshine.git' in a shell) and put it
+;; in a place where Emacs can find it. `outshine' loads this library if it is
+;; able to successfully require it. The functions and keybindings (for 'M
+;; -<<arrow-key>>' navigation and visibility cycling) defined there are so
+;; convenient that I put the following code into my Emacs init file to have
+;; the same functionality/keybindings available in Org-mode too:
 
 ;; # #+begin_src emacs-lisp
 ;; #   (add-hook 'org-mode-hook

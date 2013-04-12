@@ -95,29 +95,31 @@ _________________
    (add-hook  'outline-minor-mode-hook 'outshine-hook-function)
   #+end_src
 
-  Download [[https://raw.github.com/andreas-marschke/dotfiles/master/elisp/outline-mode-easy-bindings.el][outline-mode-easy-bindings.el]] and put it in a place where Emacs can
-  find it. `outshine' loads this library if it is able to successfully require
-  it. The functions and keybindings (for 'M -<<arrow-key>>' navigation and
-  visibility cycling) defined there are so convenient that I put the following
-  code into my Emacs init file to have the same functionality/keybindings
-  available in Org-mode too:
+  Download
+  https://raw.github.com/tj64/outshine/master/outline-mode-easy-bindings.el
+  (or do 'git clone git@github.com:tj64/outshine.git' in a shell) and put it
+  in a place where Emacs can find it. `outshine' loads this library if it is
+  able to successfully require it. The functions and keybindings (for 'M
+  -<<arrow-key>>' navigation and visibility cycling) defined there are so
+  convenient that I put the following code into my Emacs init file to have the
+  same functionality/keybindings available in Org-mode too:
 
   #+begin_src emacs-lisp
     (add-hook 'org-mode-hook
-            (lambda ()
-              ;; Redefine arrow keys, since promoting/demoting and moving
-              ;; subtrees up and down are less frequent tasks then
-              ;; navigation and visibility cycling
-              (when (try-require 'outline-mode-easy-bindings)
-                (org-defkey org-mode-map
-                            (kbd "M-<left>") 'outline-hide-more)
-                (org-defkey org-mode-map
-                            (kbd "M-<right>") 'outline-show-more)
-                (org-defkey org-mode-map
-                            (kbd "M-<up>") 'outline-previous-visible-heading)
-                (org-defkey org-mode-map
-                            (kbd "M-<down>") 'outline-next-visible-heading)))
-            'append)
+              (lambda ()
+                ;; Redefine arrow keys, since promoting/demoting and moving
+                ;; subtrees up and down are less frequent tasks then
+                ;; navigation and visibility cycling
+                (when (require 'outline-mode-easy-bindings nil 'NOERROR)
+                  (org-defkey org-mode-map
+                              (kbd "M-<left>") 'outline-hide-more)
+                  (org-defkey org-mode-map
+                              (kbd "M-<right>") 'outline-show-more)
+                  (org-defkey org-mode-map
+                              (kbd "M-<up>") 'outline-previous-visible-heading)
+                  (org-defkey org-mode-map
+                              (kbd "M-<down>") 'outline-next-visible-heading)))
+              'append)
   #+end_src
 
   Add this to your .emacs if, e.g., you always want outshine for emacs-lisp
