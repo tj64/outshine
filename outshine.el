@@ -150,10 +150,10 @@ them set by set, separated by a nil element.  See the example for
 (make-variable-buffer-local
  'outshine-delete-leading-whitespace-from-outline-regexp-base-p)
 
-;; (defvar outshine-enforce-no-comment-padding-p nil
-;;   "If non-nil, make sure no comment-padding is used in heading.")
-;; (make-variable-buffer-local
-;;  'outshine-enforce-no-comment-padding-p)
+(defvar outshine-enforce-no-comment-padding-p nil
+  "If non-nil, make sure no comment-padding is used in heading.")
+(make-variable-buffer-local
+ 'outshine-enforce-no-comment-padding-p)
 
 (defvar outshine-outline-regexp-base ""
   "Actual base for calculating the outline-regexp")
@@ -410,13 +410,18 @@ t      Everywhere except in headlines"
         (setq str (replace-match "" t t str)))
       str)))
 
-(defun outshine-determine-outline-regexp-base ()
+(defun outshine-set-outline-regexp-base ()
   "Return the actual outline-regexp-base."
   (if (and
-       (not (outshine-default-header-style-p))
+       (not (outshine-orgmode-header-style-in-elisp-p))
        (eq major-mode 'emacs-lisp-mode))
-      outshine-oldschool-elisp-outline-regexp-base
-    outshine-default-outline-regexp-base))
+      (progn
+        (setq outshine-enforce-no-comment-padding-p t)
+        (setq outshine-outline-regexp-base
+              outshine-oldschool-elisp-outline-regexp-base))
+    (setq outshine-enforce-no-comment-padding-p nil)
+    (setq outshine-outline-regexp-base
+          outshine-default-outline-regexp-base)))
 
 (defun outshine-normalize-regexps ()
   "Chomp leading and trailing whitespace from outline regexps."
@@ -432,15 +437,16 @@ t      Everywhere except in headlines"
 
 ;; *** Calculate outline-regexp and outline-level
 
-(defun outshine-default-header-style-p (&optional buffer)
-  "Return nil, if there is no match for a default header.
+;; dealing with special case of oldschool headers in elisp (;;;+)
+(defun outshine-orgmode-header-style-in-elisp-p (&optional buffer)
+  "Return nil, if there is no match for a Org-mode style header.
 Searches in BUFFER if given, otherwise in current buffer."
   (let ((buf (or buffer (current-buffer))))
     (with-current-buffer buf
       (save-excursion
         (goto-char (point-min))
         (re-search-forward
-         (outshine-calc-outline-regexp)
+         "^;; [*]+ "
          nil 'NOERROR)))))
 
 
@@ -485,7 +491,9 @@ Based on `comment-start' and `comment-add'."
          ;; comment-start
          (outshine-calc-comment-region-starter)
          ;; comment-padding
-         (outshine-calc-comment-padding)))
+         (if outshine-enforce-no-comment-padding-p
+             ""
+         (outshine-calc-comment-padding))))
    ;; regexp-base
    outshine-normalized-outline-regexp-base
    " "))
@@ -538,7 +546,9 @@ Set optionally `outline-level' to FUN and
     (if (not outshine-outline-regexp-outcommented-p)
         base-string
       (concat (outshine-calc-comment-region-starter)
-              (outshine-calc-comment-padding)
+              (if outshine-enforce-no-comment-padding-p
+                  ""
+                (outshine-calc-comment-padding))
               base-string
               " "))))
 
@@ -628,6 +638,7 @@ top-level heading first."
 ;; TODO coordinate outshine, outorg and orgstruct
 (defun outshine-hook-function ()
   "Add this function to outline-minor-mode-hook"
+  (outshine-set-outline-regexp-base)
   (outshine-normalize-regexps)
   (let ((out-regexp (outshine-calc-outline-regexp)))
     (outshine-set-local-outline-regexp-and-level
