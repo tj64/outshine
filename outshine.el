@@ -120,6 +120,12 @@
   "Global default value of `outline-heading-end-regexp'.
 Used to override any major-mode specific file-local settings")
 
+(defconst outshine-default-outline-regexp-base "[*]+"
+  "Default base for calculating the outline-regexp")
+
+(defconst outshine-oldschool-elisp-outline-regexp-base "[;]+"
+  "Oldschool Emacs Lisp base for calculating the outline-regexp")
+
 ;; ** Vars
 
 (defvar outline-minor-mode-prefix "\C-c"
@@ -133,16 +139,24 @@ section of `outshine'.")
 (defvar outline-promotion-headings nil
   "A sorted list of headings used for promotion/demotion commands.
 Set this to a list of headings as they are matched by `outline-regexp',
-top-level heading first.  If a mode or document needs several sets of 
+top-level heading first.  If a mode or document needs several sets of
 outline headings (for example numbered and unnumbered sections), list
 them set by set, separated by a nil element.  See the example for
-`texinfo-mode' in the file commentary.") 
+`texinfo-mode' in the file commentary.")
 (make-variable-buffer-local 'outline-promotion-headings)
 
 (defvar outshine-delete-leading-whitespace-from-outline-regexp-base-p nil
   "If non-nil, delete leading whitespace from outline-regexp-base.")
 (make-variable-buffer-local
  'outshine-delete-leading-whitespace-from-outline-regexp-base-p)
+
+;; (defvar outshine-enforce-no-comment-padding-p nil
+;;   "If non-nil, make sure no comment-padding is used in heading.")
+;; (make-variable-buffer-local
+;;  'outshine-enforce-no-comment-padding-p)
+
+(defvar outshine-outline-regexp-base ""
+  "Actual base for calculating the outline-regexp")
 
 (defvar outshine-normalized-comment-start ""
   "Comment-start regexp without leading and trailing whitespace")
@@ -209,7 +223,7 @@ any other entries, and any resulting duplicates will be removed entirely."
 
 ;; The following face definitions are from `org-faces.el'
 ;; originally copied from font-lock-function-name-face
-(defface outshine-level-1 
+(defface outshine-level-1
   (outshine-compatible-face 'outline-1
     '((((class color) (min-colors 88)
         (background light)) (:foreground "Blue1"))
@@ -225,7 +239,7 @@ any other entries, and any resulting duplicates will be removed entirely."
   :group 'outshine-faces)
 
 ;; originally copied from font-lock-variable-name-face
-(defface outshine-level-2 
+(defface outshine-level-2
   (outshine-compatible-face 'outline-2
     '((((class color) (min-colors 16)
         (background light)) (:foreground "DarkGoldenrod"))
@@ -240,7 +254,7 @@ any other entries, and any resulting duplicates will be removed entirely."
   :group 'outshine-faces)
 
 ;; originally copied from font-lock-keyword-face
-(defface outshine-level-3 
+(defface outshine-level-3
   (outshine-compatible-face 'outline-3
     '((((class color) (min-colors 88)
         (background light)) (:foreground "Purple"))
@@ -344,10 +358,10 @@ poutshine-level-* faces."
   :group 'outshine
   :type 'boolean)
 
-(defcustom outshine-outline-regexp-base " [*]+ "
-  "Base for calculating the outline-regexp"
-  :group 'outshine
-  :type 'regexp)
+;; (defcustom outshine-outline-regexp-base " [*]+ "
+;;   "Base for calculating the outline-regexp"
+;;   :group 'outshine
+;;   :type 'regexp)
 
 (defcustom outshine-outline-regexp-outcommented-p t
   "Non-nil if regexp-base is outcommented to calculate outline-regexp."
@@ -396,6 +410,14 @@ t      Everywhere except in headlines"
         (setq str (replace-match "" t t str)))
       str)))
 
+(defun outshine-determine-outline-regexp-base ()
+  "Return the actual outline-regexp-base."
+  (if (and
+       (not (outshine-default-header-style-p))
+       (eq major-mode 'emacs-lisp-mode))
+      outshine-oldschool-elisp-outline-regexp-base
+    outshine-default-outline-regexp-base))
+
 (defun outshine-normalize-regexps ()
   "Chomp leading and trailing whitespace from outline regexps."
   (and comment-start
@@ -410,14 +432,17 @@ t      Everywhere except in headlines"
 
 ;; *** Calculate outline-regexp and outline-level
 
-;; ;; TODO implement
-;; (defun outshine-header-style-p (&optional buffer)
-;;   "Return nil if not outshine headers are found in current buffer or BUFFER."
-;;   (let ((buf (or buffer (current-buffer))))
-;;     (with-current-buffer buf
-;;       (save-excursion
-;;         (goto-char (point-min))
-;;         (re-search-forward ...)))))
+(defun outshine-default-header-style-p (&optional buffer)
+  "Return nil, if there is no match for a default header.
+Searches in BUFFER if given, otherwise in current buffer."
+  (let ((buf (or buffer (current-buffer))))
+    (with-current-buffer buf
+      (save-excursion
+        (goto-char (point-min))
+        (re-search-forward
+         (outshine-calc-outline-regexp)
+         nil 'NOERROR)))))
+
 
 (defun outshine-calc-comment-region-starter ()
   "Return comment-region starter as string.
@@ -445,6 +470,8 @@ Based on `comment-start' and `comment-add'."
     comment-padding)
    (t (error "No valid comment-padding"))))
 
+
+;; FIXME: no comment padding if oldschool elisp regexp-base
 (defun outshine-calc-outline-regexp ()
   "Calculate the outline regexp for the current mode."
   (concat
