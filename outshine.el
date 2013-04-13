@@ -517,8 +517,8 @@ Based on `comment-start' and `comment-add'."
            (setq m-strg
                  (split-string
                   m-strg
-                  (format "%s" outshine-normalized-comment-start))
-                 'OMIT-NULLS))
+                  (format "%s" outshine-normalized-comment-start)
+                  'OMIT-NULLS)))
          (length
           (mapconcat
            (lambda (str)
