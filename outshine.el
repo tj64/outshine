@@ -506,11 +506,19 @@ Based on `comment-start' and `comment-add'."
       (and
        (looking-at (outshine-calc-outline-regexp))
        (let ((m-strg (match-string-no-properties 0)))
-         (setq m-strg
-               (split-string
-                m-strg
-                (format "%s" outshine-normalized-comment-start)
-                'OMIT-NULLS))
+         (if outshine-enforce-no-comment-padding-p
+             ;; deal with oldschool elisp headings (;;;+)
+             (setq m-strg
+                   (split-string
+                    (substring m-strg 2)
+                    nil
+                    'OMIT-NULLS))
+           ;; orgmode style elisp heading (;; *+)
+           (setq m-strg
+                 (split-string
+                  m-strg
+                  (format "%s" outshine-normalized-comment-start))
+                 'OMIT-NULLS))
          (length
           (mapconcat
            (lambda (str)
