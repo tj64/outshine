@@ -103,6 +103,8 @@
 ;; * Requires
 
 (require 'outline)
+;; necessary before Emacs 24.3
+(require 'newcomment)
 
 ;; * Variables
 ;; ** Consts
