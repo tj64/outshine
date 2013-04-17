@@ -175,6 +175,10 @@ them set by set, separated by a nil element.  See the example for
 (make-variable-buffer-local
  'outshine-normalized-outline-regexp-base)
 
+;; (defvar outshine-level-X "1"
+;;   "Stores headline level of matched headline")
+;; (make-variable-buffer-local 'outshine-level-X)
+
 ;; ** Hooks
 
 (defvar outshine-hook nil
@@ -197,8 +201,7 @@ any other entries, and any resulting duplicates will be removed entirely."
     (setq specs (or specs
 		    (get inherits 'saved-face)
 		    (get inherits 'face-defface-spec))))
-  (cond
-   ((and inherits (facep inherits)
+  (cond   ((and inherits (facep inherits)
 	 (not (featurep 'xemacs))
 	 (>= emacs-major-version 22)
 	 ;; do not inherit outline faces before Emacs 23
@@ -596,7 +599,53 @@ top-level heading first."
 
 ;; *** Fontify the headlines
 
-;; Org-style highlighting of the headings
+;; ;; adapted from http://tinyurl.com/cwad2km
+;; (defun outshine-match-next-headline (limit)
+;;   "Function to be used as matcher in `font-lock-add-keywords'.
+;; Matcher can be either the regexp to search for, or the function
+;; name to call to make the search (called with one argument, the
+;; LIMIT of the search; it should return non-nil, move point, and
+;; set match-data' appropriately if it succeeds like
+;; `re-search-forward' would)."
+;;   (let ((start (point))
+;;         (outshine-fontify-whole-heading-line ""))
+;;     ;; Look for outline-regexp
+;;     (when (re-search-forward (outshine-calc-outline-regexp) limit t)
+;;       (let ((level (outshine-calc-outline-level)))
+;;         ;; goto beginning of headline text
+;;         (goto-char (match-end 0))
+;;         ;; match headline
+;;         (looking-at (concat
+;;                      "\\(.*\\)"
+;;                      "\\("
+;;                      outshine-outline-heading-end-regexp
+;;                      "\\)"))
+;;         ;; move point
+;;         (forward-line)
+;;         ;; set variable used to determine outline-level
+;;         (setq outshine-level-X level)))))
+
+
+;; ;; Org-style highlighting of the headings
+;; (defun outshine-fontify-headlines (outline-regexp)
+;;   "Fontify headline-levels 1-8 with Org-mode like colors."
+;;   (font-lock-add-keywords
+;;    nil
+;;    `(outshine-match-next-headline
+;;       0
+;;       ,(cond
+;;         ((eq outshine-level-X 1) 'outshine-level-1)
+;;         ((eq outshine-level-X 2) 'outshine-level-2)
+;;         ((eq outshine-level-X 3) 'outshine-level-3)
+;;         ((eq outshine-level-X 4) 'outshine-level-4)
+;;         ((eq outshine-level-X 5) 'outshine-level-5)
+;;         ((eq outshine-level-X 6) 'outshine-level-6)
+;;         ((eq outshine-level-X 7) 'outshine-level-7)
+;;         ((eq outshine-level-X 8) 'outshine-level-8))
+;;       t)))
+
+
+
 (defun outshine-fontify-headlines (outline-regexp)
   ;; (interactive)
   ;; (setq outline-regexp (tj/outline-regexp))
@@ -660,6 +709,8 @@ top-level heading first."
      out-regexp
      'outshine-calc-outline-level
      outshine-outline-heading-end-regexp)
+    ;; (make-local-variable 'outshine-level-X)
+    ;; (setq outshine-level-X 1)
     (outshine-fontify-headlines out-regexp)
     (setq outline-promotion-headings
           (outshine-make-promotion-headings-list 8))))
