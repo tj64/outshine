@@ -486,7 +486,7 @@ Based on `comment-start' and `comment-add'."
 (defun outshine-calc-outline-regexp ()
   "Calculate the outline regexp for the current mode."
   (concat
-   (if outshine-outline-regexp-outcommented-p
+   (and outshine-outline-regexp-outcommented-p
        (progn
          ;; regexp-base outcommented, but no 'comment-start' defined
          (or comment-start
@@ -494,16 +494,12 @@ Based on `comment-start' and `comment-add'."
                        "Cannot calculate outcommented outline-regexp\n"
                        "without 'comment-start' character defined!")))
          (concat
-          ;; beginning-of-line
-          "^"
           ;; comment-start
           (outshine-calc-comment-region-starter)
           ;; comment-padding
           (if outshine-enforce-no-comment-padding-p
               ""
-            (outshine-calc-comment-padding))))
-     ;; beginning-of-line
-     "^")
+            (outshine-calc-comment-padding)))))
    ;; regexp-base
    outshine-normalized-outline-regexp-base
    " "))
