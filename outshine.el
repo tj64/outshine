@@ -487,7 +487,6 @@ Based on `comment-start' and `comment-add'."
   "Calculate the outline regexp for the current mode."
   (concat
    (and outshine-outline-regexp-outcommented-p
-       (progn
          ;; regexp-base outcommented, but no 'comment-start' defined
          (or comment-start
              (message (concat
@@ -499,7 +498,7 @@ Based on `comment-start' and `comment-add'."
           ;; comment-padding
           (if outshine-enforce-no-comment-padding-p
               ""
-            (outshine-calc-comment-padding)))))
+            (outshine-calc-comment-padding))))
    ;; regexp-base
    outshine-normalized-outline-regexp-base
    " "))
