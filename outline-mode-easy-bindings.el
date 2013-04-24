@@ -1,4 +1,6 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; [OBSOLETE FOR OUTSHINE.EL, BECAUSE ALL FUNCTIONS AND KEYBINDINGS FROM THIS
+;; LIBRARY HAVE BEEN MERGED INTO OUTSHINE.EL]
+
 ;; outline-mode-easy-bindings.el (2010-08-15)
 ;;
 ;; Outlines can be managed entirely with Meta + <arrow key>.

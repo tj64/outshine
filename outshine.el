@@ -27,6 +27,11 @@
 ;; detailled instructions on usage of the additional outline functions
 ;; introduced by `outline-magic'.
 
+;; Furthermore, `outshine.el' includes functions and keybindings from
+;; `outline-mode-easy-bindings' (http://emacswiki.org/emacs/OutlineMinorMode).
+;; Unfortunately, no author is given for that library, so I cannot credit the
+;; person who wrote it.
+
 ;; Outshine's main purpose is to make `outline-minor-mode' more similar to
 ;; outline-navigation and structure-editing with (the one-and-only)
 ;; `Org-mode'. Furthermore, as additional but quite useful features, correctly
@@ -44,14 +49,11 @@
 ;; #   (add-hook 'outline-minor-mode-hook 'outshine-hook-function)
 ;; # #+end_src
 
-;; Download
-;; https://raw.github.com/tj64/outshine/master/outline-mode-easy-bindings.el
-;; (or do 'git clone git@github.com:tj64/outshine.git' in a shell) and put it
-;; in a place where Emacs can find it. `outshine' loads this library if it is
-;; able to successfully require it. The functions and keybindings (for 'M
-;; -<<arrow-key>>' navigation and visibility cycling) defined there are so
-;; convenient that I put the following code into my Emacs init file to have
-;; the same functionality/keybindings available in Org-mode too:
+;; If you like the functions and keybindings for 'M -<<arrow-key>>' navigation
+;; and visibility cycling copied from `outline-mode-easy-bindings', you might
+;; want to put the following code into your Emacs init file to have the same
+;; functionality/keybindings available in Org-mode too, overriding the less
+;; frequently used commands for moving and promoting/demoting subtrees:
 
 ;; # #+begin_src emacs-lisp
 ;; #   (add-hook 'org-mode-hook
@@ -402,6 +404,32 @@ t      Everywhere except in headlines"
 
 ;; * Defuns
 ;; ** Functions
+;; *** Define keys with fallback
+
+;; copied from Alexander Vorobiev
+;; http://www.mail-archive.com/emacs-orgmode@gnu.org/msg70648.html
+(defmacro outshine-define-key-with-fallback
+  (keymap key def condition &optional mode)
+  "Define key with fallback. Binds KEY to definition DEF in keymap KEYMAP, the
+ binding is active when the CONDITION is true. Otherwise turns MODE off and
+ re-enables previous definition for KEY. If MODE is nil, tries to recover it
+by stripping off \"-map\" from KEYMAP name."
+  `(define-key
+     ,keymap ,key
+     (lambda () (interactive)
+       (if ,condition ,def
+         (let* ((,(if mode mode
+                    (let* ((keymap-str (symbol-name keymap))
+                           (mode-name-end (- (string-width keymap-str)
+                                             4)))
+                      (if (string= "-map" (substring keymap-str
+                                                     mode-name-end))
+                          (intern (substring keymap-str 0 mode-name-end))
+                        (error "Could not deduce mode name from keymap name
+(\"-map\" missing?)")))) nil)
+(original-func (key-binding ,key)))
+(call-interactively original-func))))))
+
 ;; *** Normalize regexps
 
 ;; from http://emacswiki.org/emacs/ElispCookbook#toc6
@@ -1075,17 +1103,74 @@ may have changed."
       ;; Not at a headline: Do indent-relative
       (outline-back-to-heading))))))
 
-(defun outshine-cycle-subtree ()
-  "Cycle the visibility state of subtree at point."
-  (interactive)
-  (if (outline-on-heading-p)
-      (outline-cycle 1)
-    (message "Not on subtree - cannot cycle subtree visibility state.")))
+;; (defun outshine-cycle-subtree ()
+;;   "Cycle the visibility state of subtree at point."
+;;   (interactive)
+;;   (if (outline-on-heading-p)
+;;       (outline-cycle 1)
+;;     (message "Not on subtree - cannot cycle subtree visibility state.")))
 
-(defun outshine-cycle-buffer ()
-  "Cycle the visibility state of buffer."
+;; (defun outshine-cycle-buffer ()
+;;   "Cycle the visibility state of buffer."
+;;   (interactive)
+;;   (outline-cycle '(4)))
+
+;; **** Commands from `outline-mode-easy-bindings'
+
+;; Copied from: http://emacswiki.org/emacs/OutlineMinorMode
+
+(defun outline-body-p ()
+  (save-excursion
+    (outline-back-to-heading)
+    (outline-end-of-heading)
+    (and (not (eobp))
+         (progn (forward-char 1)
+                (not (outline-on-heading-p))))))
+
+(defun outline-body-visible-p ()
+  (save-excursion
+    (outline-back-to-heading)
+    (outline-end-of-heading)
+    (not (outline-invisible-p))))
+
+(defun outline-subheadings-p ()
+  (save-excursion
+    (outline-back-to-heading)
+    (let ((level (funcall outline-level)))
+      (outline-next-heading)
+      (and (not (eobp))
+           (< level (funcall outline-level))))))
+
+(defun outline-subheadings-visible-p ()
   (interactive)
-  (outline-cycle '(4)))
+  (save-excursion
+    (outline-next-heading)
+    (not (outline-invisible-p))))
+
+(defun outline-hide-more ()
+  (interactive)
+  (when (outline-on-heading-p)
+    (cond ((and (outline-body-p)
+                (outline-body-visible-p))
+           (hide-entry)
+           (hide-leaves))
+          (t
+           (hide-subtree)))))
+
+(defun outline-show-more ()
+  (interactive)
+  (when (outline-on-heading-p)
+    (cond ((and (outline-subheadings-p)
+                (not (outline-subheadings-visible-p)))
+           (show-children))
+          ((and (not (outline-subheadings-p))
+                (not (outline-body-visible-p)))
+           (show-subtree))
+          ((and (outline-body-p)
+                (not (outline-body-visible-p)))
+           (show-entry))
+          (t
+           (show-subtree)))))
 
 ;; *** Overridden outline commands 
 
@@ -1123,26 +1208,31 @@ This function takes `comment-end' into account."
     (run-hooks 'outline-insert-heading-hook)))
 
 ;; * Keybindings.
-;; ** Easy bindings
+;; ;; ** Easy bindings
 
-;; Explorer-like bindings (`M-left/right/up/down' to navigate outlines)
-(if (not (locate-library "outline-mode-easy-bindings.el"))
-    (message
-     (concat
-      "Consider installing 'outline-mode-easy-bindings.el' "
-      "for easy outline-mode keybindings"))
-  (add-hook 'outline-mode-hook
-            '(lambda ()
-               (require 'outline-mode-easy-bindings)))
-  (add-hook 'outline-minor-mode-hook
-            '(lambda ()
-               (require 'outline-mode-easy-bindings))))
+;; ;; Explorer-like bindings (`M-left/right/up/down' to navigate outlines)
+;; (if (not (locate-library "outline-mode-easy-bindings.el"))
+;;     (message
+;;      (concat
+;;       "Consider installing 'outline-mode-easy-bindings.el' "
+;;       "for easy outline-mode keybindings"))
+;;   (add-hook 'outline-mode-hook
+;;             '(lambda ()
+;;                (require 'outline-mode-easy-bindings)))
+;;   (add-hook 'outline-minor-mode-hook
+;;             '(lambda ()
+;;                (require 'outline-mode-easy-bindings))))
  
 ;; ** From `outline-magic'
 
 ;; keybindings like Org-mode
-(define-key outline-minor-mode-map (kbd "TAB") 'outshine-cycle-subtree)
-(define-key outline-minor-mode-map (kbd "<backtab>") 'outshine-cycle-buffer)
+;; (define-key outline-minor-mode-map (kbd "TAB") 'outshine-cycle-subtree)
+;; (define-key outline-minor-mode-map (kbd "<backtab>") 'outshine-cycle-buffer)
+
+(outshine-define-key-with-fallback outline-minor-mode-map (kbd "TAB")
+  (outline-cycle 1)(outline-on-heading-p))
+(outshine-define-key-with-fallback outline-minor-mode-map (kbd "<backtab>")
+  (outline-cycle '(4))(outline-on-heading-p))
 
 ;; Menu entries
 
@@ -1231,6 +1321,36 @@ This function takes `comment-end' into account."
     (define-key map "\C-q" 'outline-hide-sublevels)
     (define-key map "\C-o" 'outline-hide-other)))
 
+
+;; ** From `outline-mode-easy-bindings'
+
+(let ((map outline-mode-map))
+  (outshine-define-key-with-fallback
+   map (kbd "M-<left>") (outline-hide-more) (outline-on-heading-p))
+  (outshine-define-key-with-fallback
+   map (kbd "M-<right>") (outline-show-more) (outline-on-heading-p))
+  (outshine-define-key-with-fallback
+   map (kbd "M-<up>") (outline-previous-visible-heading) (outline-on-heading-p))
+  (outshine-define-key-with-fallback
+   map (kbd "M-<down>") (outline-next-visible-heading) (outline-on-heading-p))
+  (define-key map (kbd "C-c J") 'outline-hide-more)
+  (define-key map (kbd "C-c L") 'outline-show-more)
+  (define-key map (kbd "C-c I") 'outline-previous-visible-heading)
+  (define-key map (kbd "C-c K") 'outline-next-visible-heading))
+
+(let ((map outline-minor-mode-map)) 
+  (outshine-define-key-with-fallback
+   map (kbd "M-<left>") (outline-hide-more) (outline-on-heading-p))
+  (outshine-define-key-with-fallback
+   map (kbd "M-<right>") (outline-show-more) (outline-on-heading-p))
+  (outshine-define-key-with-fallback
+   map (kbd "M-<up>") (outline-previous-visible-heading) (outline-on-heading-p))
+  (outshine-define-key-with-fallback
+   map (kbd "M-<down>") (outline-next-visible-heading) (outline-on-heading-p))
+  (define-key map (kbd "C-c J") 'outline-hide-more)
+  (define-key map (kbd "C-c L") 'outline-show-more)
+  (define-key map (kbd "C-c I") 'outline-previous-visible-heading)
+  (define-key map (kbd "C-c K") 'outline-next-visible-heading))
 
 ;; * Run hooks and provide
 
