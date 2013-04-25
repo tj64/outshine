@@ -408,27 +408,26 @@ t      Everywhere except in headlines"
 
 ;; copied from Alexander Vorobiev
 ;; http://www.mail-archive.com/emacs-orgmode@gnu.org/msg70648.html
+
 (defmacro outshine-define-key-with-fallback
   (keymap key def condition &optional mode)
-  "Define key with fallback. Binds KEY to definition DEF in keymap KEYMAP, the
- binding is active when the CONDITION is true. Otherwise turns MODE off and
- re-enables previous definition for KEY. If MODE is nil, tries to recover it
-by stripping off \"-map\" from KEYMAP name."
-  `(define-key
-     ,keymap ,key
-     (lambda () (interactive)
-       (if ,condition ,def
-         (let* ((,(if mode mode
-                    (let* ((keymap-str (symbol-name keymap))
-                           (mode-name-end (- (string-width keymap-str)
-                                             4)))
-                      (if (string= "-map" (substring keymap-str
-                                                     mode-name-end))
+ "Define key with fallback.
+Binds KEY to definition DEF in keymap KEYMAP, the binding is
+active when the CONDITION is true. Otherwise turns MODE off and
+re-enables previous definition for KEY. If MODE is nil, tries to
+recover it by stripping off \"-map\" from KEYMAP name."
+  `(define-key ,keymap ,key (lambda () (interactive)
+     (if ,condition ,def
+       (let* ((,(if mode mode
+                     (let* ((keymap-str (symbol-name keymap))
+                               (mode-name-end (- (string-width keymap-str) 4)))
+                        (if (string= "-map" (substring keymap-str mode-name-end))
                           (intern (substring keymap-str 0 mode-name-end))
-                        (error "Could not deduce mode name from keymap name
-(\"-map\" missing?)")))) nil)
-(original-func (key-binding ,key)))
-(call-interactively original-func))))))
+                          (message "Could not deduce mode name from keymap name"))
+                                 ;; (\\"-map\\" missing?)")
+                        )) nil)
+                 (original-func (key-binding ,key)))
+           (call-interactively original-func))))))
 
 ;; *** Normalize regexps
 
