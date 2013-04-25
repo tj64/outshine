@@ -408,26 +408,36 @@ t      Everywhere except in headlines"
 
 ;; copied from Alexander Vorobiev
 ;; http://www.mail-archive.com/emacs-orgmode@gnu.org/msg70648.html
-
 (defmacro outshine-define-key-with-fallback
   (keymap key def condition &optional mode)
- "Define key with fallback.
+  "Define key with fallback.
 Binds KEY to definition DEF in keymap KEYMAP, the binding is
 active when the CONDITION is true. Otherwise turns MODE off and
 re-enables previous definition for KEY. If MODE is nil, tries to
 recover it by stripping off \"-map\" from KEYMAP name."
-  `(define-key ,keymap ,key (lambda () (interactive)
-     (if ,condition ,def
-       (let* ((,(if mode mode
-                     (let* ((keymap-str (symbol-name keymap))
-                               (mode-name-end (- (string-width keymap-str) 4)))
-                        (if (string= "-map" (substring keymap-str mode-name-end))
+  `(define-key
+     ,keymap
+     ,key
+     (lambda ()
+       (interactive)
+       (if ,condition ,def
+         (let* ((,(if mode mode
+                    (let* ((keymap-str (symbol-name keymap))
+                           (mode-name-end
+                            (- (string-width keymap-str) 4)))
+                      (if (string=
+                           "-map"
+                           (substring keymap-str mode-name-end))
                           (intern (substring keymap-str 0 mode-name-end))
-                          (message "Could not deduce mode name from keymap name"))
-                                 ;; (\\"-map\\" missing?)")
-                        )) nil)
-                 (original-func (key-binding ,key)))
-           (call-interactively original-func))))))
+                        (message
+                         "Could not deduce mode name from keymap name")
+                        (intern "dummy-sym"))
+                      ;; (\\"-map\\" missing?)")
+                      )) nil)
+                (original-func (key-binding ,key)))
+           (condition-case nil
+               (call-interactively original-func)
+             (error nil)))))))
 
 ;; *** Normalize regexps
 
@@ -1109,10 +1119,10 @@ may have changed."
 ;;       (outline-cycle 1)
 ;;     (message "Not on subtree - cannot cycle subtree visibility state.")))
 
-;; (defun outshine-cycle-buffer ()
-;;   "Cycle the visibility state of buffer."
-;;   (interactive)
-;;   (outline-cycle '(4)))
+(defun outshine-cycle-buffer ()
+  "Cycle the visibility state of buffer."
+  (interactive)
+  (outline-cycle '(4)))
 
 ;; **** Commands from `outline-mode-easy-bindings'
 
@@ -1225,13 +1235,14 @@ This function takes `comment-end' into account."
 ;; ** From `outline-magic'
 
 ;; keybindings like Org-mode
-;; (define-key outline-minor-mode-map (kbd "TAB") 'outshine-cycle-subtree)
-;; (define-key outline-minor-mode-map (kbd "<backtab>") 'outshine-cycle-buffer)
-
 (outshine-define-key-with-fallback outline-minor-mode-map (kbd "TAB")
   (outline-cycle 1)(outline-on-heading-p))
-(outshine-define-key-with-fallback outline-minor-mode-map (kbd "<backtab>")
-  (outline-cycle '(4))(outline-on-heading-p))
+(define-key outline-minor-mode-map (kbd "<backtab>") 'outshine-cycle-buffer)
+
+;; (define-key outline-minor-mode-map (kbd "TAB") 'outshine-cycle-subtree)
+;; ;; error when not on headline
+;; (outshine-define-key-with-fallback outline-minor-mode-map (kbd "<backtab>")
+;;   (outline-cycle '(4))(outline-on-heading-p))
 
 ;; Menu entries
 
@@ -1329,11 +1340,23 @@ This function takes `comment-end' into account."
   (outshine-define-key-with-fallback
    map (kbd "M-<right>") (outline-show-more) (outline-on-heading-p))
   (outshine-define-key-with-fallback
-   map (kbd "M-<up>") (outline-previous-visible-heading) (outline-on-heading-p))
+   map (kbd "C-c J") (outline-hide-more) (outline-on-heading-p))
   (outshine-define-key-with-fallback
-   map (kbd "M-<down>") (outline-next-visible-heading) (outline-on-heading-p))
-  (define-key map (kbd "C-c J") 'outline-hide-more)
-  (define-key map (kbd "C-c L") 'outline-show-more)
+   map (kbd "C-c L") (outline-show-more) (outline-on-heading-p))
+  ;; (outshine-define-key-with-fallback
+  ;;  map (kbd "M-<up>") (outline-previous-visible-heading 1)
+  ;;  (outline-on-heading-p))
+  ;; (outshine-define-key-with-fallback
+  ;;  map (kbd "M-<down>") (outline-next-visible-heading 1)
+  ;;  (outline-on-heading-p))
+  (outshine-define-key-with-fallback
+   map (kbd "M-<up>") (outline-previous-visible-heading 1)
+   (outline-on-heading-p))
+  (outshine-define-key-with-fallback
+   map (kbd "M-<down>") (outline-next-visible-heading 1)
+   (outline-on-heading-p))
+  ;; (define-key map (kbd "C-c J") 'outline-hide-more)
+  ;; (define-key map (kbd "C-c L") 'outline-show-more)
   (define-key map (kbd "C-c I") 'outline-previous-visible-heading)
   (define-key map (kbd "C-c K") 'outline-next-visible-heading))
 
@@ -1343,11 +1366,19 @@ This function takes `comment-end' into account."
   (outshine-define-key-with-fallback
    map (kbd "M-<right>") (outline-show-more) (outline-on-heading-p))
   (outshine-define-key-with-fallback
-   map (kbd "M-<up>") (outline-previous-visible-heading) (outline-on-heading-p))
+   map (kbd "C-c J") (outline-hide-more) (outline-on-heading-p))
   (outshine-define-key-with-fallback
-   map (kbd "M-<down>") (outline-next-visible-heading) (outline-on-heading-p))
-  (define-key map (kbd "C-c J") 'outline-hide-more)
-  (define-key map (kbd "C-c L") 'outline-show-more)
+   map (kbd "C-c L") (outline-show-more) (outline-on-heading-p))
+  ;; (outshine-define-key-with-fallback
+  ;;  map (kbd "M-<up>") (outline-previous-visible-heading 1)
+  ;;  (outline-on-heading-p))
+  ;; (outshine-define-key-with-fallback
+  ;;  map (kbd "M-<down>") (outline-next-visible-heading 1)
+  ;;  (outline-on-heading-p))
+  (define-key map (kbd "M-<up>") 'outline-previous-visible-heading)
+  (define-key map (kbd "M-<down>") 'outline-next-visible-heading)
+  ;; (define-key map (kbd "C-c J") 'outline-hide-more)
+  ;; (define-key map (kbd "C-c L") 'outline-show-more)
   (define-key map (kbd "C-c I") 'outline-previous-visible-heading)
   (define-key map (kbd "C-c K") 'outline-next-visible-heading))
 
