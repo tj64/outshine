@@ -76,6 +76,11 @@ _________________
   detailled instructions on usage of the additional outline functions
   introduced by `outline-magic'.
 
+  Furthermore, `outshine.el' includes functions and keybindings from
+  `outline-mode-easy-bindings' (http://emacswiki.org/emacs/OutlineMinorMode).
+  Unfortunately, no author is given for that library, so I cannot credit the
+  person who wrote it.
+
   Outshines main purpose is to make `outline-minor-mode' more similar to
   outline-navigation and structure-editing with (the one-and-only)
   `Org-mode'. Furthermore, as additional but quite useful features,
@@ -95,14 +100,11 @@ _________________
    (add-hook  'outline-minor-mode-hook 'outshine-hook-function)
   #+end_src
 
-  Download
-  https://raw.github.com/tj64/outshine/master/outline-mode-easy-bindings.el
-  (or do 'git clone git@github.com:tj64/outshine.git' in a shell) and put it
-  in a place where Emacs can find it. `outshine' loads this library if it is
-  able to successfully require it. The functions and keybindings (for 'M
-  -<<arrow-key>>' navigation and visibility cycling) defined there are so
-  convenient that I put the following code into my Emacs init file to have the
-  same functionality/keybindings available in Org-mode too:
+  If you like the functions and keybindings for 'M -<<arrow-key>>' navigation
+  and visibility cycling copied from `outline-mode-easy-bindings', you might
+  want to put the following code into your Emacs init file to have the same
+  functionality/keybindings available in Org-mode too, overriding the less
+  frequently used commands for moving and promoting/demoting subtrees:
 
   #+begin_src emacs-lisp
     (add-hook 'org-mode-hook
@@ -110,7 +112,7 @@ _________________
                 ;; Redefine arrow keys, since promoting/demoting and moving
                 ;; subtrees up and down are less frequent tasks then
                 ;; navigation and visibility cycling
-                (when (require 'outline-mode-easy-bindings nil 'NOERROR)
+                (when (require 'outshine nil 'NOERROR)
                   (org-defkey org-mode-map
                               (kbd "M-<left>") 'outline-hide-more)
                   (org-defkey org-mode-map
