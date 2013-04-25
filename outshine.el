@@ -8,7 +8,7 @@
 ;;   :part-of-emacs: no
 ;;   :authors: Thorsten_Jolitz Carsten_Dominik Per_Abrahamsen
 ;;   :author_email: tjolitz AT gmail DOT com
-;;   :credits:  Fabrice Niessen
+;;   :credits:  Fabrice Niessen Alexander Vorobiev
 ;;   :inspiration: outline-magic outxxtra out-xtra
 ;;   :keywords: emacs outlines file_structuring
 ;;   :END:
@@ -176,10 +176,6 @@ them set by set, separated by a nil element.  See the example for
   "Outline-regex-base without leading and trailing whitespace")
 (make-variable-buffer-local
  'outshine-normalized-outline-regexp-base)
-
-;; (defvar outshine-level-X "1"
-;;   "Stores headline level of matched headline")
-;; (make-variable-buffer-local 'outshine-level-X)
 
 ;; ** Hooks
 
@@ -365,11 +361,6 @@ poutshine-level-* faces."
   :group 'outshine
   :type 'boolean)
 
-;; (defcustom outshine-outline-regexp-base " [*]+ "
-;;   "Base for calculating the outline-regexp"
-;;   :group 'outshine
-;;   :type 'regexp)
-
 (defcustom outshine-outline-regexp-outcommented-p t
   "Non-nil if regexp-base is outcommented to calculate outline-regexp."
   :group 'outshine
@@ -406,7 +397,7 @@ t      Everywhere except in headlines"
 ;; ** Functions
 ;; *** Define keys with fallback
 
-;; copied from Alexander Vorobiev
+;; copied and adapted from Alexander Vorobiev
 ;; http://www.mail-archive.com/emacs-orgmode@gnu.org/msg70648.html
 (defmacro outshine-define-key-with-fallback
   (keymap key def condition &optional mode)
@@ -631,53 +622,6 @@ top-level heading first."
 
 ;; *** Fontify the headlines
 
-;; ;; adapted from http://tinyurl.com/cwad2km
-;; (defun outshine-match-next-headline (limit)
-;;   "Function to be used as matcher in `font-lock-add-keywords'.
-;; Matcher can be either the regexp to search for, or the function
-;; name to call to make the search (called with one argument, the
-;; LIMIT of the search; it should return non-nil, move point, and
-;; set match-data' appropriately if it succeeds like
-;; `re-search-forward' would)."
-;;   (let ((start (point))
-;;         (outshine-fontify-whole-heading-line ""))
-;;     ;; Look for outline-regexp
-;;     (when (re-search-forward (outshine-calc-outline-regexp) limit t)
-;;       (let ((level (outshine-calc-outline-level)))
-;;         ;; goto beginning of headline text
-;;         (goto-char (match-end 0))
-;;         ;; match headline
-;;         (looking-at (concat
-;;                      "\\(.*\\)"
-;;                      "\\("
-;;                      outshine-outline-heading-end-regexp
-;;                      "\\)"))
-;;         ;; move point
-;;         (forward-line)
-;;         ;; set variable used to determine outline-level
-;;         (setq outshine-level-X level)))))
-
-
-;; ;; Org-style highlighting of the headings
-;; (defun outshine-fontify-headlines (outline-regexp)
-;;   "Fontify headline-levels 1-8 with Org-mode like colors."
-;;   (font-lock-add-keywords
-;;    nil
-;;    `(outshine-match-next-headline
-;;       0
-;;       ,(cond
-;;         ((eq outshine-level-X 1) 'outshine-level-1)
-;;         ((eq outshine-level-X 2) 'outshine-level-2)
-;;         ((eq outshine-level-X 3) 'outshine-level-3)
-;;         ((eq outshine-level-X 4) 'outshine-level-4)
-;;         ((eq outshine-level-X 5) 'outshine-level-5)
-;;         ((eq outshine-level-X 6) 'outshine-level-6)
-;;         ((eq outshine-level-X 7) 'outshine-level-7)
-;;         ((eq outshine-level-X 8) 'outshine-level-8))
-;;       t)))
-
-
-
 (defun outshine-fontify-headlines (outline-regexp)
   ;; (interactive)
   ;; (setq outline-regexp (tj/outline-regexp))
@@ -741,8 +685,6 @@ top-level heading first."
      out-regexp
      'outshine-calc-outline-level
      outshine-outline-heading-end-regexp)
-    ;; (make-local-variable 'outshine-level-X)
-    ;; (setq outshine-level-X 1)
     (outshine-fontify-headlines out-regexp)
     (setq outline-promotion-headings
           (outshine-make-promotion-headings-list 8))))
@@ -1112,13 +1054,6 @@ may have changed."
       ;; Not at a headline: Do indent-relative
       (outline-back-to-heading))))))
 
-;; (defun outshine-cycle-subtree ()
-;;   "Cycle the visibility state of subtree at point."
-;;   (interactive)
-;;   (if (outline-on-heading-p)
-;;       (outline-cycle 1)
-;;     (message "Not on subtree - cannot cycle subtree visibility state.")))
-
 (defun outshine-cycle-buffer ()
   "Cycle the visibility state of buffer."
   (interactive)
@@ -1217,32 +1152,12 @@ This function takes `comment-end' into account."
     (run-hooks 'outline-insert-heading-hook)))
 
 ;; * Keybindings.
-;; ;; ** Easy bindings
-
-;; ;; Explorer-like bindings (`M-left/right/up/down' to navigate outlines)
-;; (if (not (locate-library "outline-mode-easy-bindings.el"))
-;;     (message
-;;      (concat
-;;       "Consider installing 'outline-mode-easy-bindings.el' "
-;;       "for easy outline-mode keybindings"))
-;;   (add-hook 'outline-mode-hook
-;;             '(lambda ()
-;;                (require 'outline-mode-easy-bindings)))
-;;   (add-hook 'outline-minor-mode-hook
-;;             '(lambda ()
-;;                (require 'outline-mode-easy-bindings))))
- 
 ;; ** From `outline-magic'
 
 ;; keybindings like Org-mode
 (outshine-define-key-with-fallback outline-minor-mode-map (kbd "TAB")
   (outline-cycle 1)(outline-on-heading-p))
 (define-key outline-minor-mode-map (kbd "<backtab>") 'outshine-cycle-buffer)
-
-;; (define-key outline-minor-mode-map (kbd "TAB") 'outshine-cycle-subtree)
-;; ;; error when not on headline
-;; (outshine-define-key-with-fallback outline-minor-mode-map (kbd "<backtab>")
-;;   (outline-cycle '(4))(outline-on-heading-p))
 
 ;; Menu entries
 
@@ -1343,20 +1258,12 @@ This function takes `comment-end' into account."
    map (kbd "C-c J") (outline-hide-more) (outline-on-heading-p))
   (outshine-define-key-with-fallback
    map (kbd "C-c L") (outline-show-more) (outline-on-heading-p))
-  ;; (outshine-define-key-with-fallback
-  ;;  map (kbd "M-<up>") (outline-previous-visible-heading 1)
-  ;;  (outline-on-heading-p))
-  ;; (outshine-define-key-with-fallback
-  ;;  map (kbd "M-<down>") (outline-next-visible-heading 1)
-  ;;  (outline-on-heading-p))
   (outshine-define-key-with-fallback
    map (kbd "M-<up>") (outline-previous-visible-heading 1)
    (outline-on-heading-p))
   (outshine-define-key-with-fallback
    map (kbd "M-<down>") (outline-next-visible-heading 1)
    (outline-on-heading-p))
-  ;; (define-key map (kbd "C-c J") 'outline-hide-more)
-  ;; (define-key map (kbd "C-c L") 'outline-show-more)
   (define-key map (kbd "C-c I") 'outline-previous-visible-heading)
   (define-key map (kbd "C-c K") 'outline-next-visible-heading))
 
@@ -1369,16 +1276,8 @@ This function takes `comment-end' into account."
    map (kbd "C-c J") (outline-hide-more) (outline-on-heading-p))
   (outshine-define-key-with-fallback
    map (kbd "C-c L") (outline-show-more) (outline-on-heading-p))
-  ;; (outshine-define-key-with-fallback
-  ;;  map (kbd "M-<up>") (outline-previous-visible-heading 1)
-  ;;  (outline-on-heading-p))
-  ;; (outshine-define-key-with-fallback
-  ;;  map (kbd "M-<down>") (outline-next-visible-heading 1)
-  ;;  (outline-on-heading-p))
   (define-key map (kbd "M-<up>") 'outline-previous-visible-heading)
   (define-key map (kbd "M-<down>") 'outline-next-visible-heading)
-  ;; (define-key map (kbd "C-c J") 'outline-hide-more)
-  ;; (define-key map (kbd "C-c L") 'outline-show-more)
   (define-key map (kbd "C-c I") 'outline-previous-visible-heading)
   (define-key map (kbd "C-c K") 'outline-next-visible-heading))
 
