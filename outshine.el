@@ -423,7 +423,6 @@ recover it by stripping off \"-map\" from KEYMAP name."
                         (message
                          "Could not deduce mode name from keymap name")
                         (intern "dummy-sym"))
-                      ;; (\\"-map\\" missing?)")
                       )) nil)
                 (original-func (key-binding ,key)))
            (condition-case nil
@@ -1157,6 +1156,8 @@ This function takes `comment-end' into account."
 ;; keybindings like Org-mode
 (outshine-define-key-with-fallback outline-minor-mode-map (kbd "TAB")
   (outline-cycle 1)(outline-on-heading-p))
+(outshine-define-key-with-fallback outline-minor-mode-map (kbd "M-RET")
+  (outshine-insert-heading)(outline-on-heading-p))
 (define-key outline-minor-mode-map (kbd "<backtab>") 'outshine-cycle-buffer)
 
 ;; Menu entries
