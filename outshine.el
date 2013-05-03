@@ -2,7 +2,7 @@
 ;;   :PROPERTIES:
 ;;   :copyright: Thorsten Jolitz
 ;;   :copyright-years: 2013
-;;   :version:  0.9
+;;   :version:  1.0
 ;;   :licence:  GPL 2 or later (free software)
 ;;   :licence-url: http://www.gnu.org/licenses/
 ;;   :part-of-emacs: no
@@ -100,6 +100,7 @@
 
 ;; | date            | author(s)       | version |
 ;; |-----------------+-----------------+---------|
+;; | <2013-05-03 Fr> | Thorsten Jolitz |     1.0 |
 ;; | <2013-02-20 Mi> | Thorsten Jolitz |     0.9 |
 
 ;; * Requires
@@ -111,7 +112,7 @@
 ;; * Variables
 ;; ** Consts
 
-(defconst outshine-version "0.9"
+(defconst outshine-version "1.0"
   "outshine version number.")
 
 ;; copied from org-source.el
