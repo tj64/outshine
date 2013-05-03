@@ -25,7 +25,7 @@ _________________
 
   Authors: Thorsten Jolitz, Carsten Dominik, Per Abrahamsen
   Maintainer: Thorsten Jolitz <tjolitz AT gmail DOT com>
-  Version: 0.9
+  Version: 1.0
   Keywords:  outlines, file structuring
 
 
@@ -155,4 +155,5 @@ _________________
 
    date            author(s)          version 
   -------------------------------------------------
+   2013-05-03 Fr   Thorsten Jolitz      1.0
    2013-02-20 Mi   Thorsten Jolitz      0.9 

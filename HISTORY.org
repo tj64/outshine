@@ -1,15 +1,37 @@
-* TODO Version 1.0
+* DONE Version 1.0
+  CLOSED: [2013-05-03 Fr 18:57]
+  :LOGBOOK:
+  - State "DONE"       from "TODO"       [2013-05-03 Fr 18:57]
+  :END:
   [2013-02-19 Di 23:29]
 
-** TODO announce in org-mode mailing-list
+** CANCELLED announce in org-mode mailing-list                    :CANCELLED:
+   CLOSED: [2013-05-03 Fr 18:57]
+   :LOGBOOK:
+   - State "CANCELLED"  from "TODO"       [2013-05-03 Fr 18:57] \\
+     enough publicity
+   :END:
   [2013-02-19 Di 23:36]
-** TODO announce in emacs-user mailing-list
+** CANCELLED announce in emacs-user mailing-list                  :CANCELLED:
+   CLOSED: [2013-05-03 Fr 18:57]
+   :LOGBOOK:
+   - State "CANCELLED"  from "TODO"       [2013-05-03 Fr 18:57] \\
+     enough publicity
+   :END:
   [2013-02-19 Di 23:36]
-** TODO set version number
+** DONE set version number
+   CLOSED: [2013-05-03 Fr 18:57]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2013-05-03 Fr 18:57]
+   :END:
  [2013-02-19 Di 23:29]
 
 
-* NEXT Version 0.9
+* DONE Version 0.9
+  CLOSED: [2013-05-03 Fr 18:56]
+  :LOGBOOK:
+  - State "DONE"       from "NEXT"       [2013-05-03 Fr 18:56]
+  :END:
   [2013-02-19 Di 23:29]
 
 
@@ -31,7 +53,11 @@ Local in buffer refA-test.html; global value is "\n"
    - State "DONE"       from "TODO"       [2013-02-20 Mi 14:43]
    :END:
    [2013-02-20 Mi 05:58]
-** TODO make custom vars alists with one entry per major-mode
+** DONE make custom vars alists with one entry per major-mode
+   CLOSED: [2013-05-03 Fr 18:56]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2013-05-03 Fr 18:56]
+   :END:
    [2013-02-20 Mi 00:12]
 ** DONE merge renamed outxxtra and outline-magic
    CLOSED: [2013-02-20 Mi 02:49]
@@ -64,11 +90,28 @@ Local in buffer refA-test.html; global value is "\n"
    - State "DONE"       from "TODO"       [2013-02-20 Mi 02:48]
    :END:
    [2013-02-19 Di 23:37]
-** TODO Emacs Wiki article
+** CANCELLED Emacs Wiki article                                   :CANCELLED:
+   CLOSED: [2013-05-03 Fr 18:56]
+   :LOGBOOK:
+   - State "CANCELLED"  from "TODO"       [2013-05-03 Fr 18:56] \\
+     Don't like publishing of name and ip-address
+   :END:
    [2013-02-19 Di 23:37]
-** TODO announce in org-mode mailing-list
+** DONE announce in org-mode mailing-list
+   CLOSED: [2013-05-03 Fr 18:56]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2013-05-03 Fr 18:56]
+   :END:
    [2013-02-19 Di 23:36]
-** TODO announce in emacs-user mailing-list
+** DONE announce in emacs-user mailing-list
+   CLOSED: [2013-05-03 Fr 18:56]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2013-05-03 Fr 18:56]
+   :END:
    [2013-02-19 Di 23:36]
-** TODO set version number
+** DONE set version number
+   CLOSED: [2013-05-03 Fr 18:56]
+   :LOGBOOK:
+   - State "DONE"       from "TODO"       [2013-05-03 Fr 18:56]
+   :END:
   [2013-02-19 Di 23:29]
