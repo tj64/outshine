@@ -393,6 +393,12 @@ t      Everywhere except in headlines"
   :group 'outlines
   :type '(repeat symbol))
 
+;; startup options
+(defcustom outshine-startup-folded nil
+  "Non-nil means files will be opened with all but top level headers folded."
+  :group 'outshine
+  :type 'boolean)
+
 ;; * Defuns
 ;; ** Functions
 ;; *** Define keys with fallback
@@ -686,7 +692,9 @@ top-level heading first."
      outshine-outline-heading-end-regexp)
     (outshine-fontify-headlines out-regexp)
     (setq outline-promotion-headings
-          (outshine-make-promotion-headings-list 8))))
+          (outshine-make-promotion-headings-list 8)))
+  (when outshine-startup-folded
+    (outline-hide-sublevels 1)))
 
 ;; ;; add this to your .emacs
 ;; (add-hook 'outline-minor-mode-hook 'outshine-hook-function)
