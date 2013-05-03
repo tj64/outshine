@@ -644,29 +644,46 @@ top-level heading first."
 
   (let ((outshine-fontify-whole-heading-line "") ; "\n?")
         (heading-1-regexp
-         (concat (substring outline-regexp 0 -1) 
-                 "\\{1\\} \\(.*" outshine-fontify-whole-heading-line "\\)"))
+         ;; deal with special case 'oldschool elisp headers'
+         (if outshine-enforce-no-comment-padding-p
+             "^;;; \\(.*\\)"
+           (concat (substring outline-regexp 0 -1) 
+                   "\\{1\\} \\(.*" outshine-fontify-whole-heading-line "\\)")))
         (heading-2-regexp
-         (concat (substring outline-regexp 0 -1)
-                 "\\{2\\} \\(.*" outshine-fontify-whole-heading-line "\\)"))
+         (if outshine-enforce-no-comment-padding-p
+             "^;;;; \\(.*\\)"
+           (concat (substring outline-regexp 0 -1)
+                   "\\{2\\} \\(.*" outshine-fontify-whole-heading-line "\\)")))
         (heading-3-regexp
-         (concat (substring outline-regexp 0 -1)
-                 "\\{3\\} \\(.*" outshine-fontify-whole-heading-line "\\)"))
+         (if outshine-enforce-no-comment-padding-p
+             "^;;;;; \\(.*\\)"
+           (concat (substring outline-regexp 0 -1)
+                   "\\{3\\} \\(.*" outshine-fontify-whole-heading-line "\\)")))
         (heading-4-regexp
-         (concat (substring outline-regexp 0 -1)
-                 "\\{4,\\} \\(.*" outshine-fontify-whole-heading-line "\\)"))
-         (heading-5-regexp
-         (concat (substring outline-regexp 0 -1)
-                 "\\{5\\} \\(.*" outshine-fontify-whole-heading-line "\\)"))
+         (if outshine-enforce-no-comment-padding-p
+             "^;;;;;; \\(.*\\)"
+           (concat (substring outline-regexp 0 -1)
+                   "\\{4,\\} \\(.*" outshine-fontify-whole-heading-line "\\)")))
+        (heading-5-regexp
+         (if outshine-enforce-no-comment-padding-p
+             "^;;;;;;; \\(.*\\)"
+           (concat (substring outline-regexp 0 -1)
+                   "\\{5\\} \\(.*" outshine-fontify-whole-heading-line "\\)")))
         (heading-6-regexp
-         (concat (substring outline-regexp 0 -1)
-                 "\\{6,\\} \\(.*" outshine-fontify-whole-heading-line "\\)"))
+         (if outshine-enforce-no-comment-padding-p
+             "^;;;;;;;; \\(.*\\)"
+           (concat (substring outline-regexp 0 -1)
+                   "\\{6,\\} \\(.*" outshine-fontify-whole-heading-line "\\)")))
         (heading-7-regexp
-         (concat (substring outline-regexp 0 -1)
-                 "\\{7,\\} \\(.*" outshine-fontify-whole-heading-line "\\)"))
+         (if outshine-enforce-no-comment-padding-p
+             "^;;;;;;;;; \\(.*\\)"
+           (concat (substring outline-regexp 0 -1)
+                   "\\{7,\\} \\(.*" outshine-fontify-whole-heading-line "\\)")))
         (heading-8-regexp
-         (concat (substring outline-regexp 0 -1)
-                 "\\{8,\\} \\(.*" outshine-fontify-whole-heading-line "\\)")))
+         (if outshine-enforce-no-comment-padding-p
+             "^;;;;;;;;;; \\(.*\\)"
+           (concat (substring outline-regexp 0 -1)
+                   "\\{8,\\} \\(.*" outshine-fontify-whole-heading-line "\\)"))))
     (font-lock-add-keywords
      nil
      `((,heading-1-regexp 1 'outshine-level-1 t)
