@@ -1284,12 +1284,8 @@ This function takes `comment-end' into account."
    map (kbd "C-c J") (outline-hide-more) (outline-on-heading-p))
   (outshine-define-key-with-fallback
    map (kbd "C-c L") (outline-show-more) (outline-on-heading-p))
-  (outshine-define-key-with-fallback
-   map (kbd "M-<up>") (outline-previous-visible-heading 1)
-   (outline-on-heading-p))
-  (outshine-define-key-with-fallback
-   map (kbd "M-<down>") (outline-next-visible-heading 1)
-   (outline-on-heading-p))
+  (define-key map (kbd "M-<up>") 'outline-previous-visible-heading)
+  (define-key map (kbd "M-<down>") 'outline-next-visible-heading)
   (define-key map (kbd "C-c I") 'outline-previous-visible-heading)
   (define-key map (kbd "C-c K") 'outline-next-visible-heading))
 
