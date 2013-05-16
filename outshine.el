@@ -376,8 +376,7 @@ certain level is calculated. "
   :type 'regexp)
 
 ;; from `outline-magic'
-;; FIXME reset to nil, if TAB inserts space instead of doing completion
-(defcustom outline-cycle-emulate-tab t
+(defcustom outline-cycle-emulate-tab nil
   "Where should `outline-cycle' emulate TAB.
 nil    Never
 white  Only in completely white lines
