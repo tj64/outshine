@@ -394,10 +394,55 @@ t      Everywhere except in headlines"
   :type '(repeat symbol))
 
 ;; startup options
-(defcustom outshine-startup-folded nil
+(defcustom outshine-startup-folded-p nil
   "Non-nil means files will be opened with all but top level headers folded."
   :group 'outshine
   :type 'boolean)
+
+;; show number of hidden lines in folded subtree
+(defcustom outshine-show-hidden-lines-cookies-p nil
+  "Non-nil means line number of hidden body are shown behind headline.
+If this variable is set to a non-nil value, for each visible outline headline
+with a hidden body the number of lines of the body will be calculated and
+shown behind the headline. The numbers are updated with each change of outline
+visibility in the buffer."
+  :group 'outshine
+  :type 'boolean)
+
+(defcustom outshine-hidden-lines-cookie-left-delimiter "["
+  "Left delimiter of cookie that shows number of hidden lines."
+  :group 'outshine
+  :type 'string)
+
+(defcustom outshine-hidden-lines-cookie-right-delimiter "]"
+  "Left delimiter of cookie that shows number of hidden lines."
+  :group 'outshine
+  :type 'string)
+
+(defcustom outshine-hidden-lines-cookie-left-signal-char "#"
+  "Left signal character of cookie that shows number of hidden lines."
+  :group 'outshine
+  :type 'string)
+
+(defcustom outshine-hidden-lines-cookie-right-signal-char ""
+  "Right signal character of cookie that shows number of hidden lines."
+  :group 'outshine
+  :type 'string)
+
+;; TODO delete this line  "\\(\\[\\)\\([[:digit:]+]\\)\\( L\\]\\)"
+(defvar outshine-hidden-lines-cookie-format-regexp
+  (concat
+   "\\( "
+   (regexp-quote outshine-hidden-lines-cookie-left-delimiter)
+   (regexp-quote outshine-hidden-lines-cookie-left-signal-char)
+   "\\)"
+   "\\([[:digit:]]+\\)"
+   "\\("
+   (regexp-quote outshine-hidden-lines-cookie-right-signal-char)
+   ;; FIXME robust enough?
+   (format "\\%s" outshine-hidden-lines-cookie-right-delimiter)
+   "\\)")
+  "Matches cookies that show number of hidden lines for folded subtrees.")
 
 ;; * Defuns
 ;; ** Functions
@@ -584,6 +629,68 @@ Set optionally `outline-level' to FUN and
              (make-local-variable 'outline-heading-end-regexp)
              (setq outline-heading-end-regexp end-regexp)))
 
+;; *** Show number of lines in hidden body
+
+;; Calc and show line number of hidden body for all visible headlines
+(defun outshine-show-hidden-lines-cookies ()
+  "Show line number of hidden lines in folded headline."
+  (and outshine-show-hidden-lines-cookies-p
+       (save-excursion
+         (goto-char (point-min))
+         (and (outline-on-heading-p)
+              (outshine-hidden-lines-cookie-status-changed-p)
+              (outshine-set-hidden-lines-cookie))
+         (while (not (eobp))
+           (outline-next-visible-heading 1)
+           (and (outline-on-heading-p)
+                (outshine-hidden-lines-cookie-status-changed-p)
+                (outshine-set-hidden-lines-cookie))))))
+
+(defun outshine-hidden-lines-cookie-status-changed-p ()
+  "Return non-nil if hidden-lines cookie needs modification."
+  (save-excursion
+    (save-match-data
+      (or (not (outline-body-visible-p))
+          (re-search-forward
+           outshine-hidden-lines-cookie-format-regexp
+           (line-end-position)
+           'NO-ERROR)))))
+
+(defun outshine-set-hidden-lines-cookie ()
+  "Calculate and set number of hidden lines in folded headline."
+  (let* ((folded-p (not (outline-body-visible-p)))
+         (line-num-current-header (line-number-at-pos))
+         (line-num-next-visible-header
+          (save-excursion
+            (outline-next-visible-heading 1)
+            (line-number-at-pos)))
+         (body-lines
+          (1- (- line-num-next-visible-header line-num-current-header))))
+    (if (re-search-forward
+         outshine-hidden-lines-cookie-format-regexp
+         (line-end-position)
+         'NO-ERROR)
+        (cond
+         ((not folded-p) (replace-match ""))
+         (folded-p (replace-match (format "%s" body-lines) nil nil nil 2)))
+      (show-entry)
+      (save-excursion
+        (end-of-line)
+        (insert
+         (format
+          " %s%s%s%s%s"
+          outshine-hidden-lines-cookie-left-delimiter
+          outshine-hidden-lines-cookie-left-signal-char
+          body-lines
+          outshine-hidden-lines-cookie-right-signal-char
+          outshine-hidden-lines-cookie-right-delimiter)))
+      (hide-entry))))
+
+;; ;; FIXME
+;; ;; outline-flag-region: Variable binding depth exceeds max-specpdl-size
+;; (add-hook 'outline-view-change-hook
+;;           'outshine-show-hidden-lines-cookies)
+
 ;; *** Return outline-string at given level
 
 (defun outshine-calc-outline-string-at-level (level)
@@ -647,7 +754,7 @@ top-level heading first."
          ;; deal with special case 'oldschool elisp headers'
          (if outshine-enforce-no-comment-padding-p
              "^;;; \\(.*\\)"
-           (concat (substring outline-regexp 0 -1) 
+           (concat (substring outline-regexp 0 -1)
                    "\\{1\\} \\(.*" outshine-fontify-whole-heading-line "\\)")))
         (heading-2-regexp
          (if outshine-enforce-no-comment-padding-p
@@ -695,7 +802,7 @@ top-level heading first."
        (,heading-7-regexp 1 'outshine-level-7 t)
        (,heading-8-regexp 1 'outshine-level-8 t)))))
 
-;; *** Outshine hook-functions
+;; *** Outshine hook-function
 
 ;; TODO coordinate outshine, outorg and orgstruct
 (defun outshine-hook-function ()
@@ -710,7 +817,7 @@ top-level heading first."
     (outshine-fontify-headlines out-regexp)
     (setq outline-promotion-headings
           (outshine-make-promotion-headings-list 8)))
-  (when outshine-startup-folded
+  (when outshine-startup-folded-p
     (outline-hide-sublevels 1)))
 
 ;; ;; add this to your .emacs
@@ -795,7 +902,7 @@ list, or an alist derived from scanning the buffer."
 	      ;; We have two entries for the same level.
 	      (add-to-list 'nonunique level))
 	  (add-to-list 'seen level))
-	(if nonunique 
+	(if nonunique
 	    (error "Cannot promote/demote: non-unique headings at level %s\nYou may want to configure `outline-promotion-headings'."
 		   (mapconcat 'int-to-string nonunique ","))))))
     ;; OK, return the list
@@ -854,7 +961,7 @@ headings are polymers of a single character, e.g. \"*\".
 If yes, return this character."
   (if (consp (car headlist))
       ;; this is an alist - it makes sense to check for atomic structure
-      (let ((re (concat "\\`" 
+      (let ((re (concat "\\`"
 			(regexp-quote (substring (car (car headlist)) 0 1))
 			"+\\'")))
 	(if (not (delq nil (mapcar (lambda (x) (not (string-match re (car x))))
@@ -874,7 +981,7 @@ If yes, return this character."
   (>= level 1000))
 
 ;; ** Commands
-;; *** Additional outline commands 
+;; *** Additional outline commands
 ;; **** Commands from `out-xtra'
 
 (defun outline-hide-sublevels (keep-levels)
@@ -921,7 +1028,7 @@ Essentially a much simplified version of `next-line'."
   (while (and (not (eobp))
 	      (get-char-property (1- (point)) 'invisible))
     (beginning-of-line 2)))
- 
+
 (defun outline-move-subtree-up (&optional arg)
   "Move the currrent subtree up past ARG headlines of the same level."
   (interactive "p")
@@ -931,7 +1038,7 @@ Essentially a much simplified version of `next-line'."
   "Move the currrent subtree down past ARG headlines of the same level."
   (interactive "p")
   (let ((re (concat "^" outline-regexp))
-	(movfunc (if (> arg 0) 'outline-get-next-sibling 
+	(movfunc (if (> arg 0) 'outline-get-next-sibling
 		   'outline-get-last-sibling))
 	(ins-point (make-marker))
 	(cnt (abs arg))
@@ -945,13 +1052,13 @@ Essentially a much simplified version of `next-line'."
     ;; Find insertion point, with error handling
     (goto-char beg)
     (while (> cnt 0)
-      (or (funcall movfunc) 
+      (or (funcall movfunc)
 	  (progn (goto-char beg)
 		 (error "Cannot move past superior level")))
       (setq cnt (1- cnt)))
     (if (> arg 0)
 	;; Moving forward - still need to move over subtree
-	(progn (outline-end-of-subtree) 
+	(progn (outline-end-of-subtree)
 	       (if (= (char-after) ?\n) (forward-char 1))))
     (move-marker ins-point (point))
     (setq txt (buffer-substring beg end))
@@ -965,7 +1072,7 @@ Essentially a much simplified version of `next-line'."
 When the region is active in transient-mark-mode, all headlines in the
 region are changed.  Otherwise the current subtree is targeted. Note that
 after each application of the command the scope of \"current subtree\"
-may have changed." 
+may have changed."
   (interactive "p")
   (outline-change-level (- arg)))
 
@@ -1015,7 +1122,7 @@ may have changed."
        ((eq last-command 'outline-cycle-overview)
 	;; We just created the overview - now do table of contents
 	;; This can be slow in very large buffers, so indicate action
-	(message "CONTENTS...") 
+	(message "CONTENTS...")
 	(save-excursion
 	  ;; Visit all headings and show their offspring
 	  (goto-char (point-max))
@@ -1052,7 +1159,7 @@ may have changed."
 	  (outline-end-of-subtree)            (setq eos (point)))
 	;; Find out what to do next and set `this-command'
 	(cond
-	 ((= eos eoh) 
+	 ((= eos eoh)
 	  ;; Nothing is hidden behind this heading
 	  (message "EMPTY ENTRY"))
 	 ((>= eol eos)
@@ -1065,7 +1172,7 @@ may have changed."
 	  ;; We just showed the children, now show everything.
 	  (show-subtree)
 	  (message "SUBTREE"))
-	 (t 
+	 (t
 	  ;; Default action: hide the subtree.
 	  (hide-subtree)
 	  (message "FOLDED")))))
@@ -1140,11 +1247,11 @@ may have changed."
           (t
            (show-subtree)))))
 
-;; *** Overridden outline commands 
+;; *** Overridden outline commands
 
 ;; overriding 'outline-insert-heading'
 ;; copied and adapted form outline.el, taking into account modes
-;; with 'comment-end' defined (as non-empty string). 
+;; with 'comment-end' defined (as non-empty string).
 (defun outshine-insert-heading ()
   "Insert a new heading at same depth at point.
 This function takes `comment-end' into account."
@@ -1289,7 +1396,7 @@ This function takes `comment-end' into account."
   (define-key map (kbd "C-c I") 'outline-previous-visible-heading)
   (define-key map (kbd "C-c K") 'outline-next-visible-heading))
 
-(let ((map outline-minor-mode-map)) 
+(let ((map outline-minor-mode-map))
   (outshine-define-key-with-fallback
    map (kbd "M-<left>") (outline-hide-more) (outline-on-heading-p))
   (outshine-define-key-with-fallback
