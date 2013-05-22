@@ -499,7 +499,7 @@ recover it by stripping off \"-map\" from KEYMAP name."
 (defun outshine-set-outline-regexp-base ()
   "Return the actual outline-regexp-base."
   (if (and
-       (not (outshine-outshine-header-style-in-elisp-p))
+       (not (outshine-modern-header-style-in-elisp-p))
        (eq major-mode 'emacs-lisp-mode))
       (progn
         (setq outshine-enforce-no-comment-padding-p t)
@@ -524,7 +524,7 @@ recover it by stripping off \"-map\" from KEYMAP name."
 ;; *** Calculate outline-regexp and outline-level
 
 ;; dealing with special case of oldschool headers in elisp (;;;+)
-(defun outshine-outshine-header-style-in-elisp-p (&optional buffer)
+(defun outshine-modern-header-style-in-elisp-p (&optional buffer)
   "Return nil, if there is no match for a outshine-style header.
 Searches in BUFFER if given, otherwise in current buffer."
   (let ((buf (or buffer (current-buffer))))
