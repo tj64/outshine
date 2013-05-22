@@ -1263,7 +1263,7 @@ may have changed."
       (outshine-write-hidden-lines-cookies))))
 
 (defun outshine-hide-hidden-lines-cookies ()
-  "Delete all hidden-lines cookies and fold buffer."
+  "Delete all hidden-lines cookies."
   (interactive)
   (let* ((base-buf (point-marker))
          (indirect-buf-name
@@ -1281,22 +1281,6 @@ may have changed."
         (kill-buffer (marker-buffer indirect-buf))
         (set-marker indirect-buf nil))
       (set-marker base-buf nil))))
-
-;; (defun outshine-hide-hidden-lines-cookies ()
-;;   "Delete all hidden-lines cookies and fold buffer."
-;;   (interactive)
-;;   (save-excursion
-;;     (goto-char (point-min))
-;;     (unless (outline-on-heading-p)
-;;       (outline-next-visible-heading))
-;;     (save-restriction
-;;       (show-all)
-;;       (unless outshine-show-hidden-lines-cookies-p
-;;         (setq outshine-show-hidden-lines-cookies-p 1))
-;;       (outshine-write-hidden-lines-cookies)
-;;       (hide-other)
-;;       (hide-subtree))))
-
 
 (defun outshine-toggle-hidden-lines-cookies-activation ()
   "Toggles activation of hidden-lines cookies."
