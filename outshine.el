@@ -181,6 +181,11 @@ them set by set, separated by a nil element.  See the example for
 (defvar outshine-show-hidden-lines-cookies-p nil
   "If non-nil, commands for hidden-lines cookies are activated.")
 
+;; remember if hidden-lines cookies are shown or hidden
+(defvar outshine-hidden-lines-cookies-on-p nil
+  "If non-nil, hidden-lines cookies are shown, otherwise hidden.")
+
+
 ;; ** Hooks
 
 (defvar outshine-hook nil
@@ -1259,7 +1264,8 @@ may have changed."
     (if (not (y-or-n-p "Activate hidden-lines cookies "))
         (message "Unable to show hidden-lines cookies - deactivated.")
       (outshine-toggle-hidden-lines-cookies-activation)
-      (outshine-write-hidden-lines-cookies))))
+      (outshine-write-hidden-lines-cookies)))
+  (setq outshine-hidden-lines-cookies-on-p 1))
 
 (defun outshine-hide-hidden-lines-cookies ()
   "Delete all hidden-lines cookies."
@@ -1279,7 +1285,8 @@ may have changed."
         (switch-to-buffer (marker-buffer base-buf))
         (kill-buffer (marker-buffer indirect-buf))
         (set-marker indirect-buf nil))
-      (set-marker base-buf nil))))
+      (set-marker base-buf nil)))
+  (setq outshine-hidden-lines-cookies-on-p nil))
 
 (defun outshine-toggle-hidden-lines-cookies-activation ()
   "Toggles activation of hidden-lines cookies."
@@ -1287,10 +1294,17 @@ may have changed."
   (if outshine-show-hidden-lines-cookies-p
       (progn
         (setq outshine-show-hidden-lines-cookies-p nil)
+        (setq outshine-hidden-lines-cookies-on-p nil)
         (message "hidden-lines cookies are deactivated now"))
     (setq outshine-show-hidden-lines-cookies-p 1)
     (message "hidden-lines cookies are activated now")))
 
+(defun outshine-toggle-hidden-lines-cookies ()
+  "Toggles status of hidden-lines cookies between shown and hidden."
+  (interactive)
+  (if outshine-hidden-lines-cookies-on-p
+      (outshine-hide-hidden-lines-cookies)
+    (outshine-show-hidden-lines-cookies)))
 
 ;; *** Overridden outline commands
 
