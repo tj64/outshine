@@ -125,9 +125,6 @@
   "Global default value of `outline-heading-end-regexp'.
 Used to override any major-mode specific file-local settings")
 
-(defconst outshine-default-outline-regexp-base "[*]+"
-  "Default base for calculating the outline-regexp")
-
 (defconst outshine-oldschool-elisp-outline-regexp-base "[;]+"
   "Oldschool Emacs Lisp base for calculating the outline-regexp")
 
@@ -426,6 +423,16 @@ t      Everywhere except in headlines"
   "Right signal character of cookie that shows number of hidden lines."
   :group 'outshine
   :type 'string)
+
+(defcustom outshine-regexp-base-char "*"
+  "Character used in outline-regexp base."
+  :group 'outshine
+  :type 'string)
+
+;; old regexp: "[*]+"
+(defvar outshine-default-outline-regexp-base 
+  (format "[%s]+" outshine-regexp-base-char)
+  "Default base for calculating the outline-regexp")
 
 ;; TODO delete this line  "\\(\\[\\)\\([[:digit:]+]\\)\\( L\\]\\)"
 (defvar outshine-hidden-lines-cookie-format-regexp
