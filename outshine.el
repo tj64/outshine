@@ -1,6 +1,6 @@
 ;; * outshine.el --- outline with outshine outshines outline
 ;;   :PROPERTIES:
-;;   :copyright: Thorsten Jolitz
+;;   :copyright: Thorsten_Jolitz
 ;;   :copyright-years: 2013
 ;;   :version:  1.0
 ;;   :licence:  GPL 2 or later (free software)
@@ -8,7 +8,7 @@
 ;;   :part-of-emacs: no
 ;;   :authors: Thorsten_Jolitz Carsten_Dominik Per_Abrahamsen
 ;;   :author_email: tjolitz AT gmail DOT com
-;;   :credits:  Fabrice Niessen Alexander Vorobiev
+;;   :credits:  Fabrice_Niessen Alexander_Vorobiev Jonas_Bernoulli
 ;;   :inspiration: outline-magic outxxtra out-xtra
 ;;   :keywords: emacs outlines file_structuring
 ;;   :END:
