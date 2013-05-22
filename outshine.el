@@ -178,6 +178,14 @@ them set by set, separated by a nil element.  See the example for
 (make-variable-buffer-local
  'outshine-normalized-outline-regexp-base)
 
+;; show number of hidden lines in folded subtree
+(defvar outshine-show-hidden-lines-cookies-p nil
+  "Non-nil means line number of hidden body are shown behind headline.
+If this variable is set to a non-nil value, for each visible outline headline
+with a hidden body the number of lines of the body will be calculated and
+shown behind the headline. The numbers are updated with each change of outline
+visibility in the buffer.")
+
 ;; ** Hooks
 
 (defvar outshine-hook nil
@@ -396,16 +404,6 @@ t      Everywhere except in headlines"
 ;; startup options
 (defcustom outshine-startup-folded-p nil
   "Non-nil means files will be opened with all but top level headers folded."
-  :group 'outshine
-  :type 'boolean)
-
-;; show number of hidden lines in folded subtree
-(defcustom outshine-show-hidden-lines-cookies-p nil
-  "Non-nil means line number of hidden body are shown behind headline.
-If this variable is set to a non-nil value, for each visible outline headline
-with a hidden body the number of lines of the body will be calculated and
-shown behind the headline. The numbers are updated with each change of outline
-visibility in the buffer."
   :group 'outshine
   :type 'boolean)
 
@@ -632,7 +630,7 @@ Set optionally `outline-level' to FUN and
 ;; *** Show number of lines in hidden body
 
 ;; Calc and show line number of hidden body for all visible headlines
-(defun outshine-show-hidden-lines-cookies ()
+(defun outshine-write-hidden-lines-cookies ()
   "Show line number of hidden lines in folded headline."
   (and outshine-show-hidden-lines-cookies-p
        (save-excursion
@@ -689,7 +687,7 @@ Set optionally `outline-level' to FUN and
 ;; ;; FIXME
 ;; ;; outline-flag-region: Variable binding depth exceeds max-specpdl-size
 ;; (add-hook 'outline-view-change-hook
-;;           'outshine-show-hidden-lines-cookies)
+;;           'outshine-write-hidden-lines-cookies)
 
 ;; *** Return outline-string at given level
 
@@ -1246,6 +1244,41 @@ may have changed."
            (show-entry))
           (t
            (show-subtree)))))
+
+(defun outshine-show-hidden-lines-cookies ()
+  "Show hidden-lines cookies for all visible and folded headlines."
+  (interactive)
+  (if outshine-show-hidden-lines-cookies-p
+      (outshine-write-hidden-lines-cookies)
+    (if (not (y-or-n-p "Activate hidden-lines cookies "))
+        (message "Unable to show hidden-lines cookies - deactivated.")
+      (outshine-toggle-hidden-lines-cookies-activation)
+      (outshine-write-hidden-lines-cookies))))
+
+(defun outshine-hide-hidden-lines-cookies ()
+  "Delete all hiidden-lines cookies and fold buffer."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (unless (outline-on-heading-p)
+      (outline-next-visible-heading))
+    (show-all)
+    (unless outshine-show-hidden-lines-cookies-p
+      (setq outshine-show-hidden-lines-cookies-p 1))
+    (outshine-write-hidden-lines-cookies)
+    (hide-other)
+    (hide-subtree)))
+
+(defun outshine-toggle-hidden-lines-cookies-activation ()
+  "Toggles activation of hidden-lines cookies."
+  (interactive)
+  (if outshine-show-hidden-lines-cookies-p
+      (progn
+        (setq outshine-show-hidden-lines-cookies-p nil)
+        (message "hidden-lines cookies are deactivated now"))
+    (setq outshine-show-hidden-lines-cookies-p 1)
+    (message "hidden-lines cookies are activated now")))
+
 
 ;; *** Overridden outline commands
 
