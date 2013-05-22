@@ -179,11 +179,7 @@ them set by set, separated by a nil element.  See the example for
 
 ;; show number of hidden lines in folded subtree
 (defvar outshine-show-hidden-lines-cookies-p nil
-  "Non-nil means line number of hidden body are shown behind headline.
-If this variable is set to a non-nil value, for each visible outline headline
-with a hidden body the number of lines of the body will be calculated and
-shown behind the headline. The numbers are updated with each change of outline
-visibility in the buffer.")
+  "If non-nil, commands for hidden-lines cookies are activated.")
 
 ;; ** Hooks
 
