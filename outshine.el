@@ -802,7 +802,6 @@ top-level heading first."
 
 ;; *** Outshine hook-function
 
-;; TODO coordinate outshine, outorg and orgstruct
 (defun outshine-hook-function ()
   "Add this function to outline-minor-mode-hook"
   (outshine-set-outline-regexp-base)
@@ -816,10 +815,13 @@ top-level heading first."
     (setq outline-promotion-headings
           (outshine-make-promotion-headings-list 8)))
   (when outshine-startup-folded-p
-    (outline-hide-sublevels 1)))
+    (condition-case error-data
+        (outline-hide-sublevels 1)
+      ('error (message "No outline structure detected")))))
 
 ;; ;; add this to your .emacs
 ;; (add-hook 'outline-minor-mode-hook 'outshine-hook-function)
+
 ;; *** Additional outline functions
 ;; **** Functions from `outline-magic'
 
@@ -1256,18 +1258,19 @@ may have changed."
       (outshine-write-hidden-lines-cookies))))
 
 (defun outshine-hide-hidden-lines-cookies ()
-  "Delete all hiidden-lines cookies and fold buffer."
+  "Delete all hidden-lines cookies and fold buffer."
   (interactive)
   (save-excursion
     (goto-char (point-min))
     (unless (outline-on-heading-p)
       (outline-next-visible-heading))
-    (show-all)
-    (unless outshine-show-hidden-lines-cookies-p
-      (setq outshine-show-hidden-lines-cookies-p 1))
-    (outshine-write-hidden-lines-cookies)
-    (hide-other)
-    (hide-subtree)))
+    (save-restriction
+      (show-all)
+      (unless outshine-show-hidden-lines-cookies-p
+        (setq outshine-show-hidden-lines-cookies-p 1))
+      (outshine-write-hidden-lines-cookies)
+      (hide-other)
+      (hide-subtree))))
 
 (defun outshine-toggle-hidden-lines-cookies-activation ()
   "Toggles activation of hidden-lines cookies."
