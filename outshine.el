@@ -11,6 +11,8 @@
 ;;   :credits:  Fabrice_Niessen Alexander_Vorobiev Jonas_Bernoulli
 ;;   :inspiration: outline-magic outxxtra out-xtra
 ;;   :keywords: emacs outlines file_structuring
+;;   :git-repo: https://github.com/tj64/outshine.git
+;;   :git-clone: git://github.com/tj64/outshine.git
 ;;   :END:
 
 ;; ** Commentary
