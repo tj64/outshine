@@ -468,8 +468,8 @@ recover it by stripping off \"-map\" from KEYMAP name."
   `(define-key
      ,keymap
      ,key
-     (lambda ()
-       (interactive)
+     (lambda (&optional arg)
+       (interactive "P")
        (if ,condition ,def
          (let* ((,(if mode mode
                     (let* ((keymap-str (symbol-name keymap))
@@ -1346,7 +1346,7 @@ This function takes `comment-end' into account."
 
 ;; keybindings like Org-mode
 (outshine-define-key-with-fallback outline-minor-mode-map (kbd "TAB")
-  (outline-cycle 1)(outline-on-heading-p))
+  (outline-cycle arg)(outline-on-heading-p))
 (outshine-define-key-with-fallback outline-minor-mode-map (kbd "M-RET")
   (outshine-insert-heading)(outline-on-heading-p))
 (define-key outline-minor-mode-map (kbd "<backtab>") 'outshine-cycle-buffer)
