@@ -88,6 +88,12 @@
 ;; #  (defvar outline-minor-mode-prefix "\C-c")
 ;; # #+end_src
 
+;; or
+
+;; # #+begin_src emacs-lisp
+;; #  (defvar outline-minor-mode-prefix "\M-#")
+;; # #+end_src
+
 ;; or whatever. The prefix can only be changed before outline (minor) mode is
 ;; loaded.
 
@@ -1386,7 +1392,12 @@ This function takes `comment-end' into account."
 	 (define-key map "\C-q" 'outline-hide-sublevels)
 	 (define-key map "\C-o" 'outline-hide-other)
       	 (define-key map (kbd "RET") 'outshine-insert-heading)
+         ;; set the outline prefix-key in your init-file
+         ;; best used with prefix-key 'C-c' 
          (define-key map "'" 'outorg-edit-as-org)
+         ;; best used with prefix-key 'M-#'
+         (define-key map "\M-#" 'outorg-edit-as-org)
+         (define-key map "#" 'outorg-edit-as-org)
 
 	 (define-key outline-minor-mode-map [menu-bar hide hide-sublevels]
 	   '("Hide Sublevels" . outline-hide-sublevels))
