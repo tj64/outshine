@@ -1125,7 +1125,7 @@ may have changed."
   (cond
 
    ((equal arg '(4))
-    ; Run `outline-cycle' as if at the top of the buffer.
+                                        ; Run `outline-cycle' as if at the top of the buffer.
     (save-excursion
       (goto-char (point-min))
       (outline-cycle nil)))
@@ -1159,7 +1159,17 @@ may have changed."
 	(setq this-command 'outline-cycle-showall))
        (t
 	;; Default action: go to overview
-	(hide-sublevels 1)
+	;; (hide-sublevels 1)
+        (let ((toplevel
+               (cond
+                (current-prefix-arg
+                 (prefix-numeric-value current-prefix-arg))
+                ((save-excursion
+                   (beginning-of-line)
+                   (looking-at outline-regexp))
+                 (max 1 (funcall outline-level)))
+                (t 1))))
+          (hide-sublevels toplevel))
 	(message "OVERVIEW")
 	(setq this-command 'outline-cycle-overview))))
 
