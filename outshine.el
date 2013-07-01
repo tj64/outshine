@@ -1125,7 +1125,7 @@ may have changed."
   (cond
 
    ((equal arg '(4))
-                                        ; Run `outline-cycle' as if at the top of the buffer.
+    ;; Run `outline-cycle' as if at the top of the buffer.
     (save-excursion
       (goto-char (point-min))
       (outline-cycle nil)))
