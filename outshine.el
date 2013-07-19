@@ -459,6 +459,10 @@ t      Everywhere except in headlines"
    "\\)")
   "Matches cookies that show number of hidden lines for folded subtrees.")
 
+(defvar outshine-cycle-silently nil
+  "Suppress visibility-state-change messages when non-nil.")
+
+
 ;; * Defuns
 ;; ** Functions
 ;; *** Define keys with fallback
@@ -1138,7 +1142,8 @@ may have changed."
        ((eq last-command 'outline-cycle-overview)
 	;; We just created the overview - now do table of contents
 	;; This can be slow in very large buffers, so indicate action
-	(message "CONTENTS...")
+	(unless outshine-cycle-silently
+          (message "CONTENTS..."))
 	(save-excursion
 	  ;; Visit all headings and show their offspring
 	  (goto-char (point-max))
@@ -1150,12 +1155,14 @@ may have changed."
 			(looking-at outline-regexp))
 	      (show-branches)
 	      (if (bobp) (throw 'exit nil))))
-	  (message "CONTENTS...done"))
+	  (unless outshine-cycle-silently
+            (message "CONTENTS...done")))
 	(setq this-command 'outline-cycle-toc))
        ((eq last-command 'outline-cycle-toc)
 	;; We just showed the table of contents - now show everything
 	(show-all)
-	(message "SHOW ALL")
+	(unless outshine-cycle-silently
+          (message "SHOW ALL"))
 	(setq this-command 'outline-cycle-showall))
        (t
 	;; Default action: go to overview
@@ -1170,7 +1177,8 @@ may have changed."
                  (max 1 (funcall outline-level)))
                 (t 1))))
           (hide-sublevels toplevel))
-	(message "OVERVIEW")
+	(unless outshine-cycle-silently
+          (message "OVERVIEW"))
 	(setq this-command 'outline-cycle-overview))))
 
      ((save-excursion (beginning-of-line 1) (looking-at outline-regexp))
@@ -1187,21 +1195,25 @@ may have changed."
 	(cond
 	 ((= eos eoh)
 	  ;; Nothing is hidden behind this heading
-	  (message "EMPTY ENTRY"))
+	  (unless outshine-cycle-silently
+            (message "EMPTY ENTRY")))
 	 ((>= eol eos)
 	  ;; Entire subtree is hidden in one line: open it
 	  (show-entry)
 	  (show-children)
-	  (message "CHILDREN")
+	  (unless outshine-cycle-silently
+            (message "CHILDREN"))
 	  (setq this-command 'outline-cycle-children))
 	 ((eq last-command 'outline-cycle-children)
 	  ;; We just showed the children, now show everything.
 	  (show-subtree)
-	  (message "SUBTREE"))
+	  (unless outshine-cycle-silently
+            (message "SUBTREE")))
 	 (t
 	  ;; Default action: hide the subtree.
 	  (hide-subtree)
-	  (message "FOLDED")))))
+	  (unless outshine-cycle-silently
+            (message "FOLDED"))))))
 
      ;; TAB emulation
      ((outline-cycle-emulate-tab)
@@ -1215,6 +1227,23 @@ may have changed."
   "Cycle the visibility state of buffer."
   (interactive)
   (outline-cycle '(4)))
+
+(defun outshine-toggle-silent-cycling (&optional arg)
+  "Toggle silent cycling between visibility states.
+
+  When silent cycling is off, visibility state-change messages are
+  written to stdout (i.e. the *Messages* buffer), otherwise these
+  messages are suppressed. With prefix argument ARG, cycle silently
+  if ARG is positive, otherwise write state-change messages."
+  (interactive "P")
+  (setq outshine-cycle-silently
+	(if (null arg)
+	    (not outshine-cycle-silently)
+	  (> (prefix-numeric-value arg) 0)))
+  (message "Silent visibility cycling %s"
+	   (if outshine-cycle-silently "enabled" "disabled")))
+
+
 
 ;; **** Commands from `outline-mode-easy-bindings'
 
