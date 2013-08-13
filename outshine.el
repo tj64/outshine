@@ -370,6 +370,11 @@ any other entries, and any resulting duplicates will be removed entirely."
 
 ;; *** Custom Vars
 
+(defcustom outshine-imenu-show-headlines-p t
+  "Non-nil means use calculated outline-regexp for imenu."
+  :group 'outshine
+  :type 'boolean)
+
 ;; from `org'
 (defcustom outshine-fontify-whole-heading-line nil
   "Non-nil means fontify the whole line for headings.
@@ -834,7 +839,13 @@ top-level heading first."
      outshine-outline-heading-end-regexp)
     (outshine-fontify-headlines out-regexp)
     (setq outline-promotion-headings
-          (outshine-make-promotion-headings-list 8)))
+          (outshine-make-promotion-headings-list 8))
+    ;; imenu preparation
+    (and outshine-imenu-show-headlines-p
+         (setq outshine-imenu-generic-expression
+               `((nil ,(concat out-regexp "\\(.*$\\)") 1)))
+         (setq imenu-generic-expression
+               outshine-imenu-generic-expression)))
   (when outshine-startup-folded-p
     (condition-case error-data
         (outline-hide-sublevels 1)
@@ -1392,7 +1403,7 @@ This function takes `comment-end' into account."
          (forward-char -1))
     (run-hooks 'outline-insert-heading-hook)))
 
-;; * Keybindings and Menus
+;; * Menus and Keybindings
 
 ;; ** Menus
 ;; *** Advertise Bindings
