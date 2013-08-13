@@ -1094,7 +1094,8 @@ region are changed.  Otherwise the current subtree is targeted. Note that
 after each application of the command the scope of \"current subtree\"
 may have changed."
   (interactive "p")
-  (outline-change-level (- arg)))
+  (let ((delta (or arg 1)))
+    (outline-change-level (- delta))))
 
 (defun outline-demote (&optional arg)
   "Increase the level of an outline-structure by ARG levels.
@@ -1103,7 +1104,8 @@ region are changed.  Otherwise the current subtree is targeted. Note that
 after each application of the command the scope of \"current subtree\"
 may have changed."
   (interactive "p")
-  (outline-change-level arg))
+  (let ((delta (or arg 1)))
+    (outline-change-level delta)))
 
 (defun outline-cycle (&optional arg)
   "Visibility cycling for outline(-minor)-mode.
@@ -1387,7 +1389,7 @@ This function takes `comment-end' into account."
          (forward-char -1))
     (run-hooks 'outline-insert-heading-hook)))
 
-;; * Keybindings.
+;; * Keybindings and Menus
 ;; ** From `outline-magic'
 
 ;; keybindings like Org-mode
@@ -1395,6 +1397,10 @@ This function takes `comment-end' into account."
   (outline-cycle arg)(outline-on-heading-p))
 (outshine-define-key-with-fallback outline-minor-mode-map (kbd "M-RET")
   (outshine-insert-heading)(outline-on-heading-p))
+(outshine-define-key-with-fallback outline-minor-mode-map (kbd "M-S-<left>")
+  (outline-promote)(outline-on-heading-p))
+(outshine-define-key-with-fallback outline-minor-mode-map (kbd "M-S-<right>")
+  (outline-demote)(outline-on-heading-p))
 (define-key outline-minor-mode-map (kbd "<backtab>") 'outshine-cycle-buffer)
 
 ;; Menu entries
