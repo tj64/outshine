@@ -114,6 +114,7 @@
 ;; * Requires
 
 (require 'outline)
+(require 'easymenu)
 ;; necessary before Emacs 24.3
 (require 'newcomment)
 
@@ -1052,16 +1053,18 @@ Essentially a much simplified version of `next-line'."
 (defun outline-move-subtree-up (&optional arg)
   "Move the currrent subtree up past ARG headlines of the same level."
   (interactive "p")
-  (outline-move-subtree-down (- arg)))
+  (let ((headers (or arg 1)))
+    (outline-move-subtree-down (- headers))))
 
 (defun outline-move-subtree-down (&optional arg)
   "Move the currrent subtree down past ARG headlines of the same level."
   (interactive "p")
-  (let ((re (concat "^" outline-regexp))
-	(movfunc (if (> arg 0) 'outline-get-next-sibling
+  (let* ((headers (or arg 1))
+        (re (concat "^" outline-regexp))
+	(movfunc (if (> headers 0) 'outline-get-next-sibling
 		   'outline-get-last-sibling))
 	(ins-point (make-marker))
-	(cnt (abs arg))
+	(cnt (abs headers))
 	beg end txt)
     ;; Select the tree
     (outline-back-to-heading)
@@ -1076,7 +1079,7 @@ Essentially a much simplified version of `next-line'."
 	  (progn (goto-char beg)
 		 (error "Cannot move past superior level")))
       (setq cnt (1- cnt)))
-    (if (> arg 0)
+    (if (> headers 0)
 	;; Moving forward - still need to move over subtree
 	(progn (outline-end-of-subtree)
 	       (if (= (char-after) ?\n) (forward-char 1))))
@@ -1390,141 +1393,303 @@ This function takes `comment-end' into account."
     (run-hooks 'outline-insert-heading-hook)))
 
 ;; * Keybindings and Menus
-;; ** From `outline-magic'
 
-;; keybindings like Org-mode
-(outshine-define-key-with-fallback outline-minor-mode-map (kbd "TAB")
-  (outline-cycle arg)(outline-on-heading-p))
-(outshine-define-key-with-fallback outline-minor-mode-map (kbd "M-RET")
-  (outshine-insert-heading)(outline-on-heading-p))
-(outshine-define-key-with-fallback outline-minor-mode-map (kbd "M-S-<left>")
-  (outline-promote)(outline-on-heading-p))
-(outshine-define-key-with-fallback outline-minor-mode-map (kbd "M-S-<right>")
-  (outline-demote)(outline-on-heading-p))
-(define-key outline-minor-mode-map (kbd "<backtab>") 'outshine-cycle-buffer)
+;; ** Menus
+;; *** Advertise Bindings
+ 
+(put 'outshine-insert-heading :advertised-binding [M-enter])
+(put 'outline-cycle :advertised-binding [TAB])
+(put 'outshine-cycle-buffer :advertised-binding [BACKTAB])
+(put 'outline-promote :advertised-binding [M-S-left])
+(put 'outline-demote :advertised-binding [M-S-right])
+(put 'outline-move-subtree-up :advertised-binding [M-S-up])
+(put 'outline-move-subtree-down :advertised-binding [M-S-down])
+(put 'outline-hide-more :advertised-binding [M-left])
+(put 'outline-show-more :advertised-binding [M-right])
+(put 'outline-next-visible-header :advertised-binding [M-down])
+(put 'outline-previous-visible-header :advertised-binding [M-up])
+(put 'show-all :advertised-binding [M-\# M-a])
+(put 'outline-up-heading :advertised-binding [M-\# M-u])
+(put 'outorg-edit-as-org :advertised-binding [M-\# M-\#])
 
-;; Menu entries
+;; *** Define Menu
 
-(define-key outline-mode-menu-bar-map [headings outline-move-subtree-down]
-  '("Move subtree down" . outline-move-subtree-down))
-(define-key outline-mode-menu-bar-map [headings outline-move-subtree-up]
-  '("Move subtree up" . outline-move-subtree-up))
-(define-key outline-mode-menu-bar-map [headings outline-demote]
-  '("Demote by 1 level" . outline-demote))
-(define-key outline-mode-menu-bar-map [headings outline-promote]
-  '("Promote by 1 level" . outline-promote))
-(define-key outline-mode-menu-bar-map [show outline-cycle]
-  '("Rotate visibility" . outline-cycle))
-(define-key outline-mode-menu-bar-map [hide outline-cycle]
-  '("Rotate visibility" . outline-cycle))
+(easy-menu-define outshine-menu outline-minor-mode-map "Outshine menu"
+  '("Outshine"
+     ["Cycle Subtree" outline-cycle
+      :active (outline-on-heading-p)]
+     ["Cycle Buffer" outshine-cycle-buffer t]
+     ["Show More" outline-show-more
+      :active (outline-on-heading-p)]
+     ["Hide More" outline-hide-more
+      :active (outline-on-heading-p)]
+     ["Show All" show-all t]
+     "--"
+     ["Insert Heading" outshine-insert-heading t]
+     ["Promote Heading" outline-promote
+      :active (outline-on-heading-p)]
+     ["Demote Heading" outline-demote
+      :active (outline-on-heading-p)]
+     ["Move Heading Up" outline-move-heading-up
+      :active (outline-on-heading-p)]
+     ["Move Heading Down" outline-move-heading-down
+      :active (outline-on-heading-p)]
+    "--"
+     ["Previous Visible Heading" outline-previous-visible-heading t]
+     ["Next Visible Heading" outline-next-visible-heading t]
+     ["Up Heading" outline-up-heading t]
+    "--"
+     ["Mark Subtree" outline-mark-subtree t]
+     ["Edit As Org" outorg-edit-as-org t]))
 
-;; ** From `out-xtra'
+;; add "Outshine" menu item
+(easy-menu-add outshine-menu outline-minor-mode-map)
+;; get rid of "Outline" menu item
+(define-key outline-minor-mode-map [menu-bar outline] 'undefined)
 
-;; We provide bindings for all keys.
-;; old stuff from `out-xtra' - still up-to-date?
+;; ;; menu map for outshine
+;; (defvar outshine-menu-map
+;;   (let ((map (make-sparse-keymap)))
+;;     ;; (define-key map [next-error-follow-minor-mode]
+;;     ;;   `(menu-item ,(purecopy "Auto Occurrence Display")
+;;     ;;     	  next-error-follow-minor-mode
+;;     ;;     	  :help ,(purecopy
+;;     ;;     		  "Display another occurrence when moving the cursor")
+;;     ;;     	  :button (:toggle . (and (boundp 'next-error-follow-minor-mode)
+;;     ;;     				  next-error-follow-minor-mode))))
 
-(if (fboundp 'eval-after-load)
-    ;; FSF Emacs 19.
-    (eval-after-load "outline"
-      '(let ((map (lookup-key outline-minor-mode-map
-			      outline-minor-mode-prefix)))
-	 (define-key map "\C-t" 'hide-body)
-	 (define-key map "\C-a" 'show-all)
-	 (define-key map "\C-c" 'hide-entry)
-	 (define-key map "\C-e" 'show-entry)
-	 (define-key map "\C-l" 'hide-leaves)
-	 (define-key map "\C-k" 'show-branches)
-	 (define-key map "\C-q" 'outline-hide-sublevels)
-	 (define-key map "\C-o" 'outline-hide-other)
-      	 (define-key map (kbd "RET") 'outshine-insert-heading)
-         ;; set the outline prefix-key in your init-file
-         ;; best used with prefix-key 'C-c' 
-         (define-key map "'" 'outorg-edit-as-org)
-         ;; best used with prefix-key 'M-#'
-         (define-key map "\M-#" 'outorg-edit-as-org)
-         (define-key map "#" 'outorg-edit-as-org)
+;;     ;; (define-key map [separator-11] menu-bar-separator)
 
-	 (define-key outline-minor-mode-map [menu-bar hide hide-sublevels]
-	   '("Hide Sublevels" . outline-hide-sublevels))
-	 (define-key outline-minor-mode-map [menu-bar hide hide-other]
-	   '("Hide Other" . outline-hide-other))
-	 (if (fboundp 'update-power-keys)
-	     (update-power-keys outline-minor-mode-map))))
+;;     ;; Edit as Org
+;;     (define-key map [outorg-edit-as-org]
+;;       `(menu-item ,(purecopy "Edit Subtree/Buffer as Org")
+;;       outorg-edit-as-org :help ,(purecopy "Edit subtree (or whole buffer with
+;;     prefix) as Org-mode file in temporary Outorg edit buffer")))
+;;     ;; Motion
+;;     (define-key map [separator-5] menu-bar-separator)
+;;     (define-key map [outline-up-heading]
+;;       `(menu-item ,(purecopy "Backward to Higher Level Heading")
+;;       outline-up-heading :help ,(purecopy "Move
+;;       backward to higher level heading")))
+;;     (define-key map [outline-previous-visible-heading]
+;;       `(menu-item ,(purecopy "Previous Heading Same Level")
+;;       outline-previous-visible-heading :help ,(purecopy "Move
+;;       to previous heading at the same level")))
+;;     (define-key map [outline-next-visible-heading]
+;;       `(menu-item ,(purecopy "Next Heading Same Level")
+;;       outline-next-visible-heading :help ,(purecopy "Move
+;;       to next heading at the same level")))
+;;     ;; Structure Editing
+;;     (define-key map [separator-4] menu-bar-separator)
+;;     (define-key map [outline-move-subtree-up]
+;;       `(menu-item ,(purecopy "Move Subtree Down") outline-move-subtree-up
+;; 		  :help ,(purecopy "Move subtree up, above the
+;;       next heading at the same level")))
+;;     (define-key map [outline-move-subtree-down]
+;;       `(menu-item ,(purecopy "Move Subtree Down") outline-move-subtree-down
+;; 		  :help ,(purecopy "Move subtree down, below the
+;;       next heading at the same level")))
+;;     (define-key map [outline-demote]
+;;       `(menu-item ,(purecopy "Demote Subtree") outline-demote
+;; 		  :help ,(purecopy "Demote subtree at point")))
+;;     (define-key map [outline-promote]
+;;       `(menu-item ,(purecopy "Promote Subtree") outline-promote
+;; 		  :help ,(purecopy "Promote subtree at point")))
+;;     ;; Insert New Heading
+;;     (define-key map [separator-3] menu-bar-separator)
+;;     (define-key map [outshine-insert-heading]
+;;       `(menu-item ,(purecopy "Insert Heading") outshine-insert-heading
+;; 		  :help ,(purecopy "With point on a headline,
+;; 		  insert new heading")))
+;;     ;; Visibility Cycling
+;;     (define-key map [separator-2] menu-bar-separator)
+;;     (define-key map [show-all]
+;;       `(menu-item ,(purecopy "Show All")
+;;       show-all :help ,(purecopy "Hide more subtrees and content"))) 
+;;     (define-key map [outline-hide-more]
+;;       `(menu-item ,(purecopy "Hide More")
+;;       outline-hide-mode :help ,(purecopy "Hide more subtrees and content"))) 
+;;     (define-key map [outline-show-more]
+;;       `(menu-item ,(purecopy "Show More")
+;;       outline-show-mode :help ,(purecopy "Show more subtrees and content"))) 
+;;     (define-key map [outshine-cycle-buffer]
+;;       `(menu-item ,(purecopy "Cycle Buffer")
+;;       outshine-cycle-buffer :help ,(purecopy "Cycle entire buffer"))) 
+;;     (define-key map [outline-cycle]
+;;       `(menu-item ,(purecopy "Cycle Subtree")
+;;       outline-cycle :help ,(purecopy "Cycle subtree at point"))) map)
+;;   "Menu keymap for `outshine'.")
 
-  (if (string-match "Lucid" emacs-version)
-      (progn				;; Lucid Emacs 19
-	(defconst outline-menu
-	  '(["Up" outline-up-heading t]
-	    ["Next" outline-next-visible-heading t]
-	    ["Previous" outline-previous-visible-heading t]
-	    ["Next Same Level" outline-forward-same-level t]
-	    ["Previous Same Level" outline-backward-same-level t]
-	    "---"
-	    ["Show All" show-all t]
-	    ["Show Entry" show-entry t]
-	    ["Show Branches" show-branches t]
-	    ["Show Children" show-children t]
-	    ["Show Subtree" show-subtree t]
-	    "---"
-	    ["Hide Leaves" hide-leaves t]
-	    ["Hide Body" hide-body t]
-	    ["Hide Entry" hide-entry t]
-	    ["Hide Subtree" hide-subtree t]
-	    ["Hide Other" outline-hide-other t]
-	    ["Hide Sublevels" outline-hide-sublevels t]))
+;; ;; get rid of 'Outline' menu
+;; (define-key outshine-menu-map [menu-bar outline] 'undefined)
 
-        (defun outline-add-menu ()
-	  (set-buffer-menubar (copy-sequence current-menubar))
-	  (add-menu nil "Outline" outline-menu))
+;; ** Keybindings
+;; *** Principal Keybindings
 
-	(add-hook 'outline-minor-mode-hook 'outline-add-menu)
-	(add-hook 'outline-mode-hook 'outline-add-menu)
-	(add-hook 'outline-minor-mode-off-hook
-                  (function (lambda () (delete-menu-item '("Outline")))))))
-
-  ;; Lucid Emacs or Emacs 18.
-  (require 'outln-18)
-  (let ((map (lookup-key outline-minor-mode-map outline-minor-mode-prefix)))
-    ;; Should add a menu here.
-    (define-key map "\C-t" 'hide-body)
-    (define-key map "\C-a" 'show-all)
-    (define-key map "\C-c" 'hide-entry)
-    (define-key map "\C-e" 'show-entry)
-    (define-key map "\C-l" 'hide-leaves)
-    (define-key map "\C-k" 'show-branches)
-    (define-key map "\C-q" 'outline-hide-sublevels)
-    (define-key map "\C-o" 'outline-hide-other)))
-
-
-;; ** From `outline-mode-easy-bindings'
-
-(let ((map outline-mode-map))
-  (outshine-define-key-with-fallback
-   map (kbd "M-<left>") (outline-hide-more) (outline-on-heading-p))
-  (outshine-define-key-with-fallback
-   map (kbd "M-<right>") (outline-show-more) (outline-on-heading-p))
-  (outshine-define-key-with-fallback
-   map (kbd "C-c J") (outline-hide-more) (outline-on-heading-p))
-  (outshine-define-key-with-fallback
-   map (kbd "C-c L") (outline-show-more) (outline-on-heading-p))
-  (define-key map (kbd "M-<up>") 'outline-previous-visible-heading)
-  (define-key map (kbd "M-<down>") 'outline-next-visible-heading)
-  (define-key map (kbd "C-c I") 'outline-previous-visible-heading)
-  (define-key map (kbd "C-c K") 'outline-next-visible-heading))
-
+;;  Adapted from `org-mode' and `outline-mode-easy-bindings'
 (let ((map outline-minor-mode-map))
+  ;; Visibility Cycling
+  (outshine-define-key-with-fallback
+   map (kbd "TAB") (outline-cycle arg) (outline-on-heading-p))
+  (define-key
+    map (kbd "<backtab>") 'outshine-cycle-buffer)
   (outshine-define-key-with-fallback
    map (kbd "M-<left>") (outline-hide-more) (outline-on-heading-p))
   (outshine-define-key-with-fallback
    map (kbd "M-<right>") (outline-show-more) (outline-on-heading-p))
+  ;; Headline Insertion
   (outshine-define-key-with-fallback
-   map (kbd "C-c J") (outline-hide-more) (outline-on-heading-p))
+   map (kbd "M-RET") (outshine-insert-heading) (outline-on-heading-p))
+  ;; Structure Editing
   (outshine-define-key-with-fallback
-   map (kbd "C-c L") (outline-show-more) (outline-on-heading-p))
-  (define-key map (kbd "M-<up>") 'outline-previous-visible-heading)
-  (define-key map (kbd "M-<down>") 'outline-next-visible-heading)
-  (define-key map (kbd "C-c I") 'outline-previous-visible-heading)
-  (define-key map (kbd "C-c K") 'outline-next-visible-heading))
+   map (kbd "M-S-<left>") (outline-promote) (outline-on-heading-p))
+  (outshine-define-key-with-fallback
+   map (kbd "M-S-<right>") (outline-demote) (outline-on-heading-p))
+  (outshine-define-key-with-fallback
+   map (kbd "M-S-<up>") (outline-move-subtree-up) (outline-on-heading-p))
+  (outshine-define-key-with-fallback
+   map (kbd "M-S-<down>") (outline-move-subtree-down) (outline-on-heading-p))
+  ;; Motion
+  (define-key
+    map (kbd "M-<up>") 'outline-previous-visible-heading)
+  (define-key
+    map (kbd "M-<down>") 'outline-next-visible-heading))
+
+
+;; *** Other Keybindings
+
+;; set the outline-minor-mode-prefix key in your init-file
+;; before loading outline-mode 
+(let ((map (lookup-key outline-minor-mode-map outline-minor-mode-prefix)))
+  ;; FIXME: aren't the following 4 bindings from `outline-mode-easy-bindings'
+  ;; violating Emacs conventions and might break user settings?
+  (outshine-define-key-with-fallback
+   map (kbd "J") (outline-hide-more) (outline-on-heading-p))
+  (outshine-define-key-with-fallback
+   map (kbd "L") (outline-show-more) (outline-on-heading-p))
+  (define-key map (kbd "I") 'outline-previous-visible-heading)
+  (define-key map (kbd "K") 'outline-next-visible-heading)
+  ;; for use with 'C-c' prefix
+  (define-key map "\C-t" 'hide-body)
+  (define-key map "\C-a" 'show-all)
+  (define-key map "\C-c" 'hide-entry)
+  (define-key map "\C-e" 'show-entry)
+  (define-key map "\C-l" 'hide-leaves)
+  (define-key map "\C-k" 'show-branches)
+  (define-key map "\C-q" 'outline-hide-sublevels)
+  (define-key map "\C-o" 'outline-hide-other)
+  ;; for use with 'M-#' prefix
+  (define-key map "\M-t" 'hide-body)
+  (define-key map "\M-a" 'show-all)
+  (define-key map "\M-c" 'hide-entry)
+  (define-key map "\M-e" 'show-entry)
+  (define-key map "\M-l" 'hide-leaves)
+  (define-key map "\M-k" 'show-branches)
+  (define-key map "\M-q" 'outline-hide-sublevels)
+  (define-key map "\M-o" 'outline-hide-other)
+  (define-key map "\M-u" 'outline-up-heading)
+  ;; call `outorg' 
+  ;; best used with prefix-key 'C-c' 
+  (define-key map "'" 'outorg-edit-as-org)
+  ;; best used with prefix-key 'M-#'
+  (define-key map "\M-#" 'outorg-edit-as-org)
+  (define-key map "#" 'outorg-edit-as-org))
+
+;; ;; Menu entries
+
+;; (define-key outline-mode-menu-bar-map [headings outline-move-subtree-down]
+;;   '("Move subtree down" . outline-move-subtree-down))
+;; (define-key outline-mode-menu-bar-map [headings outline-move-subtree-up]
+;;   '("Move subtree up" . outline-move-subtree-up))
+;; (define-key outline-mode-menu-bar-map [headings outline-demote]
+;;   '("Demote by 1 level" . outline-demote))
+;; (define-key outline-mode-menu-bar-map [headings outline-promote]
+;;   '("Promote by 1 level" . outline-promote))
+;; (define-key outline-mode-menu-bar-map [show outline-cycle]
+;;   '("Rotate visibility" . outline-cycle))
+;; (define-key outline-mode-menu-bar-map [hide outline-cycle]
+;;   '("Rotate visibility" . outline-cycle))
+
+;; ;; ** From `out-xtra'
+
+;; ;; We provide bindings for all keys.
+;; ;; old stuff from `out-xtra' - still up-to-date?
+
+;; (if (fboundp 'eval-after-load)
+;;     ;; FSF Emacs 19.
+;;     (eval-after-load "outline"
+;;       '(let ((map (lookup-key outline-minor-mode-map
+;; 			      outline-minor-mode-prefix)))
+;; 	 (define-key map "\C-t" 'hide-body)
+;; 	 (define-key map "\C-a" 'show-all)
+;; 	 (define-key map "\C-c" 'hide-entry)
+;; 	 (define-key map "\C-e" 'show-entry)
+;; 	 (define-key map "\C-l" 'hide-leaves)
+;; 	 (define-key map "\C-k" 'show-branches)
+;; 	 (define-key map "\C-q" 'outline-hide-sublevels)
+;; 	 (define-key map "\C-o" 'outline-hide-other)
+;;       	 (define-key map (kbd "RET") 'outshine-insert-heading)
+
+;; 	 (define-key outline-minor-mode-map [menu-bar hide hide-sublevels]
+;; 	   '("Hide Sublevels" . outline-hide-sublevels))
+;; 	 (define-key outline-minor-mode-map [menu-bar hide hide-other]
+;; 	   '("Hide Other" . outline-hide-other))
+;; 	 (if (fboundp 'update-power-keys)
+;; 	     (update-power-keys outline-minor-mode-map))))
+
+;;   (if (string-match "Lucid" emacs-version)
+;;       (progn				;; Lucid Emacs 19
+;; 	(defconst outline-menu
+;; 	  '(["Up" outline-up-heading t]
+;; 	    ["Next" outline-next-visible-heading t]
+;; 	    ["Previous" outline-previous-visible-heading t]
+;; 	    ["Next Same Level" outline-forward-same-level t]
+;; 	    ["Previous Same Level" outline-backward-same-level t]
+;; 	    "---"
+;; 	    ["Show All" show-all t]
+;; 	    ["Show Entry" show-entry t]
+;; 	    ["Show Branches" show-branches t]
+;; 	    ["Show Children" show-children t]
+;; 	    ["Show Subtree" show-subtree t]
+;; 	    "---"
+;; 	    ["Hide Leaves" hide-leaves t]
+;; 	    ["Hide Body" hide-body t]
+;; 	    ["Hide Entry" hide-entry t]
+;; 	    ["Hide Subtree" hide-subtree t]
+;; 	    ["Hide Other" outline-hide-other t]
+;; 	    ["Hide Sublevels" outline-hide-sublevels t]))
+
+;; (easy-menu-add outshine-menu-map)
+
+;; (defun outshine-add-menu ()
+;;   (set-buffer-menubar (copy-sequence current-menubar))
+;;   (add-menu nil "Outshine" outshine-menu))
+
+;; (add-hook 'outline-minor-mode-hook 'outshine-add-menu)
+;; (add-hook 'outline-mode-hook 'outline-add-menu)
+;; (add-hook 'outline-minor-mode-off-hook
+;;           (function (lambda () (delete-menu-item '("Outshine")))))
+
+  ;; ;; Lucid Emacs or Emacs 18.
+  ;; (require 'outln-18)
+
+
+;; ;; ** From `outline-mode-easy-bindings'
+
+;; (let ((map outline-mode-map))
+;;   (outshine-define-key-with-fallback
+;;    map (kbd "M-<left>") (outline-hide-more) (outline-on-heading-p))
+;;   (outshine-define-key-with-fallback
+;;    map (kbd "M-<right>") (outline-show-more) (outline-on-heading-p))
+;;   (outshine-define-key-with-fallback
+;;    map (kbd "C-c J") (outline-hide-more) (outline-on-heading-p))
+;;   (outshine-define-key-with-fallback
+;;    map (kbd "C-c L") (outline-show-more) (outline-on-heading-p))
+;;   (define-key map (kbd "M-<up>") 'outline-previous-visible-heading)
+;;   (define-key map (kbd "M-<down>") 'outline-next-visible-heading)
+;;   (define-key map (kbd "C-c I") 'outline-previous-visible-heading)
+;;   (define-key map (kbd "C-c K") 'outline-next-visible-heading))
+
 
 ;; * Run hooks and provide
 
