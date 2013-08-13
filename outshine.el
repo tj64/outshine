@@ -1482,7 +1482,7 @@ This function takes `comment-end' into account."
 
 ;; *** Other Keybindings
 
-;; set the outline-minor-mode-prefix key in your init-file
+;; Set the outline-minor-mode-prefix key in your init-file
 ;; before loading outline-mode 
 (let ((map (lookup-key outline-minor-mode-map outline-minor-mode-prefix)))
   ;; FIXME: aren't the following 4 bindings from `outline-mode-easy-bindings'
