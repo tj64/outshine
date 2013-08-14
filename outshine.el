@@ -1416,7 +1416,8 @@ This function takes `comment-end' into account."
 
 ;; *** iMenu and idoMenu Support
 
-(defun outshine-imenu-with-navi-regexp (kbd-key &optional PREFER-IMENU-P)
+(defun outshine-imenu-with-navi-regexp
+  (kbd-key &optional PREFER-IMENU-P LAST-PARENTH-EXPR-P)
   "Enhanced iMenu/idoMenu support depending on `navi-mode'.
 
 KBD-KEY is a single character keyboard-key defined as a
@@ -1447,10 +1448,14 @@ If PREFER-IMENU-P is non-nil, this command calls `imenu' even if
    (cond
     ((equal current-prefix-arg nil)
      (list (read-char "Key: ")))
-    (t
-     (list
-      (read-char "Key: ")
-      'PREFER-IMENU-P))))
+    ((equal current-prefix-arg '(4))
+     (list (read-char "Key: ")
+           nil 'LAST-PARENTH-EXPR-P))
+    ((equal current-prefix-arg '(16))
+     (list (read-char "Key: ")
+           'PREFER-IMENU-P 'LAST-PARENTH-EXPR-P))
+    (t (list (read-char "Key: ")
+             'PREFER-IMENU-P))))
   (if (require 'navi-mode nil 'NOERROR)
       (let* ((lang (car (split-string
                          (symbol-name major-mode)
@@ -1459,10 +1464,10 @@ If PREFER-IMENU-P is non-nil, this command calls `imenu' even if
                    lang (char-to-string kbd-key)))
              (base-rgx (navi-get-regexp lang key))
              ;; (base-rgx-depth (regexp-opt-depth base-rgx))
-             (rgx (concat base-rgx "\\([^[:space:]]+\\)"))
+             (rgx (concat base-rgx "\\([^[:space:]]+[[:space:]]?$\\)"))
              (rgx-depth (regexp-opt-depth rgx))
              (outshine-imenu-generic-expression
-              `((nil ,rgx ,rgx-depth)))
+              `((nil ,rgx ,(if LAST-PARENTH-EXPR-P rgx-depth 0))))
              (imenu-generic-expression
               outshine-imenu-generic-expression)
              (imenu-prev-index-position-function nil)
