@@ -193,6 +193,10 @@ them set by set, separated by a nil element.  See the example for
 (defvar outshine-hidden-lines-cookies-on-p nil
   "If non-nil, hidden-lines cookies are shown, otherwise hidden.")
 
+(defvar outshine-imenu-generic-expression nil
+  "Expression assigned to `imenu-generic-expression'.")
+(make-variable-buffer-local
+ 'outshine-imenu-generic-expression)
 
 ;; ** Hooks
 
@@ -842,10 +846,11 @@ top-level heading first."
           (outshine-make-promotion-headings-list 8))
     ;; imenu preparation
     (and outshine-imenu-show-headlines-p
-         (setq outshine-imenu-generic-expression
+         (set (make-local-variable
+               'outshine-imenu-default-generic-expression)
                `((nil ,(concat out-regexp "\\(.*$\\)") 1)))
          (setq imenu-generic-expression
-               outshine-imenu-generic-expression)))
+               outshine-imenu-default-generic-expression)))
   (when outshine-startup-folded-p
     (condition-case error-data
         (outline-hide-sublevels 1)
@@ -1011,6 +1016,7 @@ If yes, return this character."
 (defun outline-static-level-p (level)
   "Test if a level should not be changed by level promotion/demotion."
   (>= level 1000))
+
 
 ;; ** Commands
 ;; *** Additional outline commands
@@ -1403,6 +1409,75 @@ This function takes `comment-end' into account."
          (forward-char -1))
     (run-hooks 'outline-insert-heading-hook)))
 
+;; *** iMenu and idoMenu Support
+
+(defun outshine-imenu-with-navi-regexp (kbd-key &optional PREFER-IMENU-P)
+  "Enhanced iMenu/idoMenu support depending on `navi-mode'.
+
+KBD-KEY is a single character keyboard-key defined as a
+user-command for a keyword-search in `navi-mode'. A list of all
+registered major-mode languages and their single-key commands can
+be found in the customizable variable `navi-key-mappings'. The
+regexps that define the keyword-searches associated with these
+keyboard-keys can be found in the customizable variable
+`navi-keywords'. 
+
+Note that all printable ASCII characters are predefined as
+single-key commands in navi-mode, i.e. you can define
+key-mappings and keywords for languages not yet registered in
+navi-mode or add your own key-mappings and keywords for languages
+already registered simply by customizing the two variables
+mentioned above - as long as there are free keys available for
+the language at hand. You need to respect navi-mode's own core
+keybindings when doing so, of course.
+
+Please share your own language definitions with the author so
+that they can be included in navi-mode, resulting in a growing
+number of supported languages over time.
+
+If PREFER-IMENU-P is non-nil, this command calls `imenu' even if
+`idomenu' is available."
+  ;; (interactive "cKeyboard key: ")
+  (interactive
+   (cond
+    ((equal current-prefix-arg nil)
+     (list (read-char "Key: ")))
+    (t
+     (list
+      (read-char "Key: ")
+      'PREFER-IMENU-P))))
+  (if (require 'navi-mode nil 'NOERROR)
+      (let* ((lang (car (split-string
+                         (symbol-name major-mode)
+                         "-mode" 'OMIT-NULLS)))
+             (key (navi-map-keyboard-to-key
+                   lang (char-to-string kbd-key)))
+             (base-rgx (navi-get-regexp lang key))
+             ;; (base-rgx-depth (regexp-opt-depth base-rgx))
+             (rgx (concat base-rgx "\\([^[:space:]]+\\)"))
+             (rgx-depth (regexp-opt-depth rgx))
+             (outshine-imenu-generic-expression
+              `((nil ,rgx ,rgx-depth)))
+             (imenu-generic-expression
+              outshine-imenu-generic-expression)
+             (imenu-prev-index-position-function nil)
+             (imenu-extract-index-name-function nil)
+             (imenu-auto-rescan t)
+             (imenu-auto-rescan-maxout 360000))
+        ;; prefer idomenu
+        (if (and (require 'idomenu nil 'NOERROR)
+                 (not PREFER-IMENU-P))
+            (funcall 'idomenu)
+          ;; else call imenu
+          (funcall 'imenu
+                   (imenu-choose-buffer-index
+                    (concat (car
+                             (split-string
+                              (symbol-name key) ":" 'OMIT-NULLS))
+                            ": ")))))
+    (message "Unable to load library `navi-mode.el'")))
+
+
 ;; * Menus and Keybindings
 
 ;; FIXME
@@ -1550,6 +1625,7 @@ This function takes `comment-end' into account."
   (define-key map "\M-q" 'outline-hide-sublevels)
   (define-key map "\M-o" 'outline-hide-other)
   (define-key map "\M-u" 'outline-up-heading)
+  (define-key map "\M-+" 'outshine-imenu-with-navi-regexp)
   ;; call `outorg' 
   ;; best used with prefix-key 'C-c' 
   (define-key map "'" 'outorg-edit-as-org)
