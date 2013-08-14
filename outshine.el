@@ -1488,10 +1488,7 @@ If PREFER-IMENU-P is non-nil, this command calls `imenu' even if
 
 (defun outshine-imenu (&optional PREFER-IMENU-P)
   "Convenience function for calling imenu/idomenu from outshine."
-  (interactive
-   (cond
-    ((equal current-prefix-arg nil) nil)
-    (t (list 'PREFER-IMENU-P))))
+  (interactive "P")
   (or outshine-imenu-default-generic-expression
       (setq outshine-imenu-default-generic-expression
             outshine-imenu-preliminary-generic-expression))
@@ -1510,7 +1507,6 @@ If PREFER-IMENU-P is non-nil, this command calls `imenu' even if
                (imenu-choose-buffer-index
                 "Headline: ")))))
 
-  
 
 ;; * Menus and Keybindings
 
