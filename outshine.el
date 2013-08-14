@@ -193,6 +193,11 @@ them set by set, separated by a nil element.  See the example for
 (defvar outshine-hidden-lines-cookies-on-p nil
   "If non-nil, hidden-lines cookies are shown, otherwise hidden.")
 
+(defvar outshine-imenu-default-generic-expression nil
+  "Expression assigned by default to `imenu-generic-expression'.")
+(make-variable-buffer-local
+ 'outshine-imenu-default-generic-expression)
+
 (defvar outshine-imenu-generic-expression nil
   "Expression assigned to `imenu-generic-expression'.")
 (make-variable-buffer-local
@@ -847,10 +852,10 @@ top-level heading first."
     ;; imenu preparation
     (and outshine-imenu-show-headlines-p
          (set (make-local-variable
-               'outshine-imenu-default-generic-expression)
+               'outshine-imenu-preliminary-generic-expression)
                `((nil ,(concat out-regexp "\\(.*$\\)") 1)))
          (setq imenu-generic-expression
-               outshine-imenu-default-generic-expression)))
+               outshine-imenu-preliminary-generic-expression)))
   (when outshine-startup-folded-p
     (condition-case error-data
         (outline-hide-sublevels 1)
@@ -1475,8 +1480,37 @@ If PREFER-IMENU-P is non-nil, this command calls `imenu' even if
                              (split-string
                               (symbol-name key) ":" 'OMIT-NULLS))
                             ": ")))))
-    (message "Unable to load library `navi-mode.el'")))
+    (message "Unable to load library `navi-mode.el'"))
+  (setq imenu-generic-expression
+        (or outshine-imenu-default-generic-expression
+            outshine-imenu-preliminary-generic-expression)))
 
+
+(defun outshine-imenu (&optional PREFER-IMENU-P)
+  "Convenience function for calling imenu/idomenu from outshine."
+  (interactive
+   (cond
+    ((equal current-prefix-arg nil) nil)
+    (t (list 'PREFER-IMENU-P))))
+  (or outshine-imenu-default-generic-expression
+      (setq outshine-imenu-default-generic-expression
+            outshine-imenu-preliminary-generic-expression))
+  (let* ((imenu-generic-expression
+          outshine-imenu-default-generic-expression)
+         (imenu-prev-index-position-function nil)
+         (imenu-extract-index-name-function nil)
+         (imenu-auto-rescan t)
+         (imenu-auto-rescan-maxout 360000))
+    ;; prefer idomenu
+    (if (and (require 'idomenu nil 'NOERROR)
+             (not PREFER-IMENU-P))
+        (funcall 'idomenu)
+      ;; else call imenu
+      (funcall 'imenu
+               (imenu-choose-buffer-index
+                "Headline: ")))))
+
+  
 
 ;; * Menus and Keybindings
 
@@ -1626,6 +1660,7 @@ If PREFER-IMENU-P is non-nil, this command calls `imenu' even if
   (define-key map "\M-o" 'outline-hide-other)
   (define-key map "\M-u" 'outline-up-heading)
   (define-key map "\M-+" 'outshine-imenu-with-navi-regexp)
+  (define-key map "\M-p" 'outshine-imenu)
   ;; call `outorg' 
   ;; best used with prefix-key 'C-c' 
   (define-key map "'" 'outorg-edit-as-org)
