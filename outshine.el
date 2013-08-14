@@ -1405,12 +1405,37 @@ This function takes `comment-end' into account."
 
 ;; * Menus and Keybindings
 
+;; FIXME
+;; From: Stefan Monnier <monnier@iro.umontreal.ca>
+;; Subject: Re: Commands with more than one keybinding in menus
+;; Newsgroups: gmane.emacs.help
+;; To: help-gnu-emacs@gnu.org
+;; Date: Wed, 14 Aug 2013 12:23:12 -0400 (4 minutes, 20 seconds ago)
+;; Organization: A noiseless patient Spider
+
+;; > The macro was offered by a user of outshine, I only fiddled around with
+;; > it until it worked without errors. It serves its purpose, because
+;; > without it a minor-mode, unconditionally defining 'M-[S-]<arrow-key>'
+;; > bindings, runs a high risk of breaking major-mode or user settings - I
+;; > would not want to do without it.
+
+;; There are a few ways to have your cake and eat it too:
+;; - Move the conditional test into the command, so the menu entries are
+;;   bound to the same command as the keys.  If you want the menu-entries
+;;   to skip the test, then you can do that by checking the event(s) that
+;;   triggered the command.
+;; - You can use ":keys STRING" in the menu.  This will show "STRING" as
+;;   the shortcut without checking if it indeed runs the same command.
+;; - You can use dynamic key-bindings, i.e. instead of binding your key to
+;;   (lambda () (interactive) (if foo (CMD))), bind it to
+;;   (menu-item "" CMD :filter (lambda (cmd) (if foo cmd))).
+
 ;; ** Menus
 ;; *** Advertise Bindings
- 
-(put 'outshine-insert-heading :advertised-binding [M-enter])
-(put 'outline-cycle :advertised-binding [TAB])
-(put 'outshine-cycle-buffer :advertised-binding [BACKTAB])
+
+(put 'outshine-insert-heading :advertised-binding [M-ret])
+(put 'outline-cycle :advertised-binding [?\t])
+(put 'outshine-cycle-buffer :advertised-binding [backtab])
 (put 'outline-promote :advertised-binding [M-S-left])
 (put 'outline-demote :advertised-binding [M-S-right])
 (put 'outline-move-subtree-up :advertised-binding [M-S-up])
@@ -1419,35 +1444,37 @@ This function takes `comment-end' into account."
 (put 'outline-show-more :advertised-binding [M-right])
 (put 'outline-next-visible-header :advertised-binding [M-down])
 (put 'outline-previous-visible-header :advertised-binding [M-up])
-(put 'show-all :advertised-binding [M-\# M-a])
-(put 'outline-up-heading :advertised-binding [M-\# M-u])
-(put 'outorg-edit-as-org :advertised-binding [M-\# M-\#])
+(put 'show-all :advertised-binding [?\M-# \?M-a])
+(put 'outline-up-heading :advertised-binding [?\M-# ?\M-u])
+(put 'outorg-edit-as-org :advertised-binding [?\M-# ?\M-#])
 
 ;; *** Define Menu
 
 (easy-menu-define outshine-menu outline-minor-mode-map "Outshine menu"
   '("Outshine"
      ["Cycle Subtree" outline-cycle
-      :active (outline-on-heading-p)]
-     ["Cycle Buffer" outshine-cycle-buffer t]
+      :active (outline-on-heading-p) :keys "<tab>"]
+     ["Cycle Buffer" outshine-cycle-buffer t :keys "<backtab>"]
      ["Show More" outline-show-more
-      :active (outline-on-heading-p)]
+      :active (outline-on-heading-p) :keys "M-<right>"]
      ["Hide More" outline-hide-more
-      :active (outline-on-heading-p)]
-     ["Show All" show-all t]
+      :active (outline-on-heading-p) :keys "M-<left>"]
+     ["Show All" show-all t :keys "M-# M-a>"]
      "--"
-     ["Insert Heading" outshine-insert-heading t]
+     ["Insert Heading" outshine-insert-heading t :keys "M-<return>"]
      ["Promote Heading" outline-promote
-      :active (outline-on-heading-p)]
+      :active (outline-on-heading-p) :keys "M-S-<left>"]
      ["Demote Heading" outline-demote
-      :active (outline-on-heading-p)]
+      :active (outline-on-heading-p) :keys "M-S-<right>"]
      ["Move Heading Up" outline-move-heading-up
-      :active (outline-on-heading-p)]
+      :active (outline-on-heading-p) :keys "M-S-<up>"]
      ["Move Heading Down" outline-move-heading-down
-      :active (outline-on-heading-p)]
+      :active (outline-on-heading-p) :keys "M-S-<down>"]
     "--"
-     ["Previous Visible Heading" outline-previous-visible-heading t]
-     ["Next Visible Heading" outline-next-visible-heading t]
+     ["Previous Visible Heading" outline-previous-visible-heading
+      t :keys "M-<up>"]
+     ["Next Visible Heading" outline-next-visible-heading
+      t :keys "M-<down>"]
      ["Up Heading" outline-up-heading t]
     "--"
      ["Mark Subtree" outline-mark-subtree t]
@@ -1465,7 +1492,7 @@ This function takes `comment-end' into account."
 (let ((map outline-minor-mode-map))
   ;; Visibility Cycling
   (outshine-define-key-with-fallback
-   map (kbd "TAB") (outline-cycle arg) (outline-on-heading-p))
+   map (kbd "<tab>") (outline-cycle arg) (outline-on-heading-p))
   (define-key
     map (kbd "<backtab>") 'outshine-cycle-buffer)
   (outshine-define-key-with-fallback
@@ -1474,7 +1501,7 @@ This function takes `comment-end' into account."
    map (kbd "M-<right>") (outline-show-more) (outline-on-heading-p))
   ;; Headline Insertion
   (outshine-define-key-with-fallback
-   map (kbd "M-RET") (outshine-insert-heading) (outline-on-heading-p))
+   map (kbd "M-<return>") (outshine-insert-heading) (outline-on-heading-p))
   ;; Structure Editing
   (outshine-define-key-with-fallback
    map (kbd "M-S-<left>") (outline-promote) (outline-on-heading-p))
