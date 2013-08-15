@@ -73,7 +73,7 @@ _________________
   together with some new features and ideas.
 
   See `outline-magic.el' ([https://github.com/tj64/outline-magic]) for
-  detailled instructions on usage of the additional outline functions
+  detailed instructions on usage of the additional outline functions
   introduced by `outline-magic'.
 
   Furthermore, `outshine.el' includes functions and keybindings from
