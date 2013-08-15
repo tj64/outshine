@@ -1,4 +1,9 @@
-;; * outshine.el --- outline with outshine outshines outline
+;;; outshine.el --- outline with outshine outshines outline
+;;
+;; Author: Thorsten Jolitz <tjolitz AT gmail DOT com>
+;; Version: 1.0
+;; URL: https://github.com/tj64/outshine
+;;
 ;; ** MetaData
 ;;   :PROPERTIES:
 ;;   :copyright: Thorsten_Jolitz
@@ -1686,4 +1691,4 @@ i.e. the text following the regexp match until the next space character."
 ;; ispell-local-dictionary: "en_US"
 ;; End:
 
-;; outshine.el ends here
+;;; outshine.el ends here
