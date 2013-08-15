@@ -4,7 +4,7 @@
 ;; Version: 1.0
 ;; URL: https://github.com/tj64/outshine
 ;;
-;; ** MetaData
+;;;; MetaData
 ;;   :PROPERTIES:
 ;;   :copyright: Thorsten_Jolitz
 ;;   :copyright-from: 2013
@@ -21,10 +21,18 @@
 ;;   :git-clone: git://github.com/tj64/outshine.git
 ;;   :END:
 
-;; ** Commentary
+;;;; Commentary
 
-;; *** About outshine
+;;;;; About outshine
 
+;; [NOTE: For the sake of adding this library to MELPA, headlines had to be
+;; converted back from 'Org-mode style' to 'oldschool', and a few extra lines
+;; of required information had to be added on top of the MetaData section -
+;; just to comply with the required file formatting. All outshine, outorg and
+;; navi-mode functionality still works with this file. See my
+;; [[https://github.com/tj64/iorg][iOrg]] repository for examples of
+;; Emacs-Lisp and PicoLisp files structured 'the outshine way'.]
+ 
 ;; This library merges, modifies and extends two existing extension-libraries
 ;; for `outline' (minor) mode: `outline-magic' (by Carsten Dominik) and
 ;; `out-xtra' (by Per Abrahamsen). It offers all the functionality of
@@ -47,7 +55,7 @@
 ;; in temporary Org-mode buffers) and `navi-mode.el' (fast navigation and
 ;; remote-control via modified occur-buffers).
 
-;; *** Installation
+;;;;; Installation
 
 ;; Download `outshine.el' and copy it to a location where Emacs can find it,
 ;; and use this in your '.emacs' to get started:
@@ -103,29 +111,29 @@
 ;; or whatever. The prefix can only be changed before outline (minor) mode is
 ;; loaded.
 
-;; *** Emacs Version
+;;;;; Emacs Version
 
 ;; `outshine.el' works with [GNU Emacs 24.2.1 (x86_64-unknown-linux-gnu, GTK+
 ;; Version 3.6.4) of 2013-01-20 on eric]. No attempts of testing with older
 ;; versions or other types of Emacs have been made (yet).
 
 
-;; ** ChangeLog
+;;;; ChangeLog
 
 ;; | date            | author(s)       | version |
 ;; |-----------------+-----------------+---------|
 ;; | <2013-05-03 Fr> | Thorsten Jolitz |     1.0 |
 ;; | <2013-02-20 Mi> | Thorsten Jolitz |     0.9 |
 
-;; * Requires
+;;; Requires
 
 (require 'outline)
 (require 'easymenu)
 ;; necessary before Emacs 24.3
 (require 'newcomment)
 
-;; * Variables
-;; ** Consts
+;;; Variables
+;;;; Consts
 
 (defconst outshine-version "1.0"
   "outshine version number.")
@@ -143,7 +151,7 @@ Used to override any major-mode specific file-local settings")
 (defconst outshine-oldschool-elisp-outline-regexp-base "[;]+"
   "Oldschool Emacs Lisp base for calculating the outline-regexp")
 
-;; ** Vars
+;;;; Vars
 
 ;; "\C-c" conflicts with other modes like e.g. ESS
 (defvar outline-minor-mode-prefix "\M-#"
@@ -209,12 +217,12 @@ them set by set, separated by a nil element.  See the example for
 (make-variable-buffer-local
  'outshine-imenu-generic-expression)
 
-;; ** Hooks
+;;;; Hooks
 
 (defvar outshine-hook nil
   "Functions to run after `outshine' is loaded.")
 
-;; ** Faces
+;;;; Faces
 
 ;; from `org-compat.el'
 (defun outshine-compatible-face (inherits specs)
@@ -369,8 +377,8 @@ any other entries, and any resulting duplicates will be removed entirely."
   "Face used for level 8 headlines."
   :group 'outshine-faces)
 
-;; ** Customs
-;; *** Custom Groups
+;;;; Customs
+;;;;; Custom Groups
 
 (defgroup outshine nil
   "Enhanced library for outline navigation in source code buffers."
@@ -383,7 +391,7 @@ any other entries, and any resulting duplicates will be removed entirely."
   :group 'outshine)
 
 
-;; *** Custom Vars
+;;;;; Custom Vars
 
 (defcustom outshine-imenu-show-headlines-p t
   "Non-nil means use calculated outline-regexp for imenu."
@@ -484,9 +492,9 @@ t      Everywhere except in headlines"
   "Suppress visibility-state-change messages when non-nil.")
 
 
-;; * Defuns
-;; ** Functions
-;; *** Define keys with fallback
+;;; Defuns
+;;;; Functions
+;;;;; Define keys with fallback
 
 ;; copied and adapted from Alexander Vorobiev
 ;; http://www.mail-archive.com/emacs-orgmode@gnu.org/msg70648.html
@@ -520,7 +528,7 @@ recover it by stripping off \"-map\" from KEYMAP name."
                (call-interactively original-func)
              (error nil)))))))
 
-;; *** Normalize regexps
+;;;;; Normalize regexps
 
 ;; from http://emacswiki.org/emacs/ElispCookbook#toc6
 (defun outshine-chomp (str)
@@ -558,7 +566,7 @@ recover it by stripping off \"-map\" from KEYMAP name."
        (setq outshine-normalized-outline-regexp-base
              (outshine-chomp outshine-outline-regexp-base))))
 
-;; *** Calculate outline-regexp and outline-level
+;;;;; Calculate outline-regexp and outline-level
 
 ;; dealing with special case of oldschool headers in elisp (;;;+)
 (defun outshine-modern-header-style-in-elisp-p (&optional buffer)
@@ -652,7 +660,7 @@ Based on `comment-start' and `comment-add'."
            m-strg
            "")))))))
 
-;; *** Set outline-regexp und outline-level
+;;;;; Set outline-regexp und outline-level
 
 (defun outshine-set-local-outline-regexp-and-level
   (start-regexp &optional fun end-regexp)
@@ -668,7 +676,7 @@ Set optionally `outline-level' to FUN and
              (make-local-variable 'outline-heading-end-regexp)
              (setq outline-heading-end-regexp end-regexp)))
 
-;; *** Show number of lines in hidden body
+;;;;; Show number of lines in hidden body
 
 ;; Calc and show line number of hidden body for all visible headlines
 (defun outshine-write-hidden-lines-cookies ()
@@ -730,7 +738,7 @@ Set optionally `outline-level' to FUN and
 ;; (add-hook 'outline-view-change-hook
 ;;           'outshine-write-hidden-lines-cookies)
 
-;; *** Return outline-string at given level
+;;;;; Return outline-string at given level
 
 (defun outshine-calc-outline-string-at-level (level)
   "Return outline-string at level LEVEL."
@@ -771,7 +779,7 @@ top-level heading first."
              `(,(outshine-calc-outline-string-at-level (+ i 2)) . ,(+ i 2))
              'APPEND))))
 
-;; *** Fontify the headlines
+;;;;; Fontify the headlines
 
 (defun outshine-fontify-headlines (outline-regexp)
   ;; (interactive)
@@ -841,7 +849,7 @@ top-level heading first."
        (,heading-7-regexp 1 'outshine-level-7 t)
        (,heading-8-regexp 1 'outshine-level-8 t)))))
 
-;; *** Outshine hook-function
+;;;;; Outshine hook-function
 
 (defun outshine-hook-function ()
   "Add this function to outline-minor-mode-hook"
@@ -870,8 +878,8 @@ top-level heading first."
 ;; ;; add this to your .emacs
 ;; (add-hook 'outline-minor-mode-hook 'outshine-hook-function)
 
-;; *** Additional outline functions
-;; **** Functions from `outline-magic'
+;;;;; Additional outline functions
+;;;;;; Functions from `outline-magic'
 
 (defun outline-cycle-emulate-tab ()
   "Check if TAB should be emulated at the current position."
@@ -1029,9 +1037,9 @@ If yes, return this character."
   (>= level 1000))
 
 
-;; ** Commands
-;; *** Additional outline commands
-;; **** Commands from `out-xtra'
+;;;; Commands
+;;;;; Additional outline commands
+;;;;;; Commands from `out-xtra'
 
 (defun outline-hide-sublevels (keep-levels)
   "Hide everything except the first KEEP-LEVEL headers."
@@ -1067,7 +1075,7 @@ If yes, return this character."
 	  (show-children)
 	  (setq last (point)))))))
 
-;; **** Commands from `outline-magic'
+;;;;;; Commands from `outline-magic'
 
 (defun outline-next-line ()
   "Forward line, but mover over invisible line ends.
@@ -1278,7 +1286,7 @@ may have changed."
 
 
 
-;; **** Commands from `outline-mode-easy-bindings'
+;;;;;; Commands from `outline-mode-easy-bindings'
 
 ;; Copied from: http://emacswiki.org/emacs/OutlineMinorMode
 
@@ -1385,7 +1393,7 @@ may have changed."
       (outshine-hide-hidden-lines-cookies)
     (outshine-show-hidden-lines-cookies)))
 
-;; *** Overridden outline commands
+;;;;; Overridden outline commands
 
 ;; overriding 'outline-insert-heading'
 ;; copied and adapted form outline.el, taking into account modes
@@ -1420,7 +1428,7 @@ This function takes `comment-end' into account."
          (forward-char -1))
     (run-hooks 'outline-insert-heading-hook)))
 
-;; *** iMenu and idoMenu Support
+;;;;; iMenu and idoMenu Support
 
 (defun outshine-imenu-with-navi-regexp
   (kbd-key &optional PREFER-IMENU-P LAST-PARENTH-EXPR-P)
@@ -1524,7 +1532,7 @@ i.e. the text following the regexp match until the next space character."
                 "Headline: ")))))
 
 
-;; * Menus and Keybindings
+;;; Menus and Keybindings
 
 ;; FIXME
 ;; From: Stefan Monnier <monnier@iro.umontreal.ca>
@@ -1551,8 +1559,8 @@ i.e. the text following the regexp match until the next space character."
 ;;   (lambda () (interactive) (if foo (CMD))), bind it to
 ;;   (menu-item "" CMD :filter (lambda (cmd) (if foo cmd))).
 
-;; ** Menus
-;; *** Advertise Bindings
+;;;; Menus
+;;;;; Advertise Bindings
 
 (put 'outshine-insert-heading :advertised-binding [M-ret])
 (put 'outline-cycle :advertised-binding [?\t])
@@ -1569,7 +1577,7 @@ i.e. the text following the regexp match until the next space character."
 (put 'outline-up-heading :advertised-binding [?\M-# ?\M-u])
 (put 'outorg-edit-as-org :advertised-binding [?\M-# ?\M-#])
 
-;; *** Define Menu
+;;;;; Define Menu
 
 (easy-menu-define outshine-menu outline-minor-mode-map "Outshine menu"
   '("Outshine"
@@ -1606,8 +1614,8 @@ i.e. the text following the regexp match until the next space character."
 ;; get rid of "Outline" menu item
 (define-key outline-minor-mode-map [menu-bar outline] 'undefined)
 
-;; ** Keybindings
-;; *** Principal Keybindings
+;;;; Keybindings
+;;;;; Principal Keybindings
 
 ;;  Adapted from `org-mode' and `outline-mode-easy-bindings'
 (let ((map outline-minor-mode-map))
@@ -1639,7 +1647,7 @@ i.e. the text following the regexp match until the next space character."
     map (kbd "M-<down>") 'outline-next-visible-heading))
 
 
-;; *** Other Keybindings
+;;;;; Other Keybindings
 
 ;; Set the outline-minor-mode-prefix key in your init-file
 ;; before loading outline-mode 
@@ -1680,7 +1688,7 @@ i.e. the text following the regexp match until the next space character."
   (define-key map "\M-#" 'outorg-edit-as-org)
   (define-key map "#" 'outorg-edit-as-org))
 
-;; * Run hooks and provide
+;;; Run hooks and provide
 
 (run-hooks 'outshine-hook)
 
