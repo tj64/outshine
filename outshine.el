@@ -1,7 +1,8 @@
 ;; * outshine.el --- outline with outshine outshines outline
+;; ** MetaData
 ;;   :PROPERTIES:
 ;;   :copyright: Thorsten_Jolitz
-;;   :copyright-years: 2013
+;;   :copyright-from: 2013
 ;;   :version:  1.0
 ;;   :licence:  GPL 2 or later (free software)
 ;;   :licence-url: http://www.gnu.org/licenses/
@@ -1463,8 +1464,8 @@ If PREFER-IMENU-P is non-nil, this command calls `imenu' even if
              (key (navi-map-keyboard-to-key
                    lang (char-to-string kbd-key)))
              (base-rgx (navi-get-regexp lang key))
-             ;; (base-rgx-depth (regexp-opt-depth base-rgx))
-             (rgx (concat base-rgx "\\([^[:space:]]+[[:space:]]?$\\)"))
+             ;; (rgx (concat base-rgx "\\([^[:space:]]+[[:space:]]?$\\)"))
+             (rgx (concat base-rgx "\\([^[:space:]]+[[:space:]]\\)"))
              (rgx-depth (regexp-opt-depth rgx))
              (outshine-imenu-generic-expression
               `((nil ,rgx ,(if LAST-PARENTH-EXPR-P rgx-depth 0))))
