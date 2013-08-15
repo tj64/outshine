@@ -1443,7 +1443,12 @@ that they can be included in navi-mode, resulting in a growing
 number of supported languages over time.
 
 If PREFER-IMENU-P is non-nil, this command calls `imenu' even if
-`idomenu' is available."
+`idomenu' is available.
+
+By default, the whole string matched by the keyword-regexp plus the text
+before the next space character is shown as result. If LAST-PARENTH-EXPR-P is
+non-nil, only the last parenthetical expression in the match-data is shown,
+i.e. the text following the regexp match until the next space character."
   ;; (interactive "cKeyboard key: ")
   (interactive
    (cond
