@@ -523,7 +523,13 @@ recover it by stripping off \"-map\" from KEYMAP name."
                          "Could not deduce mode name from keymap name")
                         (intern "dummy-sym"))
                       )) nil)
-                (original-func (key-binding ,key)))
+		;; Check for `<tab>'.  It translates to `TAB' which
+		;; will prevent `(key-binding ...)' from finding the
+		;; original binding.
+                (original-func (if (equal (kbd "<tab>") ,key)
+                                   (or (key-binding ,key)
+                                       (key-binding (kbd "TAB")))
+                                 (key-binding ,key)))
            (condition-case nil
                (call-interactively original-func)
              (error nil)))))))
@@ -1618,33 +1624,40 @@ i.e. the text following the regexp match until the next space character."
 ;;;;; Principal Keybindings
 
 ;;  Adapted from `org-mode' and `outline-mode-easy-bindings'
-(let ((map outline-minor-mode-map))
-  ;; Visibility Cycling
-  (outshine-define-key-with-fallback
-   map (kbd "<tab>") (outline-cycle arg) (outline-on-heading-p))
-  (define-key
-    map (kbd "<backtab>") 'outshine-cycle-buffer)
-  (outshine-define-key-with-fallback
-   map (kbd "M-<left>") (outline-hide-more) (outline-on-heading-p))
-  (outshine-define-key-with-fallback
-   map (kbd "M-<right>") (outline-show-more) (outline-on-heading-p))
-  ;; Headline Insertion
-  (outshine-define-key-with-fallback
-   map (kbd "M-<return>") (outshine-insert-heading) (outline-on-heading-p))
-  ;; Structure Editing
-  (outshine-define-key-with-fallback
-   map (kbd "M-S-<left>") (outline-promote) (outline-on-heading-p))
-  (outshine-define-key-with-fallback
-   map (kbd "M-S-<right>") (outline-demote) (outline-on-heading-p))
-  (outshine-define-key-with-fallback
-   map (kbd "M-S-<up>") (outline-move-subtree-up) (outline-on-heading-p))
-  (outshine-define-key-with-fallback
-   map (kbd "M-S-<down>") (outline-move-subtree-down) (outline-on-heading-p))
-  ;; Motion
-  (define-key
-    map (kbd "M-<up>") 'outline-previous-visible-heading)
-  (define-key
-    map (kbd "M-<down>") 'outline-next-visible-heading))
+;; Visibility Cycling
+(outshine-define-key-with-fallback
+ outline-minor-mode-map (kbd "<tab>")
+ (outline-cycle arg) (outline-on-heading-p))
+(define-key
+  outline-minor-mode-map (kbd "<backtab>") 'outshine-cycle-buffer)
+(outshine-define-key-with-fallback
+ outline-minor-mode-map (kbd "M-<left>")
+ (outline-hide-more) (outline-on-heading-p))
+(outshine-define-key-with-fallback
+ outline-minor-mode-map (kbd "M-<right>")
+ (outline-show-more) (outline-on-heading-p))
+;; Headline Insertion
+(outshine-define-key-with-fallback
+ outline-minor-mode-map (kbd "M-<return>")
+ (outshine-insert-heading) (outline-on-heading-p))
+;; Structure Editing
+(outshine-define-key-with-fallback
+ outline-minor-mode-map (kbd "M-S-<left>")
+ (outline-promote) (outline-on-heading-p))
+(outshine-define-key-with-fallback
+ outline-minor-mode-map (kbd "M-S-<right>")
+ (outline-demote) (outline-on-heading-p))
+(outshine-define-key-with-fallback
+ outline-minor-mode-map (kbd "M-S-<up>")
+ (outline-move-subtree-up) (outline-on-heading-p))
+(outshine-define-key-with-fallback
+ outline-minor-mode-map (kbd "M-S-<down>")
+ (outline-move-subtree-down) (outline-on-heading-p))
+;; Motion
+(define-key
+  outline-minor-mode-map (kbd "M-<up>") 'outline-previous-visible-heading)
+(define-key
+  outline-minor-mode-map (kbd "M-<down>") 'outline-next-visible-heading)
 
 
 ;;;;; Other Keybindings
