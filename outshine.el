@@ -523,7 +523,13 @@ recover it by stripping off \"-map\" from KEYMAP name."
                          "Could not deduce mode name from keymap name")
                         (intern "dummy-sym"))
                       )) nil)
-                (original-func (key-binding ,key)))
+		;; Check for `<tab>'.  It translates to `TAB' which
+		;; will prevent `(key-binding ...)' from finding the
+		;; original binding.
+                (original-func (if (equal (kbd "<tab>") ,key)
+                                   (or (key-binding ,key)
+                                       (key-binding (kbd "TAB")))
+                                 (key-binding ,key)))
            (condition-case nil
                (call-interactively original-func)
              (error nil)))))))
