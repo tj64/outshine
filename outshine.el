@@ -529,7 +529,7 @@ recover it by stripping off \"-map\" from KEYMAP name."
                 (original-func (if (equal (kbd "<tab>") ,key)
                                    (or (key-binding ,key)
                                        (key-binding (kbd "TAB")))
-                                 (key-binding ,key)))
+                                 (key-binding ,key))))
            (condition-case nil
                (call-interactively original-func)
              (error nil)))))))
