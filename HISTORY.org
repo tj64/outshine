@@ -1,3 +1,7 @@
+* Version 1.0
+** TODO implement 'ARCHIVE' like tag :FOLD: for outshine
+Copy only visibility characteristics
+
 * DONE Version 1.0
   CLOSED: [2013-05-03 Fr 18:57]
   :LOGBOOK:
