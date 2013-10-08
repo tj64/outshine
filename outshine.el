@@ -1625,11 +1625,16 @@ i.e. the text following the regexp match until the next space character."
 
 ;;  Adapted from `org-mode' and `outline-mode-easy-bindings'
 ;; Visibility Cycling
+;; (outshine-define-key-with-fallback
+;;  outline-minor-mode-map (kbd "<tab>")
+;;  (outline-cycle arg) (outline-on-heading-p))
 (outshine-define-key-with-fallback
- outline-minor-mode-map (kbd "<tab>")
+ outline-minor-mode-map (kbd "TAB")
  (outline-cycle arg) (outline-on-heading-p))
 (define-key
   outline-minor-mode-map (kbd "<backtab>") 'outshine-cycle-buffer)
+;; (define-key
+;;   outline-minor-mode-map (kbd "BACKTAB") 'outshine-cycle-buffer)
 (outshine-define-key-with-fallback
  outline-minor-mode-map (kbd "M-<left>")
  (outline-hide-more) (outline-on-heading-p))
