@@ -491,6 +491,17 @@ t      Everywhere except in headlines"
 (defvar outshine-cycle-silently nil
   "Suppress visibility-state-change messages when non-nil.")
 
+(defcustom outshine-org-style-global-cycling-at-bob-p nil
+  "Cycle globally if cursor is at beginning of buffer and not at a headline.
+
+This makes it possible to do global cycling without having to use
+S-TAB or C-u TAB.  For this special case to work, the first line
+of the buffer must not be a headline -- it may be empty or some
+other text. When this option is nil, don't do anything special at
+the beginning of the buffer."
+  :group 'outshine
+  :type 'boolean)
+
 
 ;;; Defuns
 ;;;; Functions
@@ -1177,14 +1188,25 @@ may have changed."
 
    ((equal arg '(4))
     ;; Run `outline-cycle' as if at the top of the buffer.
+    (let ((outshine-org-style-global-cycling-at-bob-p nil)
+	  (current-prefix-arg nil))
     (save-excursion
       (goto-char (point-min))
-      (outline-cycle nil)))
+      (outline-cycle nil))))
 
    (t
     (cond
-     ((bobp) ;; Beginning of buffer: Global cycling
-
+     ;; Beginning of buffer: Global cycling
+     ((or
+       ;; outline-magic style behaviour
+       (and
+	(bobp)
+	(not outshine-org-style-global-cycling-at-bob-p))
+       ;; org-mode style behaviour
+       (and
+	(bobp)
+	(not (outline-on-heading-p))
+	outshine-org-style-global-cycling-at-bob-p))
       (cond
        ((eq last-command 'outline-cycle-overview)
 	;; We just created the overview - now do table of contents
@@ -1628,9 +1650,21 @@ i.e. the text following the regexp match until the next space character."
 ;; (outshine-define-key-with-fallback
 ;;  outline-minor-mode-map (kbd "<tab>")
 ;;  (outline-cycle arg) (outline-on-heading-p))
+
+;; (outshine-define-key-with-fallback
+;;  outline-minor-mode-map (kbd "TAB")
+;;  (outline-cycle arg) (outline-on-heading-p))
+
 (outshine-define-key-with-fallback
  outline-minor-mode-map (kbd "TAB")
- (outline-cycle arg) (outline-on-heading-p))
+ (outline-cycle arg)
+ (or
+  (and
+   (bobp)
+   (not (outline-on-heading-p))
+   outshine-org-style-global-cycling-at-bob-p)
+  (outline-on-heading-p)))
+
 (define-key
   outline-minor-mode-map (kbd "<backtab>") 'outshine-cycle-buffer)
 ;; (define-key
