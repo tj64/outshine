@@ -636,7 +636,9 @@ Based on `comment-start' and `comment-add'."
                        "without 'comment-start' character defined!")))
          (concat
           ;; comment-start
-          (outshine-calc-comment-region-starter)
+          ;; (outshine-calc-comment-region-starter)
+          (regexp-quote
+	   (outshine-calc-comment-region-starter))
           ;; comment-padding
           (if outshine-enforce-no-comment-padding-p
               ""
@@ -1664,7 +1666,6 @@ i.e. the text following the regexp match until the next space character."
    (not (outline-on-heading-p))
    outshine-org-style-global-cycling-at-bob-p)
   (outline-on-heading-p)))
-
 (define-key
   outline-minor-mode-map (kbd "<backtab>") 'outshine-cycle-buffer)
 ;; (define-key
@@ -1677,7 +1678,8 @@ i.e. the text following the regexp match until the next space character."
  (outline-show-more) (outline-on-heading-p))
 ;; Headline Insertion
 (outshine-define-key-with-fallback
- outline-minor-mode-map (kbd "M-<return>")
+ ;; outline-minor-mode-map (kbd "M-<return>")
+ outline-minor-mode-map (kbd "M-RET")
  (outshine-insert-heading) (outline-on-heading-p))
 ;; Structure Editing
 (outshine-define-key-with-fallback
@@ -1694,9 +1696,13 @@ i.e. the text following the regexp match until the next space character."
  (outline-move-subtree-down) (outline-on-heading-p))
 ;; Motion
 (define-key
-  outline-minor-mode-map (kbd "M-<up>") 'outline-previous-visible-heading)
+  outline-minor-mode-map (kbd "M-<up>")
+  ;; outline-minor-mode-map (kbd "<M-up>")
+  'outline-previous-visible-heading)
 (define-key
-  outline-minor-mode-map (kbd "M-<down>") 'outline-next-visible-heading)
+  outline-minor-mode-map (kbd "M-<down>")
+  ;; outline-minor-mode-map (kbd "<M-down>")
+  'outline-next-visible-heading)
 
 
 ;;;;; Other Keybindings
