@@ -151,6 +151,70 @@ Used to override any major-mode specific file-local settings")
 (defconst outshine-oldschool-elisp-outline-regexp-base "[;]+"
   "Oldschool Emacs Lisp base for calculating the outline-regexp")
 
+(defconst outshine-speed-commands-default
+  '(
+    ("Outline Navigation")
+    ("n" . (outshine-speed-move-safe
+	    'outline-next-visible-heading))
+    ("p" . (outshine-speed-move-safe
+	    'outline-previous-visible-heading))
+    ("f" . (outshine-speed-move-safe
+	    'outline-forward-same-level))
+    ("b" . (outshine-speed-move-safe
+	    'outline-backward-same-level))
+    ;; ("F" . outshine-next-block)
+    ;; ("B" . outshine-previous-block)
+    ("u" . (outshine-speed-move-safe
+	    'outline-up-heading))
+    ;; ("j" . outshine-goto)
+    ;; ("g" . (outshine-refile t))
+    ("Outline Visibility")
+    ("c" . outline-cycle)
+    ("C" . outshine-cycle-buffer)
+    ;; (" " . outshine-display-outline-path)
+    ("r" . outshine-narrow-to-subtree)
+    ("w" . widen)
+    ;; ("=" . outshine-columns)
+    ("Outline Structure Editing")
+    ("^" . outline-move-subtree-up)
+    ("<" . outline-move-subtree-down)
+    ;; ("r" . outshine-metaright)
+    ;; ("l" . outshine-metaleft)
+    ("+" . outline-demote)
+    ("-" . outline-promote)
+    ;; ("i" . (progn (forward-char 1)
+    ;; 		  (call-interactively
+    ;; 		   'outshine-insert-heading-respect-content)))
+    ;; ("^" . outshine-sort)
+    ;; ("a" . outshine-archive-subtree-default-with-confirmation)
+    ("m" . outline-mark-subtree)
+    ;; ("#" . outshine-toggle-comment)
+    ("Clock Commands")
+    ;; ("I" . outshine-clock-in)
+    ;; ("O" . outshine-clock-out)
+    ("Meta Data Editing")
+    ;; ("t" . outshine-todo)
+    ;; ("," . (outshine-priority))
+    ;; ("0" . (outshine-priority ?\ ))
+    ;; ("1" . (outshine-priority ?A))
+    ;; ("2" . (outshine-priority ?B))
+    ;; ("3" . (outshine-priority ?C))
+    ;; (":" . outshine-set-tags-command)
+    ;; ("e" . outshine-set-effort)
+    ;; ("E" . outshine-inc-effort)
+    ;; ("W" . (lambda(m) (interactive "sMinutes before warning: ")
+    ;; 	     (outshine-entry-put (point) "APPT_WARNTIME" m)))
+    ;; ("Agenda Views etc")
+    ;; ("v" . outshine-agenda)
+    ;; ("/" . outshine-sparse-tree)
+    ("Misc")
+    ;; ("o" . outshine-open-at-point)
+    ("?" . outshine-speed-command-help)
+    ;; ("<" . (outshine-agenda-set-restriction-lock 'subtree))
+    ;; (">" . (outshine-agenda-remove-restriction-lock))
+    )
+  "The default speed commands.")
+
 ;;;; Vars
 
 ;; "\C-c" conflicts with other modes like e.g. ESS
@@ -216,6 +280,12 @@ them set by set, separated by a nil element.  See the example for
   "Expression assigned to `imenu-generic-expression'.")
 (make-variable-buffer-local
  'outshine-imenu-generic-expression)
+
+(defvar outshine-self-insert-command-undo-counter 0
+  "Used for outshine speed-commands.")
+
+(defvar outshine-speed-command nil
+  "Used for outshine speed-commands.")
 
 ;;;; Hooks
 
@@ -502,6 +572,68 @@ the beginning of the buffer."
   :group 'outshine
   :type 'boolean)
 
+(defcustom outshine-use-speed-commands nil
+  "Non-nil means activate single letter commands at beginning of a headline.
+This may also be a function to test for appropriate locations
+where speed commands should be active, e.g.:
+
+    (setq outshine-use-speed-commands
+      (lambda ()  ( ...your code here ... ))"
+  :group 'outshine
+  :type '(choice
+	  (const :tag "Never" nil)
+	  (const :tag "At beginning of headline stars" t)
+	  (function)))
+
+(defcustom outshine-speed-commands-user nil
+  "Alist of additional speed commands.
+This list will be checked before `outshine-speed-commands-default'
+when the variable `outshine-use-speed-commands' is non-nil
+and when the cursor is at the beginning of a headline.
+The car if each entry is a string with a single letter, which must
+be assigned to `self-insert-command' in the global map.
+The cdr is either a command to be called interactively, a function
+to be called, or a form to be evaluated.
+An entry that is just a list with a single string will be interpreted
+as a descriptive headline that will be added when listing the speed
+commands in the Help buffer using the `?' speed command."
+  :group 'outshine
+  :type '(repeat :value ("k" . ignore)
+		 (choice :value ("k" . ignore)
+			 (list :tag "Descriptive Headline" (string :tag "Headline"))
+			 (cons :tag "Letter and Command"
+			       (string :tag "Command letter")
+			       (choice
+				(function)
+				(sexp))))))
+
+(defcustom outshine-speed-command-hook
+  '(outshine-speed-command-activate)
+  "Hook for activating speed commands at strategic locations.
+Hook functions are called in sequence until a valid handler is
+found.
+
+Each hook takes a single argument, a user-pressed command key
+which is also a `self-insert-command' from the global map.
+
+Within the hook, examine the cursor position and the command key
+and return nil or a valid handler as appropriate.  Handler could
+be one of an interactive command, a function, or a form.
+
+Set `outshine-use-speed-commands' to non-nil value to enable this
+hook.  The default setting is `outshine-speed-command-activate'."
+  :group 'outshine
+  :version "24.1"
+  :type 'hook)
+
+(defcustom outshine-self-insert-cluster-for-undo
+  (or (featurep 'xemacs) (version<= emacs-version "24.1"))
+  "Non-nil means cluster self-insert commands for undo when possible.
+If this is set, then, like in the Emacs command loop, 20 consecutive
+characters will be undone together.
+This is configurable, because there is some impact on typing performance."
+  :group 'outshine
+  :type 'boolean)
 
 ;;; Defuns
 ;;;; Functions
@@ -624,7 +756,6 @@ Based on `comment-start' and `comment-add'."
    (t (error "No valid comment-padding"))))
 
 
-;; FIXME: no comment padding if oldschool elisp regexp-base
 (defun outshine-calc-outline-regexp ()
   "Calculate the outline regexp for the current mode."
   (concat
@@ -867,6 +998,113 @@ top-level heading first."
        (,heading-6-regexp 1 'outshine-level-6 t)
        (,heading-7-regexp 1 'outshine-level-7 t)
        (,heading-8-regexp 1 'outshine-level-8 t)))))
+
+;;;;; Outshine speed commands
+
+;; copied and modified from org-mode.el
+(defun outshine-print-speed-command (e)
+  (if (> (length (car e)) 1)
+      (progn
+	(princ "\n")
+	(princ (car e))
+	(princ "\n")
+	(princ (make-string (length (car e)) ?-))
+	(princ "\n"))
+    (princ (car e))
+    (princ "   ")
+    (if (symbolp (cdr e))
+	(princ (symbol-name (cdr e)))
+      (prin1 (cdr e)))
+    (princ "\n")))
+
+(defun outshine-speed-command-help ()
+  "Show the available speed commands."
+  (interactive)
+  (if (not outshine-use-speed-commands)
+      (user-error "Speed commands are not activated, customize `outshine-use-speed-commands'")
+    (with-output-to-temp-buffer "*Help*"
+      (princ "User-defined Speed commands\n===========================\n")
+      (mapc 'outshine-print-speed-command outshine-speed-commands-user)
+      (princ "\n")
+      (princ "Built-in Speed commands\n=======================\n")
+      (mapc 'outshine-print-speed-command outshine-speed-commands-default))
+    (with-current-buffer "*Help*"
+      (setq truncate-lines t))))
+
+(defun outshine-speed-move-safe (cmd)
+  "Execute CMD, but make sure that the cursor always ends up in a headline.
+If not, return to the original position and throw an error."
+  (interactive)
+  (let ((pos (point)))
+    (call-interactively cmd)
+    (unless (and (bolp) (outline-at-heading-p))
+      (goto-char pos)
+      (error "Boundary reached while executing %s" cmd))))
+
+(defun outshine-speed-command-activate (keys)
+  "Hook for activating single-letter speed commands.
+`outshine-speed-commands-default' specifies a minimal command set.
+Use `outshine-speed-commands-user' for further customization."
+  (when (or (and
+	     (bolp)
+	     (looking-at (outshine-calc-outline-regexp)))
+	    (and
+	     (functionp outshine-use-speed-commands)
+	     (funcall outshine-use-speed-commands)))
+    (cdr (assoc keys (append outshine-speed-commands-user
+			     outshine-speed-commands-default)))))
+
+(defun outshine-self-insert-command (N)
+  "Like `self-insert-command', use overwrite-mode for whitespace in tables.
+If the cursor is in a table looking at whitespace, the whitespace is
+overwritten, and the table is not marked as requiring realignment."
+  (interactive "p")
+  ;; (outshine-check-before-invisible-edit 'insert)
+  (cond
+   ((and outshine-use-speed-commands
+	 (setq outshine-speed-command
+	       (run-hook-with-args-until-success
+		'outshine-speed-command-hook (this-command-keys))))
+    (cond
+     ((commandp outshine-speed-command)
+      (setq this-command outshine-speed-command)
+      (call-interactively outshine-speed-command))
+     ((functionp outshine-speed-command)
+      (funcall outshine-speed-command))
+     ((and outshine-speed-command (listp outshine-speed-command))
+      (eval outshine-speed-command))
+     (t (let (outshine-use-speed-commands)
+	  (call-interactively 'outshine-self-insert-command)))))   
+   (t
+    (self-insert-command N)
+    (if outshine-self-insert-cluster-for-undo
+	(if (not (eq last-command 'outshine-self-insert-command))
+	    (setq outshine-self-insert-command-undo-counter 1)
+	  (if (>= outshine-self-insert-command-undo-counter 20)
+	      (setq outshine-self-insert-command-undo-counter 1)
+	    (and (> outshine-self-insert-command-undo-counter 0)
+		 buffer-undo-list (listp buffer-undo-list)
+		 (not (cadr buffer-undo-list)) ; remove nil entry
+		 (setcdr buffer-undo-list (cddr buffer-undo-list)))
+	    (setq outshine-self-insert-command-undo-counter
+		  (1+ outshine-self-insert-command-undo-counter))))))))
+
+(defun outshine-defkey (keymap key def)
+  "Define a KEY in a KEYMAP with definition DEF."
+  (define-key keymap key def))
+
+(defun outshine-remap (map &rest commands)
+  "In MAP, remap the functions given in COMMANDS.
+COMMANDS is a list of alternating OLDDEF NEWDEF command names."
+  (let (new old)
+    (while commands
+      (setq old (pop commands) new (pop commands))
+      (if (fboundp 'command-remapping)
+	  (outshine-defkey map (vector 'remap old) new)
+	(substitute-key-definition old new map global-map)))))
+
+(outshine-remap outline-minor-mode-map
+	     'self-insert-command 'outshine-self-insert-command)
 
 ;;;;; Outshine hook-function
 
@@ -1422,6 +1660,20 @@ may have changed."
   (if outshine-hidden-lines-cookies-on-p
       (outshine-hide-hidden-lines-cookies)
     (outshine-show-hidden-lines-cookies)))
+
+;;;;;; New outline commands
+
+(defun outshine-narrow-to-subtree ()
+  "Narrow buffer to subtree at point."
+  (interactive)
+  (if (outline-on-heading-p)
+      (progn
+        (outline-mark-subtree)
+        (and
+         (use-region-p)
+         (narrow-to-region (region-beginning) (region-end)))
+        (deactivate-mark))
+    (message "Not at headline, cannot narrow to subtree")))
 
 ;;;;; Overridden outline commands
 
