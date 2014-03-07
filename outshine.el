@@ -1646,6 +1646,11 @@ i.e. the text following the regexp match until the next space character."
 
 ;;;; Keybindings
 ;;;;; Principal Keybindings
+ 
+;; from
+;; http://stackoverflow.com/questions/4351044/binding-m-up-m-down-in-emacs-23-1-1
+(define-key input-decode-map "\e\eOA" [(meta up)])
+(define-key input-decode-map "\e\eOB" [(meta down)])
 
 ;;  Adapted from `org-mode' and `outline-mode-easy-bindings'
 ;; Visibility Cycling
@@ -1666,10 +1671,11 @@ i.e. the text following the regexp match until the next space character."
    (not (outline-on-heading-p))
    outshine-org-style-global-cycling-at-bob-p)
   (outline-on-heading-p)))
+;; works on the console too
 (define-key
-  outline-minor-mode-map (kbd "<backtab>") 'outshine-cycle-buffer)
-;; (define-key
-;;   outline-minor-mode-map (kbd "BACKTAB") 'outshine-cycle-buffer)
+  outline-minor-mode-map (kbd "M-TAB") 'outshine-cycle-buffer)
+;; outline-minor-mode-map (kbd "<backtab>") 'outshine-cycle-buffer)
+;; outline-minor-mode-map (kbd "BACKTAB") 'outshine-cycle-buffer)
 (outshine-define-key-with-fallback
  outline-minor-mode-map (kbd "M-<left>")
  (outline-hide-more) (outline-on-heading-p))
@@ -1696,11 +1702,15 @@ i.e. the text following the regexp match until the next space character."
  (outline-move-subtree-down) (outline-on-heading-p))
 ;; Motion
 (define-key
-  outline-minor-mode-map (kbd "M-<up>")
+  ;; outline-minor-mode-map [(meta up)]
+  outline-minor-mode-map [M-up]
+  ;; outline-minor-mode-map (kbd "M-<up>")
   ;; outline-minor-mode-map (kbd "<M-up>")
   'outline-previous-visible-heading)
 (define-key
-  outline-minor-mode-map (kbd "M-<down>")
+  ;; outline-minor-mode-map [(meta down)]
+  outline-minor-mode-map [M-down]
+  ;; outline-minor-mode-map (kbd "M-<down>")
   ;; outline-minor-mode-map (kbd "<M-down>")
   'outline-next-visible-heading)
 
