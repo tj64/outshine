@@ -215,6 +215,10 @@ Used to override any major-mode specific file-local settings")
     )
   "The default speed commands.")
 
+(defconst outshine-comment-tag "comment"
+  "The tag that marks a subtree as comment.
+A comment subtree does not open during visibility cycling.")
+
 ;;;; Vars
 
 ;; "\C-c" conflicts with other modes like e.g. ESS
@@ -286,6 +290,12 @@ them set by set, separated by a nil element.  See the example for
 
 (defvar outshine-speed-command nil
   "Used for outshine speed-commands.")
+
+(defvar outshine-open-comment-trees nil
+  "Cycle comment-subtrees anyway when non-nil.")
+
+(defvar outshine-current-buffer-visibility-state nil
+  "Stores current visibility state of buffer.")
 
 ;;;; Hooks
 
@@ -999,7 +1009,7 @@ top-level heading first."
        (,heading-7-regexp 1 'outshine-level-7 t)
        (,heading-8-regexp 1 'outshine-level-8 t)))))
 
-;;;;; Outshine speed commands
+;;;;; Functions for speed-commands
 
 ;; copied and modified from org-mode.el
 (defun outshine-print-speed-command (e)
@@ -1017,30 +1027,6 @@ top-level heading first."
       (prin1 (cdr e)))
     (princ "\n")))
 
-(defun outshine-speed-command-help ()
-  "Show the available speed commands."
-  (interactive)
-  (if (not outshine-use-speed-commands)
-      (user-error "Speed commands are not activated, customize `outshine-use-speed-commands'")
-    (with-output-to-temp-buffer "*Help*"
-      (princ "User-defined Speed commands\n===========================\n")
-      (mapc 'outshine-print-speed-command outshine-speed-commands-user)
-      (princ "\n")
-      (princ "Built-in Speed commands\n=======================\n")
-      (mapc 'outshine-print-speed-command outshine-speed-commands-default))
-    (with-current-buffer "*Help*"
-      (setq truncate-lines t))))
-
-(defun outshine-speed-move-safe (cmd)
-  "Execute CMD, but make sure that the cursor always ends up in a headline.
-If not, return to the original position and throw an error."
-  (interactive)
-  (let ((pos (point)))
-    (call-interactively cmd)
-    (unless (and (bolp) (outline-at-heading-p))
-      (goto-char pos)
-      (error "Boundary reached while executing %s" cmd))))
-
 (defun outshine-speed-command-activate (keys)
   "Hook for activating single-letter speed commands.
 `outshine-speed-commands-default' specifies a minimal command set.
@@ -1054,40 +1040,6 @@ Use `outshine-speed-commands-user' for further customization."
     (cdr (assoc keys (append outshine-speed-commands-user
 			     outshine-speed-commands-default)))))
 
-(defun outshine-self-insert-command (N)
-  "Like `self-insert-command', use overwrite-mode for whitespace in tables.
-If the cursor is in a table looking at whitespace, the whitespace is
-overwritten, and the table is not marked as requiring realignment."
-  (interactive "p")
-  ;; (outshine-check-before-invisible-edit 'insert)
-  (cond
-   ((and outshine-use-speed-commands
-	 (setq outshine-speed-command
-	       (run-hook-with-args-until-success
-		'outshine-speed-command-hook (this-command-keys))))
-    (cond
-     ((commandp outshine-speed-command)
-      (setq this-command outshine-speed-command)
-      (call-interactively outshine-speed-command))
-     ((functionp outshine-speed-command)
-      (funcall outshine-speed-command))
-     ((and outshine-speed-command (listp outshine-speed-command))
-      (eval outshine-speed-command))
-     (t (let (outshine-use-speed-commands)
-	  (call-interactively 'outshine-self-insert-command)))))   
-   (t
-    (self-insert-command N)
-    (if outshine-self-insert-cluster-for-undo
-	(if (not (eq last-command 'outshine-self-insert-command))
-	    (setq outshine-self-insert-command-undo-counter 1)
-	  (if (>= outshine-self-insert-command-undo-counter 20)
-	      (setq outshine-self-insert-command-undo-counter 1)
-	    (and (> outshine-self-insert-command-undo-counter 0)
-		 buffer-undo-list (listp buffer-undo-list)
-		 (not (cadr buffer-undo-list)) ; remove nil entry
-		 (setcdr buffer-undo-list (cddr buffer-undo-list)))
-	    (setq outshine-self-insert-command-undo-counter
-		  (1+ outshine-self-insert-command-undo-counter))))))))
 
 (defun outshine-defkey (keymap key def)
   "Define a KEY in a KEYMAP with definition DEF."
@@ -1106,7 +1058,39 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (outshine-remap outline-minor-mode-map
 	     'self-insert-command 'outshine-self-insert-command)
 
-;;;;; Outshine hook-function
+;;;;; Functions for hiding comment-subtrees
+
+(defun outshine--hide-comment-subtrees (beg end)
+  "Re-hide all comment subtrees after a visibility state change."
+  (save-excursion
+    (let* ((re (concat ":" outshine-comment-tag ":")))
+      (goto-char beg)
+      (while (re-search-forward re end t)
+	(outline-hide-more))))
+
+(defun outshine-hide-archived-subtrees ()
+  "Re-hide all comment subtrees after a visibility state change."
+  (let ((state outshine-current-buffer-visibility-state))
+  (when (and (not outshine-open-comment-trees)
+             (not (memq state '(overview folded))))
+    (save-excursion
+      (let* ((globalp (memq state '(contents all)))
+             (beg (if globalp (point-min) (point)))
+             (end (if globalp (point-max)
+		    (outline-end-of-subtree t))))
+	(outshine--hide-comment-subtrees beg end)
+	(goto-char beg)
+	(if (looking-at (concat ".*:" outshine-comment-tag ":"))
+	    (message "%s" (substitute-command-keys
+			   "Subtree is tagged as comment and
+			   stays closed. Use
+			   \\[outshine-force-cycle-comment] to
+			   cycle it anyway."))))))))
+
+(add-hook 'outline-view-change-hook
+	  'outshine-hide-archived-subtrees)
+
+;;;;; Hook function
 
 (defun outshine-hook-function ()
   "Add this function to outline-minor-mode-hook"
@@ -1466,13 +1450,17 @@ may have changed."
 	      (if (bobp) (throw 'exit nil))))
 	  (unless outshine-cycle-silently
             (message "CONTENTS...done")))
-	(setq this-command 'outline-cycle-toc))
+	(setq
+	 this-command 'outline-cycle-toc
+	 outshine-current-buffer-visibility-state 'contents))
        ((eq last-command 'outline-cycle-toc)
 	;; We just showed the table of contents - now show everything
 	(show-all)
 	(unless outshine-cycle-silently
           (message "SHOW ALL"))
-	(setq this-command 'outline-cycle-showall))
+	(setq
+	 this-command 'outline-cycle-showall
+	 outshine-current-buffer-visibility-state 'all))
        (t
 	;; Default action: go to overview
 	;; (hide-sublevels 1)
@@ -1488,7 +1476,9 @@ may have changed."
           (hide-sublevels toplevel))
 	(unless outshine-cycle-silently
           (message "OVERVIEW"))
-	(setq this-command 'outline-cycle-overview))))
+	(setq
+	 this-command 'outline-cycle-overview
+	 outshine-current-buffer-visibility-state 'overview))))
 
      ((save-excursion (beginning-of-line 1) (looking-at outline-regexp))
       ;; At a heading: rotate between three different views
@@ -1512,7 +1502,9 @@ may have changed."
 	  (show-children)
 	  (unless outshine-cycle-silently
             (message "CHILDREN"))
-	  (setq this-command 'outline-cycle-children))
+	  (setq
+	   this-command 'outline-cycle-children
+	   outshine-current-buffer-visibility-state 'children))
 	 ((eq last-command 'outline-cycle-children)
 	  ;; We just showed the children, now show everything.
 	  (show-subtree)
@@ -1611,6 +1603,8 @@ may have changed."
           (t
            (show-subtree)))))
 
+;;;;; Hidden-line-cookies commands
+
 (defun outshine-show-hidden-lines-cookies ()
   "Show hidden-lines cookies for all visible and folded headlines."
   (interactive)
@@ -1661,7 +1655,128 @@ may have changed."
       (outshine-hide-hidden-lines-cookies)
     (outshine-show-hidden-lines-cookies)))
 
-;;;;;; New outline commands
+;;;;; Hide comment-subtrees
+
+(defun outshine-insert-comment-subtree (&optional arg)
+  "Insert new subtree that is tagged as comment."
+    (interactive "P")
+    (outshine-insert-heading)
+    (save-excursion
+      (insert
+       (concat "  :" outshine-comment-tag ":"))))
+
+(defun outshine-toggle-subtree-comment-status (&optional arg)
+  "Tag (or untag) subtree at point with `outshine-comment-tag'.
+
+Unless point is on a heading, this function acts on the previous
+visible heading when ARG is non-nil, otherwise on the previous
+heading."
+  (interactive "P")
+  (let* ((com-end-p
+	  (and
+	   outshine-normalized-comment-end
+	   (> (length outshine-normalized-comment-end) 0)))
+	 (comtag (concat ":" outshine-comment-tag ":"))
+	 (comtag-rgxp
+	  (if com-end-p
+	      (concat comtag
+		      " *"
+		      (regexp-quote
+		       outshine-normalized-comment-end)
+		      " *")
+	    (concat comtag " *"))))
+    (unless (outline-on-heading-p)
+      (if arg
+	  (outline-previous-visible-heading 1)
+	(outline-previous-heading)))
+    (end-of-line)
+    (cond
+     ((looking-back comtag-rgxp)
+      (let ((start (match-beginning 0)))
+	(delete-region (1- start) (+ start (length comtag)))))
+     ((and com-end-p
+	   (looking-back
+	    (concat
+	     (regexp-quote outshine-normalized-comment-end) " *")))
+      (goto-char (match-beginning 0))
+       (if (looking-back " ")
+	   (insert (concat comtag " "))
+	 (insert (concat " " comtag))))
+     (t (if (looking-back " ")
+	  (insert comtag)
+	 (insert (concat " " comtag)))))))
+
+;; Cycle comment subtrees anyway
+(defun outshine-force-cycle-comment ()
+  "Cycle subtree even if it comment."
+  (interactive)
+  (setq this-command 'outline-cycle)
+  (let ((outshine-open-comment-trees t))
+    (call-interactively 'outline-cycle)))
+
+;;;;; Speed commands
+
+(defun outshine-speed-command-help ()
+  "Show the available speed commands."
+  (interactive)
+  (if (not outshine-use-speed-commands)
+      (user-error "Speed commands are not activated, customize `outshine-use-speed-commands'")
+    (with-output-to-temp-buffer "*Help*"
+      (princ "User-defined Speed commands\n===========================\n")
+      (mapc 'outshine-print-speed-command outshine-speed-commands-user)
+      (princ "\n")
+      (princ "Built-in Speed commands\n=======================\n")
+      (mapc 'outshine-print-speed-command outshine-speed-commands-default))
+    (with-current-buffer "*Help*"
+      (setq truncate-lines t))))
+
+(defun outshine-speed-move-safe (cmd)
+  "Execute CMD, but make sure that the cursor always ends up in a headline.
+If not, return to the original position and throw an error."
+  (interactive)
+  (let ((pos (point)))
+    (call-interactively cmd)
+    (unless (and (bolp) (outline-on-heading-p))
+      (goto-char pos)
+      (error "Boundary reached while executing %s" cmd))))
+
+
+(defun outshine-self-insert-command (N)
+  "Like `self-insert-command', use overwrite-mode for whitespace in tables.
+If the cursor is in a table looking at whitespace, the whitespace is
+overwritten, and the table is not marked as requiring realignment."
+  (interactive "p")
+  ;; (outshine-check-before-invisible-edit 'insert)
+  (cond
+   ((and outshine-use-speed-commands
+	 (setq outshine-speed-command
+	       (run-hook-with-args-until-success
+		'outshine-speed-command-hook (this-command-keys))))
+    (cond
+     ((commandp outshine-speed-command)
+      (setq this-command outshine-speed-command)
+      (call-interactively outshine-speed-command))
+     ((functionp outshine-speed-command)
+      (funcall outshine-speed-command))
+     ((and outshine-speed-command (listp outshine-speed-command))
+      (eval outshine-speed-command))
+     (t (let (outshine-use-speed-commands)
+	  (call-interactively 'outshine-self-insert-command)))))   
+   (t
+    (self-insert-command N)
+    (if outshine-self-insert-cluster-for-undo
+	(if (not (eq last-command 'outshine-self-insert-command))
+	    (setq outshine-self-insert-command-undo-counter 1)
+	  (if (>= outshine-self-insert-command-undo-counter 20)
+	      (setq outshine-self-insert-command-undo-counter 1)
+	    (and (> outshine-self-insert-command-undo-counter 0)
+		 buffer-undo-list (listp buffer-undo-list)
+		 (not (cadr buffer-undo-list)) ; remove nil entry
+		 (setcdr buffer-undo-list (cddr buffer-undo-list)))
+	    (setq outshine-self-insert-command-undo-counter
+		  (1+ outshine-self-insert-command-undo-counter))))))))
+
+;;;;; Other Commands
 
 (defun outshine-narrow-to-subtree ()
   "Narrow buffer to subtree at point."
@@ -1674,6 +1789,7 @@ may have changed."
          (narrow-to-region (region-beginning) (region-end)))
         (deactivate-mark))
     (message "Not at headline, cannot narrow to subtree")))
+
 
 ;;;;; Overridden outline commands
 
