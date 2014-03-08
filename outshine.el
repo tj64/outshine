@@ -739,20 +739,9 @@ Searches in BUFFER if given, otherwise in current buffer."
          (format "^;; [%s]+ " outshine-regexp-base-char)
          nil 'NOERROR)))))
 
-;; FIXME delete
-(setq calc-comment-region-starter-counter 0)
-
 (defun outshine-calc-comment-region-starter ()
   "Return comment-region starter as string.
 Based on `comment-start' and `comment-add'."
-
-  ;; FIXME delete
-  (message "calc-comment-region-starter counter: %s"
-	   (progn
-	     (setq calc-comment-region-starter-counter
-		   (1+ calc-comment-region-starter-counter))
-	     calc-comment-region-starter-counter))
-
   (if (or (not comment-add) (eq comment-add 0))
       outshine-normalized-comment-start
     (let ((comment-add-string outshine-normalized-comment-start))
@@ -760,19 +749,8 @@ Based on `comment-start' and `comment-add'."
         (setq comment-add-string
               (concat comment-add-string outshine-normalized-comment-start))))))
 
-;; FIXME delete
-(setq calc-comment-padding-counter 0)
-
 (defun outshine-calc-comment-padding ()
   "Return comment-padding as string"
-
-  ;; FIXME delete
-  (message "calc-comment-padding-counter: %s"
-	   (progn
-	     (setq calc-comment-padding-counter
-		   (1+ calc-comment-padding-counter))
-	     calc-comment-padding-counter))
-
   (cond
    ;; comment-padding is nil
    ((not comment-padding) " ")
@@ -787,19 +765,8 @@ Based on `comment-start' and `comment-add'."
     comment-padding)
    (t (error "No valid comment-padding"))))
 
-;; FIXME delete
-(setq calc-outline-regexp-counter 0)
-
 (defun outshine-calc-outline-regexp ()
   "Calculate the outline regexp for the current mode."
-
-  ;; FIXME delete
-  (message "calc-outline-regexp-counter: %s"
-	   (progn
-	     (setq calc-outline-regexp-counter
-		   (1+ calc-outline-regexp-counter))
-	     calc-outline-regexp-counter))
-
   (concat
    (and outshine-outline-regexp-outcommented-p
          ;; regexp-base outcommented, but no 'comment-start' defined
@@ -820,21 +787,10 @@ Based on `comment-start' and `comment-add'."
    outshine-normalized-outline-regexp-base
    " "))
 
-;; FIXME delete
-(setq calc-outline-level-counter 0)
-
 ;; TODO how is this called (match-data?) 'looking-at' necessary?
 (defun outshine-calc-outline-level ()
   "Calculate the right outline level for the
   outshine-outline-regexp"
-
-  ;; FIXME delete
-  (message "calc-outline-level-counter: %s"
-	   (progn
-	     (setq calc-outline-level-counter
-		   (1+ calc-outline-level-counter))
-	     calc-outline-level-counter))
-  
   (save-excursion
     (save-match-data
       ;; (and
@@ -947,19 +903,8 @@ Set optionally `outline-level' to FUN and
 
 ;;;;; Return outline-string at given level
 
-;; FIXME delete
-(setq calc-outline-string-at-level-counter 0)
-
 (defun outshine-calc-outline-string-at-level (level)
   "Return outline-string at level LEVEL."
-
-  ;; FIXME delete
-  (message "calc-outline-string-at-level-counter: %s"
-	   (progn
-	     (setq calc-outline-string-at-level-counter
-		   (1+ calc-outline-string-at-level-counter))
-	     calc-outline-string-at-level-counter))
-
   (let ((base-string (outshine-calc-outline-base-string-at-level level)))
     (if (not outshine-outline-regexp-outcommented-p)
         base-string
@@ -1085,21 +1030,10 @@ top-level heading first."
       (prin1 (cdr e)))
     (princ "\n")))
 
-;; FIXME delete
-(setq speed-command-activate-counter 0)
-
 (defun outshine-speed-command-activate (keys)
   "Hook for activating single-letter speed commands.
 `outshine-speed-commands-default' specifies a minimal command set.
 Use `outshine-speed-commands-user' for further customization."
-
-  ;; FIXME delete
-  (message "speed-command-activate-counter %s"
-	   (progn
-	     (setq speed-command-activate-counter
-		   (1+ speed-command-activate-counter))
-	     speed-command-activate-counter))
-
   (when (or (and
 	     (bolp)
 	     (looking-at outline-regexp))
@@ -1174,19 +1108,8 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 
 ;;;;; Hook function
 
-;; FIXME delete
-(setq outshine-hook-function-counter 0)
-
 (defun outshine-hook-function ()
   "Add this function to outline-minor-mode-hook"
-
-  ;; FIXME delete
-  (message "hook-function-counter: %s"
-	   (progn
-	     (setq outshine-hook-function-counter
-		   (1+ outshine-hook-function-counter))
-	     outshine-hook-function-counter))
-
   (outshine-set-outline-regexp-base)
   (outshine-normalize-regexps)
   (let ((out-regexp (outshine-calc-outline-regexp)))
