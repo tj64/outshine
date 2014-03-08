@@ -1060,7 +1060,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 
 ;;;;; Functions for hiding comment-subtrees
 
-(defun outshine--hide-comment-subtrees (beg end)
+(defun outshine-hide-comment-subtrees-in-region (beg end)
   "Re-hide all comment subtrees after a visibility state change."
   (save-excursion
     (let* ((re (concat ":" outshine-comment-tag ":")))
@@ -1068,7 +1068,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
       (while (re-search-forward re end t)
 	(outline-hide-more)))))
 
-(defun outshine-hide-archived-subtrees ()
+(defun outshine-hide-comment-subtrees ()
   "Re-hide all comment subtrees after a visibility state change."
   (let ((state outshine-current-buffer-visibility-state))
   (when (and (not outshine-open-comment-trees)
@@ -1078,7 +1078,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
              (beg (if globalp (point-min) (point)))
              (end (if globalp (point-max)
 		    (outline-end-of-subtree))))
-	(outshine--hide-comment-subtrees beg end)
+	(outshine-hide-comment-subtrees-in-region beg end)
 	(goto-char beg)
 	(if (looking-at (concat ".*:" outshine-comment-tag ":"))
 	    (message "%s" (substitute-command-keys
@@ -1087,8 +1087,8 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 			   \\[outshine-force-cycle-comment] to
 			   cycle it anyway."))))))))
 
-(add-hook 'outline-view-change-hook
-	  'outshine-hide-archived-subtrees)
+;; (add-hook 'outline-view-change-hook
+;; 	  'outshine-hide-comment-subtrees)
 
 ;;;;; Hook function
 
@@ -1503,8 +1503,8 @@ may have changed."
 	  (unless outshine-cycle-silently
             (message "CHILDREN"))
 	  (setq
-	   this-command 'outline-cycle-children
-	   outshine-current-buffer-visibility-state 'children))
+	   this-command 'outline-cycle-children))
+	   ;; outshine-current-buffer-visibility-state 'children))
 	 ((eq last-command 'outline-cycle-children)
 	  ;; We just showed the children, now show everything.
 	  (show-subtree)
