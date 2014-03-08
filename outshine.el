@@ -1066,7 +1066,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
     (let* ((re (concat ":" outshine-comment-tag ":")))
       (goto-char beg)
       (while (re-search-forward re end t)
-	(outline-hide-more))))
+	(outline-hide-more)))))
 
 (defun outshine-hide-archived-subtrees ()
   "Re-hide all comment subtrees after a visibility state change."
@@ -1077,7 +1077,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
       (let* ((globalp (memq state '(contents all)))
              (beg (if globalp (point-min) (point)))
              (end (if globalp (point-max)
-		    (outline-end-of-subtree t))))
+		    (outline-end-of-subtree))))
 	(outshine--hide-comment-subtrees beg end)
 	(goto-char beg)
 	(if (looking-at (concat ".*:" outshine-comment-tag ":"))
