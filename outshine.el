@@ -2102,9 +2102,11 @@ i.e. the text following the regexp match until the next space character."
   ;; FIXME: aren't the following 4 bindings from `outline-mode-easy-bindings'
   ;; violating Emacs conventions and might break user settings?
   (outshine-define-key-with-fallback
-   map (kbd "J") (outline-hide-more) (outline-on-heading-p))
+   outline-minor-mode-map (kbd "J")
+   (outline-hide-more) (outline-on-heading-p))
   (outshine-define-key-with-fallback
-   map (kbd "L") (outline-show-more) (outline-on-heading-p))
+   outline-minor-mode-map (kbd "L")
+   (outline-show-more) (outline-on-heading-p))
   (define-key map (kbd "I") 'outline-previous-visible-heading)
   (define-key map (kbd "K") 'outline-next-visible-heading)
   ;; for use with 'C-c' prefix
