@@ -945,62 +945,56 @@ top-level heading first."
 ;;;;; Fontify the headlines
 
 (defun outshine-fontify-headlines (outline-regexp)
-  ;; (interactive)
-  ;; (setq outline-regexp (tj/outline-regexp))
-
-  ;; highlight the headings
-  ;; see http://www.gnu.org/software/emacs/manual/html_node/emacs/Font-Lock.html
-  ;; use `M-x customize-apropos-faces' to customize faces
-  ;; to find the corresponding face for each outline level, see
-  ;; `org-faces.el'
-
-  ;; Added `\n?', after having read the following chunk of code (from org.el):
-  ;; `(,(if org-fontify-whole-heading-line
-  ;;        "^\\(\\**\\)\\(\\* \\)\\(.*\n?\\)"
-  ;;      "^\\(\\**\\)\\(\\* \\)\\(.*\\)")
-
-  (let ((outshine-fontify-whole-heading-line "") ; "\n?")
-        (heading-1-regexp
-         ;; deal with special case 'oldschool elisp headers'
-         (if outshine-enforce-no-comment-padding-p
-             "^;;; \\(.*\\)"
-           (concat (substring outline-regexp 0 -1)
-                   "\\{1\\} \\(.*" outshine-fontify-whole-heading-line "\\)")))
-        (heading-2-regexp
-         (if outshine-enforce-no-comment-padding-p
-             "^;;;; \\(.*\\)"
-           (concat (substring outline-regexp 0 -1)
-                   "\\{2\\} \\(.*" outshine-fontify-whole-heading-line "\\)")))
-        (heading-3-regexp
-         (if outshine-enforce-no-comment-padding-p
-             "^;;;;; \\(.*\\)"
-           (concat (substring outline-regexp 0 -1)
-                   "\\{3\\} \\(.*" outshine-fontify-whole-heading-line "\\)")))
-        (heading-4-regexp
-         (if outshine-enforce-no-comment-padding-p
-             "^;;;;;; \\(.*\\)"
-           (concat (substring outline-regexp 0 -1)
-                   "\\{4,\\} \\(.*" outshine-fontify-whole-heading-line "\\)")))
-        (heading-5-regexp
-         (if outshine-enforce-no-comment-padding-p
-             "^;;;;;;; \\(.*\\)"
-           (concat (substring outline-regexp 0 -1)
-                   "\\{5\\} \\(.*" outshine-fontify-whole-heading-line "\\)")))
-        (heading-6-regexp
-         (if outshine-enforce-no-comment-padding-p
-             "^;;;;;;;; \\(.*\\)"
-           (concat (substring outline-regexp 0 -1)
-                   "\\{6,\\} \\(.*" outshine-fontify-whole-heading-line "\\)")))
-        (heading-7-regexp
-         (if outshine-enforce-no-comment-padding-p
-             "^;;;;;;;;; \\(.*\\)"
-           (concat (substring outline-regexp 0 -1)
-                   "\\{7,\\} \\(.*" outshine-fontify-whole-heading-line "\\)")))
-        (heading-8-regexp
-         (if outshine-enforce-no-comment-padding-p
-             "^;;;;;;;;;; \\(.*\\)"
-           (concat (substring outline-regexp 0 -1)
-                   "\\{8,\\} \\(.*" outshine-fontify-whole-heading-line "\\)"))))
+  "Calculate heading regexps for font-lock mode."
+  (let* ((outline-rgxp (substring outline-regexp 0 -1))
+	 (heading-1-regexp
+	 (format "%s%s%s%s"
+		 outline-rgxp
+		 "\\{1\\} \\(.*"
+		 (if outshine-fontify-whole-heading-line "\n?" "")
+		 "\\)"))
+	(heading-2-regexp
+	 (format "%s%s%s%s"
+		 outline-rgxp
+		 "\\{2\\} \\(.*"
+		 (if outshine-fontify-whole-heading-line "\n?" "")
+		 "\\)"))
+	(heading-3-regexp
+	 (format "%s%s%s%s"
+		 outline-rgxp
+		 "\\{3\\} \\(.*"
+		 (if outshine-fontify-whole-heading-line "\n?" "")
+		 "\\)"))
+	(heading-4-regexp
+	 (format "%s%s%s%s"
+		 outline-rgxp
+		 "\\{4\\} \\(.*"
+		 (if outshine-fontify-whole-heading-line "\n?" "")
+		 "\\)"))
+	(heading-5-regexp
+	 (format "%s%s%s%s"
+		 outline-rgxp
+		 "\\{5\\} \\(.*"
+		 (if outshine-fontify-whole-heading-line "\n?" "")
+		 "\\)"))
+	(heading-6-regexp
+	 (format "%s%s%s%s"
+		 outline-rgxp
+		 "\\{6\\} \\(.*"
+		 (if outshine-fontify-whole-heading-line "\n?" "")
+		 "\\)"))
+	(heading-7-regexp
+	 (format "%s%s%s%s"
+		 outline-rgxp
+		 "\\{7\\} \\(.*"
+		 (if outshine-fontify-whole-heading-line "\n?" "")
+		 "\\)"))
+	(heading-8-regexp
+	 (format "%s%s%s%s"
+		 outline-rgxp
+		 "\\{8\\} \\(.*"
+		 (if outshine-fontify-whole-heading-line "\n?" "")
+		 "\\)")))
     (font-lock-add-keywords
      nil
      `((,heading-1-regexp 1 'outshine-level-1 t)
@@ -1011,6 +1005,7 @@ top-level heading first."
        (,heading-6-regexp 1 'outshine-level-6 t)
        (,heading-7-regexp 1 'outshine-level-7 t)
        (,heading-8-regexp 1 'outshine-level-8 t)))))
+
 
 ;;;;; Functions for speed-commands
 
