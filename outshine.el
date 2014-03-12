@@ -300,6 +300,11 @@ them set by set, separated by a nil element.  See the example for
 (defvar outshine-current-buffer-visibility-state nil
   "Stores current visibility state of buffer.")
 
+(defvar outshine-use-outorg-last-headline-marker nil
+  "Stores current visibility state of buffer.")
+(make-variable-buffer-local
+ 'outshine-use-outorg-last-headline-marker)
+
 ;;;; Hooks
 
 (defvar outshine-hook nil
@@ -1112,15 +1117,35 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
      "Use outorg to call FUN with FUNARGS on subtree.
 
 FUN should be an Org-mode function that acts on the subtree at
-point."
-     (when (outline-on-heading-p)
-       (save-excursion
-         (save-restriction
-           (outorg-edit-as-org)
-	   (if funargs
-	       (funcall fun funargs)
-	     (funcall fun))
-           (outorg-copy-edits-and-exit))))))
+point.
+
+Sets the variable `outshine-use-outorg-last-headline-marker' so
+that it always contains a point-marker to the last headline this
+function was called upon.
+
+The old marker is removed first. Then a new point-marker is
+created before `outorg-edit-as-org' is called on the headline."
+     (save-excursion
+       (unless (outline-on-heading-p)
+	 (outline-previous-heading))
+       (outshine--set-outorg-last-headline-marker)
+       (outorg-edit-as-org)
+       (if funargs
+	   (funcall fun funargs)
+	 (funcall fun))
+       (outorg-copy-edits-and-exit))))
+
+(defun outshine--set-outorg-last-headline-marker ()
+  "Set a point-marker to current header and remove old marker.
+
+Sets the variable `outshine-use-outorg-last-headline-marker'."
+  (and
+   (integer-or-marker-p
+    outshine-use-outorg-last-headline-marker)
+   (set-marker outshine-use-outorg-last-headline-marker nil))
+  (setq outshine-use-outorg-last-headline-marker
+	(point-marker)))
+
 
 ;;;;; Hook function
 
