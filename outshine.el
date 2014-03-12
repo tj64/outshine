@@ -1139,12 +1139,11 @@ created before `outorg-edit-as-org' is called on the headline."
   "Set a point-marker to current header and remove old marker.
 
 Sets the variable `outshine-use-outorg-last-headline-marker'."
-  (and
-   (integer-or-marker-p
-    outshine-use-outorg-last-headline-marker)
-   (set-marker outshine-use-outorg-last-headline-marker nil))
-  (setq outshine-use-outorg-last-headline-marker
-	(point-marker)))
+  (if (integer-or-marker-p
+       outshine-use-outorg-last-headline-marker)
+      (move-marker outshine-use-outorg-last-headline-marker (point))
+    (setq outshine-use-outorg-last-headline-marker
+	  (point-marker))))
 
 
 ;;;;; Hook function
