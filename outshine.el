@@ -1787,6 +1787,9 @@ overwritten, and the table is not marked as requiring realignment."
 	    (setq outshine-self-insert-command-undo-counter
 		  (1+ outshine-self-insert-command-undo-counter))))))))
 
+;; comply with `delete-selection-mode'
+(put 'outshine-self-insert-command 'delete-selection t)
+
 ;;;;; Other Commands
 
 (defun outshine-narrow-to-subtree ()
