@@ -169,15 +169,18 @@ Used to override any major-mode specific file-local settings")
     ;; ("B" . outshine-previous-block)
     ("u" . (outshine-speed-move-safe
 	    'outline-up-heading))
-    ;; ("j" . outshine-goto)
-    ;; ("g" . (outshine-refile t))
+    ("j" . (outshine-use-outorg 'org-goto))
+    ("g" . (outshine-use-outorg 'org-refile))
     ("Outline Visibility")
     ("c" . outline-cycle)
     ("C" . outshine-cycle-buffer)
-    ;; (" " . outshine-display-outline-path)
+    ;; ;; FIXME call does not work - bug in org-mode?
+    ;; (" " . (outshine-use-outorg
+    ;; 	    (call-interactively 'org-display-outline-path)
+    ;; 	    'WHOLE-BUFFER-P))
     ("r" . outshine-narrow-to-subtree)
     ("w" . widen)
-    ;; ("=" . outshine-columns)
+    ("=" . (outshine-use-outorg 'org-columns))
     ("Outline Structure Editing")
     ("^" . outline-move-subtree-up)
     ("<" . outline-move-subtree-down)
@@ -185,33 +188,35 @@ Used to override any major-mode specific file-local settings")
     ;; ("l" . outshine-metaleft)
     ("+" . outline-demote)
     ("-" . outline-promote)
+    ("i" . outshine-insert-heading)
     ;; ("i" . (progn (forward-char 1)
     ;; 		  (call-interactively
     ;; 		   'outshine-insert-heading-respect-content)))
-    ;; ("^" . outshine-sort)
-    ;; ("a" . outshine-archive-subtree-default-with-confirmation)
+    ("^" . (outshine-use-outorg 'org-sort))
+    ;; ("a" . (outshine-use-outorg
+    ;; 	    'org-archive-subtree-default-with-confirmation))
     ("m" . outline-mark-subtree)
     ;; ("#" . outshine-toggle-comment)
     ("Clock Commands")
-    ;; ("I" . outshine-clock-in)
-    ;; ("O" . outshine-clock-out)
+    ("I" . (outshine-use-outorg 'org-clock-in))
+    ("O" . outshine-clock-out)
     ("Meta Data Editing")
-    ;; ("t" . outshine-todo)
-    ;; ("," . (outshine-priority))
-    ;; ("0" . (outshine-priority ?\ ))
-    ;; ("1" . (outshine-priority ?A))
-    ;; ("2" . (outshine-priority ?B))
-    ;; ("3" . (outshine-priority ?C))
-    ;; (":" . outshine-set-tags-command)
-    ;; ("e" . outshine-set-effort)
-    ;; ("E" . outshine-inc-effort)
+    ("t" . (outshine-use-outorg 'org-todo))
+    ("," . (outshine-use-outorg 'org-priority))
+    ("0" . (outshine-use-outorg (lambda () (org-priority ?\ ))))
+    ("1" . (outshine-use-outorg (lambda () (org-priority ?A))))
+    ("2" . (outshine-use-outorg (lambda () (org-priority ?B))))
+    ("3" . (outshine-use-outorg (lambda () (org-priority ?C))))
+    (":" . (outshine-use-outorg 'org-set-tags-command))
+    ("e" . (outshine-use-outorg 'org-set-effort))
+    ("E" . (outshine-use-outorg 'org-inc-effort))
     ;; ("W" . (lambda(m) (interactive "sMinutes before warning: ")
     ;; 	     (outshine-entry-put (point) "APPT_WARNTIME" m)))
     ;; ("Agenda Views etc")
     ;; ("v" . outshine-agenda)
     ;; ("/" . outshine-sparse-tree)
     ("Misc")
-    ;; ("o" . outshine-open-at-point)
+    ("o" . (outshine-use-outorg 'org-open-at-point))
     ("?" . outshine-speed-command-help)
     ;; ("<" . (outshine-agenda-set-restriction-lock 'subtree))
     ;; (">" . (outshine-agenda-remove-restriction-lock))
@@ -1113,11 +1118,12 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 ;;;;; Use outorg
 
 (eval-after-load 'outorg
-  '(defun outshine-use-outorg (fun &rest funargs)
+  '(defun outshine-use-outorg (fun &optional whole-buffer-p &rest funargs)
      "Use outorg to call FUN with FUNARGS on subtree.
 
 FUN should be an Org-mode function that acts on the subtree at
-point.
+point. Optionally, with WHOLE-BUFFER-P non-nil,
+`outorg-edit-as-org' can be called on the whole buffer.
 
 Sets the variable `outshine-use-outorg-last-headline-marker' so
 that it always contains a point-marker to the last headline this
@@ -1129,7 +1135,9 @@ created before `outorg-edit-as-org' is called on the headline."
        (unless (outline-on-heading-p)
 	 (outline-previous-heading))
        (outshine--set-outorg-last-headline-marker)
-       (outorg-edit-as-org)
+       (if whole-buffer-p
+	   (outorg-edit-as-org '(4))
+	 (outorg-edit-as-org))
        (if funargs
 	   (funcall fun funargs)
 	 (funcall fun))
@@ -1145,7 +1153,21 @@ Sets the variable `outshine-use-outorg-last-headline-marker'."
     (setq outshine-use-outorg-last-headline-marker
 	  (point-marker))))
 
-
+(defun outshine-clock-out ()
+  "Stop Org-mode clock started with `outshine-use-outorg'."
+  (if (integer-or-marker-p
+       outshine-use-outorg-last-headline-marker)
+      (save-excursion
+	(goto-char
+	 (marker-position
+	  outshine-use-outorg-last-headline-marker))
+	(outshine-use-outorg
+	 (lambda ()
+	   (ignore-errors
+	     (org-clock-cancel))
+	   (org-clock-in)
+	   (org-clock-out))))))
+    
 ;;;;; Hook function
 
 (defun outshine-hook-function ()
