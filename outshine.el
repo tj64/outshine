@@ -129,6 +129,9 @@
 
 (require 'outline)
 (require 'easymenu)
+;; soft-dependency on outorg 
+;; FIXME introducing cyclic dependencies?
+(require 'outorg nil 'NOERROR)
 ;; necessary before Emacs 24.3
 (require 'newcomment)
 
@@ -1100,6 +1103,24 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 ;; ;; with max-lisp-eval-depth set to 600
 ;; (add-hook 'outline-view-change-hook
 ;; 	  'outshine-hide-comment-subtrees)
+
+
+;;;;; Use outorg
+
+(eval-after-load 'outorg
+  '(defun outshine-use-outorg (fun &rest funargs)
+     "Use outorg to call FUN with FUNARGS on subtree.
+
+FUN should be an Org-mode function that acts on the subtree at
+point."
+     (when (outline-on-heading-p)
+       (save-excursion
+         (save-restriction
+           (outorg-edit-as-org)
+	   (if funargs
+	       (funcall fun funargs)
+	     (funcall fun))
+           (outorg-copy-edits-and-exit))))))
 
 ;;;;; Hook function
 
