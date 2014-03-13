@@ -174,10 +174,12 @@ Used to override any major-mode specific file-local settings")
     ("Outline Visibility")
     ("c" . outline-cycle)
     ("C" . outshine-cycle-buffer)
-    ;; ;; FIXME call does not work - bug in org-mode?
-    ;; (" " . (outshine-use-outorg
-    ;; 	    (call-interactively 'org-display-outline-path)
-    ;; 	    'WHOLE-BUFFER-P))
+    (" " . (outshine-use-outorg
+    	    (lambda ()
+	      (message
+	       "%s" (substring-no-properties
+		     (org-display-outline-path))))
+    	    'WHOLE-BUFFER-P))
     ("r" . outshine-narrow-to-subtree)
     ("w" . widen)
     ("=" . (outshine-use-outorg 'org-columns))
