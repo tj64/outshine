@@ -174,12 +174,14 @@ Used to override any major-mode specific file-local settings")
     ("Outline Visibility")
     ("c" . outline-cycle)
     ("C" . outshine-cycle-buffer)
+    ;; FIXME needs to be improved!
     (" " . (outshine-use-outorg
     	    (lambda ()
 	      (message
 	       "%s" (substring-no-properties
-		     (org-display-outline-path))))
-    	    'WHOLE-BUFFER-P))
+		     (org-display-outline-path)))
+	       (sit-for 1))
+	    'WHOLE-BUFFER-P))
     ("r" . outshine-narrow-to-subtree)
     ("w" . widen)
     ("=" . (outshine-use-outorg 'org-columns))
@@ -200,6 +202,7 @@ Used to override any major-mode specific file-local settings")
     ("m" . outline-mark-subtree)
     ;; ("#" . outshine-toggle-comment)
     ("Clock Commands")
+    ;; FIXME need improvements!
     ("I" . (outshine-use-outorg 'org-clock-in))
     ("O" . outshine-clock-out)
     ("Meta Data Editing")
