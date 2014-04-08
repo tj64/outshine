@@ -1,13 +1,13 @@
 ;;; outshine.el --- outline with outshine outshines outline
-;;
+
 ;; Author: Thorsten Jolitz <tjolitz AT gmail DOT com>
 ;; Version: 1.0
 ;; URL: https://github.com/tj64/outshine
-;;
+
 ;;;; MetaData
 ;;   :PROPERTIES:
 ;;   :copyright: Thorsten_Jolitz
-;;   :copyright-from: 2013
+;;   :copyright-from: 2013+
 ;;   :version:  1.0
 ;;   :licence:  GPL 2 or later (free software)
 ;;   :licence-url: http://www.gnu.org/licenses/
