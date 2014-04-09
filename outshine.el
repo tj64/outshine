@@ -2217,7 +2217,13 @@ i.e. the text following the regexp match until the next space character."
   (define-key map "'" 'outorg-edit-as-org)
   ;; best used with prefix-key 'M-#'
   (define-key map "\M-#" 'outorg-edit-as-org)
-  (define-key map "#" 'outorg-edit-as-org))
+  (define-key map "#" 'outorg-edit-as-org)
+  ;; edit comment-section with `outorg' and propagate changes
+  ;; best used with prefix-key 'C-c' 
+  (define-key map "`" 'outorg-edit-comments-and-propagate-changes)
+  ;; best used with prefix-key 'M-#'
+  (define-key map "\M-+" 'outorg-edit-comments-and-propagate-changes)
+  (define-key map "+" 'outorg-edit-comments-and-propagate-changes))
 
 ;;; Run hooks and provide
 
