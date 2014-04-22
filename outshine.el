@@ -148,6 +148,9 @@
 (defconst outshine-version "1.0"
   "outshine version number.")
 
+(defconst outshine-max-level 8
+  "Maximal level of headlines recognized.")
+
 ;; copied from org-source.el
 (defconst outshine-level-faces
   '(outshine-level-1 outshine-level-2 outshine-level-3 outshine-level-4
@@ -158,7 +161,9 @@
   "Global default value of `outline-heading-end-regexp'.
 Used to override any major-mode specific file-local settings")
 
-(defconst outshine-oldschool-elisp-outline-regexp-base "[;]+"
+;; was "[;]+"
+(defconst outshine-oldschool-elisp-outline-regexp-base
+  (format "[;]\\{1,%d\\}" outshine-max-level)
   "Oldschool Emacs Lisp base for calculating the outline-regexp")
 
 (defconst outshine-speed-commands-default
@@ -516,7 +521,9 @@ poutshine-level-* faces."
   :group 'outshine
   :type 'boolean)
 
-(defcustom outshine-outline-regexp-special-chars "[][+]"
+;; was "[][+]"
+(defcustom outshine-outline-regexp-special-chars
+  "[][}{,+[:digit:]\\]"
   "Regexp for detecting (special) characters in outline-regexp.
 These special chars will be stripped when the outline-regexp is
 transformed into a string, e.g. when the outline-string for a
@@ -573,9 +580,12 @@ t      Everywhere except in headlines"
   :group 'outshine
   :type 'string)
 
+
+
 ;; old regexp: "[*]+"
 (defvar outshine-default-outline-regexp-base 
-  (format "[%s]+" outshine-regexp-base-char)
+  (format "[%s]\\{1,%d\\}"
+	  outshine-regexp-base-char outshine-max-level)
   "Default base for calculating the outline-regexp")
 
 ;; TODO delete this line  "\\(\\[\\)\\([[:digit:]+]\\)\\( L\\]\\)"
@@ -761,7 +771,9 @@ Searches in BUFFER if given, otherwise in current buffer."
       (save-excursion
         (goto-char (point-min))
         (re-search-forward
-         (format "^;; [%s]+ " outshine-regexp-base-char)
+         ;; (format "^;; [%s]+ " outshine-regexp-base-char)
+         (format "^;; [%s]\\{1,%d\\} "
+		 outshine-regexp-base-char outshine-max-level)
          nil 'NOERROR)))))
 
 (defun outshine-calc-comment-region-starter ()
@@ -971,7 +983,7 @@ top-level heading first."
 
 (defun outshine-fontify-headlines (outline-regexp)
   "Calculate heading regexps for font-lock mode."
-  (let* ((outline-rgxp (substring outline-regexp 0 -1))
+  (let* ((outline-rgxp (substring outline-regexp 0 -8))
 	 (heading-1-regexp
 	 (format "%s%s%s%s"
 		 outline-rgxp
