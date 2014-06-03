@@ -184,7 +184,7 @@ Used to override any major-mode specific file-local settings")
     ("u" . (outshine-speed-move-safe
             'outline-up-heading))
     ("j" . outshine-goto)
-    ("g" . (outshine-use-outorg 'org-refile))
+    ("g" . outshine-refile)
     ("Outline Visibility")
     ("c" . outline-cycle)
     ("C" . outshine-cycle-buffer)
@@ -198,7 +198,7 @@ Used to override any major-mode specific file-local settings")
             'WHOLE-BUFFER-P))
     ("r" . outshine-narrow-to-subtree)
     ("w" . widen)
-    ("=" . (outshine-use-outorg 'org-columns))
+    ("=" . outshine-columns)
     ("Outline Structure Editing")
     ("^" . outline-move-subtree-up)
     ("<" . outline-move-subtree-down)
@@ -210,36 +210,39 @@ Used to override any major-mode specific file-local settings")
     ;; ("i" . (progn (forward-char 1)
     ;;            (call-interactively
     ;;             'outshine-insert-heading-respect-content)))
-    ("^" . (outshine-use-outorg 'org-sort))
+    ("^" . outshine-sort)
     ;; ("a" . (outshine-use-outorg
     ;;      'org-archive-subtree-default-with-confirmation))
     ("m" . outline-mark-subtree)
     ;; ("#" . outshine-toggle-comment)
     ("Clock Commands")
     ;; FIXME need improvements!
-    ("I" . (outshine-use-outorg 'org-clock-in))
+    ("I" . outshine-clock-in)
     ("O" . outshine-clock-out)
     ("Meta Data Editing")
-    ("t" . (outshine-use-outorg 'org-todo))
-    ("," . (outshine-use-outorg 'org-priority))
-    ("0" . (outshine-use-outorg (lambda () (org-priority ?\ ))))
-    ("1" . (outshine-use-outorg (lambda () (org-priority ?A))))
-    ("2" . (outshine-use-outorg (lambda () (org-priority ?B))))
-    ("3" . (outshine-use-outorg (lambda () (org-priority ?C))))
-    (":" . (outshine-use-outorg 'org-set-tags-command))
-    ("e" . (outshine-use-outorg 'org-set-effort))
-    ("E" . (outshine-use-outorg 'org-inc-effort))
+    ("t" . outshine-todo)
+    ("," . outshine-priority)
+    ("0" . (outshine-use-outorg
+	    (lambda () (interactive) (org-priority ?\ ))))
+    ("1" . (outshine-use-outorg
+	    (lambda () (interactive) (org-priority ?A))))
+    ("2" . (outshine-use-outorg
+	    (lambda () (interactive) (org-priority ?B))))
+    ("3" . (outshine-use-outorg
+	    (lambda () (interactive) (org-priority ?C))))
+    (":" . outshine-set-tags-command)
+    ("e" . outshine-set-effort)
+    ("E" . outshine-inc-effort)
     ;; ("W" . (lambda(m) (interactive "sMinutes before warning: ")
     ;;       (outshine-entry-put (point) "APPT_WARNTIME" m)))
     ;; ("Agenda Views etc")
-    ;; ("v" . outshine-agenda)
-    ;; ("/" . outshine-sparse-tree)
+    ("v" . org-agenda)
+    ("/" . outshine-sparse-tree)
     ("Misc")
-    ;; works currently only for headlines at point, i.e. links
     ("o" . outshine-open-at-point)
     ("?" . outshine-speed-command-help)
-    ;; ("<" . (outshine-agenda-set-restriction-lock 'subtree))
-    ;; (">" . (outshine-agenda-remove-restriction-lock))
+    ("<" . (outshine-agenda-set-restriction-lock))
+    (">" . (outshine-agenda-remove-restriction-lock))
     )
   "The default speed commands.")
 
@@ -2193,10 +2196,11 @@ i.e. the text following the regexp match until the next space character."
   (outshine-use-outorg 'org-deadline))
 
 ;; C-c C-e		org-export-dispatch
-(defun outshine-export-dispatch ()
+(defun outshine-export-dispatch (&optional arg)
   "Call outorg to trigger `org-export-dispatch'."
-  (interactive)
-  (outshine-use-outorg 'org-export-dispatch))
+  (interactive "P")
+  (outshine-use-outorg 'org-export-dispatch
+		       arg))
 
 ;; C-c C-f		org-forward-heading-same-level
 ;; C-c C-j		org-goto
