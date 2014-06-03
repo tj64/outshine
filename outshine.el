@@ -135,10 +135,12 @@
 ;;; Requires
 
 (require 'outline)
-(require 'easymenu)
+
+;; (require 'easymenu)
 ;; soft-dependency on outorg 
 ;; FIXME introducing cyclic dependencies?
-(require 'outorg nil 'NOERROR)
+
+;; (require 'outorg nil 'NOERROR)
 ;; necessary before Emacs 24.3
 (require 'newcomment)
 
@@ -170,30 +172,30 @@ Used to override any major-mode specific file-local settings")
   '(
     ("Outline Navigation")
     ("n" . (outshine-speed-move-safe
-	    'outline-next-visible-heading))
+            'outline-next-visible-heading))
     ("p" . (outshine-speed-move-safe
-	    'outline-previous-visible-heading))
+            'outline-previous-visible-heading))
     ("f" . (outshine-speed-move-safe
-	    'outline-forward-same-level))
+            'outline-forward-same-level))
     ("b" . (outshine-speed-move-safe
-	    'outline-backward-same-level))
+            'outline-backward-same-level))
     ;; ("F" . outshine-next-block)
     ;; ("B" . outshine-previous-block)
     ("u" . (outshine-speed-move-safe
-	    'outline-up-heading))
-    ("j" . (outshine-use-outorg 'org-goto))
+            'outline-up-heading))
+    ("j" . outshine-goto)
     ("g" . (outshine-use-outorg 'org-refile))
     ("Outline Visibility")
     ("c" . outline-cycle)
     ("C" . outshine-cycle-buffer)
     ;; FIXME needs to be improved!
     (" " . (outshine-use-outorg
-    	    (lambda ()
-	      (message
-	       "%s" (substring-no-properties
-		     (org-display-outline-path)))
-	       (sit-for 1))
-	    'WHOLE-BUFFER-P))
+            (lambda ()
+              (message
+               "%s" (substring-no-properties
+                     (org-display-outline-path)))
+               (sit-for 1))
+            'WHOLE-BUFFER-P))
     ("r" . outshine-narrow-to-subtree)
     ("w" . widen)
     ("=" . (outshine-use-outorg 'org-columns))
@@ -206,11 +208,11 @@ Used to override any major-mode specific file-local settings")
     ("-" . outline-promote)
     ("i" . outshine-insert-heading)
     ;; ("i" . (progn (forward-char 1)
-    ;; 		  (call-interactively
-    ;; 		   'outshine-insert-heading-respect-content)))
+    ;;            (call-interactively
+    ;;             'outshine-insert-heading-respect-content)))
     ("^" . (outshine-use-outorg 'org-sort))
     ;; ("a" . (outshine-use-outorg
-    ;; 	    'org-archive-subtree-default-with-confirmation))
+    ;;      'org-archive-subtree-default-with-confirmation))
     ("m" . outline-mark-subtree)
     ;; ("#" . outshine-toggle-comment)
     ("Clock Commands")
@@ -228,12 +230,13 @@ Used to override any major-mode specific file-local settings")
     ("e" . (outshine-use-outorg 'org-set-effort))
     ("E" . (outshine-use-outorg 'org-inc-effort))
     ;; ("W" . (lambda(m) (interactive "sMinutes before warning: ")
-    ;; 	     (outshine-entry-put (point) "APPT_WARNTIME" m)))
+    ;;       (outshine-entry-put (point) "APPT_WARNTIME" m)))
     ;; ("Agenda Views etc")
     ;; ("v" . outshine-agenda)
     ;; ("/" . outshine-sparse-tree)
     ("Misc")
-    ("o" . (outshine-use-outorg 'org-open-at-point))
+    ;; works currently only for headlines at point, i.e. links
+    ("o" . outshine-open-at-point)
     ("?" . outshine-speed-command-help)
     ;; ("<" . (outshine-agenda-set-restriction-lock 'subtree))
     ;; (">" . (outshine-agenda-remove-restriction-lock))
@@ -347,29 +350,29 @@ to the top of the list.  The `min-colors' attribute will be removed from
 any other entries, and any resulting duplicates will be removed entirely."
   (when (and inherits (facep inherits) (not specs))
     (setq specs (or specs
-		    (get inherits 'saved-face)
-		    (get inherits 'face-defface-spec))))
+                    (get inherits 'saved-face)
+                    (get inherits 'face-defface-spec))))
   (cond   ((and inherits (facep inherits)
-	 (not (featurep 'xemacs))
-	 (>= emacs-major-version 22)
-	 ;; do not inherit outline faces before Emacs 23
-	 (or (>= emacs-major-version 23)
-	     (not (string-match "\\`outline-[0-9]+"
-				(symbol-name inherits)))))
+         (not (featurep 'xemacs))
+         (>= emacs-major-version 22)
+         ;; do not inherit outline faces before Emacs 23
+         (or (>= emacs-major-version 23)
+             (not (string-match "\\`outline-[0-9]+"
+                                (symbol-name inherits)))))
     (list (list t :inherit inherits)))
    ((or (featurep 'xemacs) (< emacs-major-version 22))
     ;; These do not understand the `min-colors' attribute.
     (let (r e a)
       (while (setq e (pop specs))
-	(cond
-	 ((memq (car e) '(t default)) (push e r))
-	 ((setq a (member '(min-colors 8) (car e)))
-	  (nconc r (list (cons (cons '(type tty) (delq (car a) (car e)))
-			       (cdr e)))))
-	 ((setq a (assq 'min-colors (car e)))
-	  (setq e (cons (delq a (car e)) (cdr e)))
-	  (or (assoc (car e) r) (push e r)))
-	 (t (or (assoc (car e) r) (push e r)))))
+        (cond
+         ((memq (car e) '(t default)) (push e r))
+         ((setq a (member '(min-colors 8) (car e)))
+          (nconc r (list (cons (cons '(type tty) (delq (car a) (car e)))
+                               (cdr e)))))
+         ((setq a (assq 'min-colors (car e)))
+          (setq e (cons (delq a (car e)) (cdr e)))
+          (or (assoc (car e) r) (push e r)))
+         (t (or (assoc (car e) r) (push e r)))))
       (nreverse r)))
    (t specs)))
 (put 'outshine-compatible-face 'lisp-indent-function 1)
@@ -539,9 +542,9 @@ white  Only in completely white lines
 t      Everywhere except in headlines"
   :group 'outlines
   :type '(choice (const :tag "Never" nil)
-		 (const :tag "Only in completely white lines" white)
-		 (const :tag "Everywhere except in headlines" t)
-		 ))
+                 (const :tag "Only in completely white lines" white)
+                 (const :tag "Everywhere except in headlines" t)
+                 ))
 
 ;; from `outline-magic'
 (defcustom outline-structedit-modifiers '(meta)
@@ -585,7 +588,7 @@ t      Everywhere except in headlines"
 ;; old regexp: "[*]+"
 (defvar outshine-default-outline-regexp-base 
   (format "[%s]\\{1,%d\\}"
-	  outshine-regexp-base-char outshine-max-level)
+          outshine-regexp-base-char outshine-max-level)
   "Default base for calculating the outline-regexp")
 
 ;; TODO delete this line  "\\(\\[\\)\\([[:digit:]+]\\)\\( L\\]\\)"
@@ -626,9 +629,9 @@ where speed commands should be active, e.g.:
       (lambda ()  ( ...your code here ... ))"
   :group 'outshine
   :type '(choice
-	  (const :tag "Never" nil)
-	  (const :tag "At beginning of headline stars" t)
-	  (function)))
+          (const :tag "Never" nil)
+          (const :tag "At beginning of headline stars" t)
+          (function)))
 
 (defcustom outshine-speed-commands-user nil
   "Alist of additional speed commands.
@@ -644,13 +647,13 @@ as a descriptive headline that will be added when listing the speed
 commands in the Help buffer using the `?' speed command."
   :group 'outshine
   :type '(repeat :value ("k" . ignore)
-		 (choice :value ("k" . ignore)
-			 (list :tag "Descriptive Headline" (string :tag "Headline"))
-			 (cons :tag "Letter and Command"
-			       (string :tag "Command letter")
-			       (choice
-				(function)
-				(sexp))))))
+                 (choice :value ("k" . ignore)
+                         (list :tag "Descriptive Headline" (string :tag "Headline"))
+                         (cons :tag "Letter and Command"
+                               (string :tag "Command letter")
+                               (choice
+                                (function)
+                                (sexp))))))
 
 (defcustom outshine-speed-command-hook
   '(outshine-speed-command-activate)
@@ -711,9 +714,9 @@ recover it by stripping off \"-map\" from KEYMAP name."
                          "Could not deduce mode name from keymap name")
                         (intern "dummy-sym"))
                       )) nil)
-		;; Check for `<tab>'.  It translates to `TAB' which
-		;; will prevent `(key-binding ...)' from finding the
-		;; original binding.
+                ;; Check for `<tab>'.  It translates to `TAB' which
+                ;; will prevent `(key-binding ...)' from finding the
+                ;; original binding.
                 (original-func (if (equal (kbd "<tab>") ,key)
                                    (or (key-binding ,key)
                                        (key-binding (kbd "TAB")))
@@ -773,7 +776,7 @@ Searches in BUFFER if given, otherwise in current buffer."
         (re-search-forward
          ;; (format "^;; [%s]+ " outshine-regexp-base-char)
          (format "^;; [%s]\\{1,%d\\} "
-		 outshine-regexp-base-char outshine-max-level)
+                 outshine-regexp-base-char outshine-max-level)
          nil 'NOERROR)))))
 
 (defun outshine-calc-comment-region-starter ()
@@ -815,7 +818,7 @@ Based on `comment-start' and `comment-add'."
           ;; comment-start
           ;; (outshine-calc-comment-region-starter)
           (regexp-quote
-	   (outshine-calc-comment-region-starter))
+           (outshine-calc-comment-region-starter))
           ;; comment-padding
           (if outshine-enforce-no-comment-padding-p
               ""
@@ -867,12 +870,12 @@ Based on `comment-start' and `comment-add'."
    "Set `outline-regexp' locally to START-REGEXP.
 Set optionally `outline-level' to FUN and
 `outline-heading-end-regexp' to END-REGEXP."
-	(make-local-variable 'outline-regexp)
-	(setq outline-regexp start-regexp)
-	(and fun
+        (make-local-variable 'outline-regexp)
+        (setq outline-regexp start-regexp)
+        (and fun
              (make-local-variable 'outline-level)
              (setq outline-level fun))
-      	(and end-regexp
+        (and end-regexp
              (make-local-variable 'outline-heading-end-regexp)
              (setq outline-heading-end-regexp end-regexp)))
 
@@ -984,54 +987,54 @@ top-level heading first."
 (defun outshine-fontify-headlines (outline-regexp)
   "Calculate heading regexps for font-lock mode."
   (let* ((outline-rgxp (substring outline-regexp 0 -8))
-	 (heading-1-regexp
-	 (format "%s%s%s%s"
-		 outline-rgxp
-		 "\\{1\\} \\(.*"
-		 (if outshine-fontify-whole-heading-line "\n?" "")
-		 "\\)"))
-	(heading-2-regexp
-	 (format "%s%s%s%s"
-		 outline-rgxp
-		 "\\{2\\} \\(.*"
-		 (if outshine-fontify-whole-heading-line "\n?" "")
-		 "\\)"))
-	(heading-3-regexp
-	 (format "%s%s%s%s"
-		 outline-rgxp
-		 "\\{3\\} \\(.*"
-		 (if outshine-fontify-whole-heading-line "\n?" "")
-		 "\\)"))
-	(heading-4-regexp
-	 (format "%s%s%s%s"
-		 outline-rgxp
-		 "\\{4\\} \\(.*"
-		 (if outshine-fontify-whole-heading-line "\n?" "")
-		 "\\)"))
-	(heading-5-regexp
-	 (format "%s%s%s%s"
-		 outline-rgxp
-		 "\\{5\\} \\(.*"
-		 (if outshine-fontify-whole-heading-line "\n?" "")
-		 "\\)"))
-	(heading-6-regexp
-	 (format "%s%s%s%s"
-		 outline-rgxp
-		 "\\{6\\} \\(.*"
-		 (if outshine-fontify-whole-heading-line "\n?" "")
-		 "\\)"))
-	(heading-7-regexp
-	 (format "%s%s%s%s"
-		 outline-rgxp
-		 "\\{7\\} \\(.*"
-		 (if outshine-fontify-whole-heading-line "\n?" "")
-		 "\\)"))
-	(heading-8-regexp
-	 (format "%s%s%s%s"
-		 outline-rgxp
-		 "\\{8\\} \\(.*"
-		 (if outshine-fontify-whole-heading-line "\n?" "")
-		 "\\)")))
+         (heading-1-regexp
+         (format "%s%s%s%s"
+                 outline-rgxp
+                 "\\{1\\} \\(.*"
+                 (if outshine-fontify-whole-heading-line "\n?" "")
+                 "\\)"))
+        (heading-2-regexp
+         (format "%s%s%s%s"
+                 outline-rgxp
+                 "\\{2\\} \\(.*"
+                 (if outshine-fontify-whole-heading-line "\n?" "")
+                 "\\)"))
+        (heading-3-regexp
+         (format "%s%s%s%s"
+                 outline-rgxp
+                 "\\{3\\} \\(.*"
+                 (if outshine-fontify-whole-heading-line "\n?" "")
+                 "\\)"))
+        (heading-4-regexp
+         (format "%s%s%s%s"
+                 outline-rgxp
+                 "\\{4\\} \\(.*"
+                 (if outshine-fontify-whole-heading-line "\n?" "")
+                 "\\)"))
+        (heading-5-regexp
+         (format "%s%s%s%s"
+                 outline-rgxp
+                 "\\{5\\} \\(.*"
+                 (if outshine-fontify-whole-heading-line "\n?" "")
+                 "\\)"))
+        (heading-6-regexp
+         (format "%s%s%s%s"
+                 outline-rgxp
+                 "\\{6\\} \\(.*"
+                 (if outshine-fontify-whole-heading-line "\n?" "")
+                 "\\)"))
+        (heading-7-regexp
+         (format "%s%s%s%s"
+                 outline-rgxp
+                 "\\{7\\} \\(.*"
+                 (if outshine-fontify-whole-heading-line "\n?" "")
+                 "\\)"))
+        (heading-8-regexp
+         (format "%s%s%s%s"
+                 outline-rgxp
+                 "\\{8\\} \\(.*"
+                 (if outshine-fontify-whole-heading-line "\n?" "")
+                 "\\)")))
     (font-lock-add-keywords
      nil
      `((,heading-1-regexp 1 'outshine-level-1 t)
@@ -1050,15 +1053,15 @@ top-level heading first."
 (defun outshine-print-speed-command (e)
   (if (> (length (car e)) 1)
       (progn
-	(princ "\n")
-	(princ (car e))
-	(princ "\n")
-	(princ (make-string (length (car e)) ?-))
-	(princ "\n"))
+        (princ "\n")
+        (princ (car e))
+        (princ "\n")
+        (princ (make-string (length (car e)) ?-))
+        (princ "\n"))
     (princ (car e))
     (princ "   ")
     (if (symbolp (cdr e))
-	(princ (symbol-name (cdr e)))
+        (princ (symbol-name (cdr e)))
       (prin1 (cdr e)))
     (princ "\n")))
 
@@ -1067,14 +1070,14 @@ top-level heading first."
 `outshine-speed-commands-default' specifies a minimal command set.
 Use `outshine-speed-commands-user' for further customization."
   (when (or (and
-	     (bolp)
-	     (looking-at outline-regexp))
-	     ;; (looking-at (outshine-calc-outline-regexp)))
-	    (and
-	     (functionp outshine-use-speed-commands)
-	     (funcall outshine-use-speed-commands)))
+             (bolp)
+             (looking-at outline-regexp))
+             ;; (looking-at (outshine-calc-outline-regexp)))
+            (and
+             (functionp outshine-use-speed-commands)
+             (funcall outshine-use-speed-commands)))
     (cdr (assoc keys (append outshine-speed-commands-user
-			     outshine-speed-commands-default)))))
+                             outshine-speed-commands-default)))))
 
 
 (defun outshine-defkey (keymap key def)
@@ -1088,11 +1091,11 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
     (while commands
       (setq old (pop commands) new (pop commands))
       (if (fboundp 'command-remapping)
-	  (outshine-defkey map (vector 'remap old) new)
-	(substitute-key-definition old new map global-map)))))
+          (outshine-defkey map (vector 'remap old) new)
+        (substitute-key-definition old new map global-map)))))
 
 (outshine-remap outline-minor-mode-map
-	     'self-insert-command 'outshine-self-insert-command)
+             'self-insert-command 'outshine-self-insert-command)
 
 ;;;;; Functions for hiding comment-subtrees
 
@@ -1102,17 +1105,17 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
     (let* ((re (concat ":" outshine-comment-tag ":")))
       (goto-char beg)
       (while (re-search-forward re end t)
-	(when (outline-on-heading-p t)
-	  (outshine-flag-subtree t)
-	  (outline-end-of-subtree))))))
+        (when (outline-on-heading-p t)
+          (outshine-flag-subtree t)
+          (outline-end-of-subtree))))))
 
 (defun outshine-flag-subtree (flag)
   (save-excursion
     (outline-back-to-heading t)
     (outline-end-of-heading)
     (outline-flag-region (point)
-			 (progn (outline-end-of-subtree) (point))
-			 flag)))
+                         (progn (outline-end-of-subtree) (point))
+                         flag)))
 
 (defun outshine-hide-comment-subtrees ()
   "Re-hide all comment subtrees after a visibility state change."
@@ -1123,15 +1126,15 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
       (let* ((globalp (memq state '(contents all)))
              (beg (if globalp (point-min) (point)))
              (end (if globalp (point-max)
-		    (outline-end-of-subtree))))
-	(outshine-hide-comment-subtrees-in-region beg end)
-	(goto-char beg)
-	(if (looking-at (concat ".*:" outshine-comment-tag ":"))
-	    (message "%s" (substitute-command-keys
-			   "Subtree is tagged as comment and
-			   stays closed. Use
-			   \\[outshine-force-cycle-comment] to
-			   cycle it anyway."))))))))
+                    (outline-end-of-subtree))))
+        (outshine-hide-comment-subtrees-in-region beg end)
+        (goto-char beg)
+        (if (looking-at (concat ".*:" outshine-comment-tag ":"))
+            (message "%s" (substitute-command-keys
+                           "Subtree is tagged as comment and
+                           stays closed. Use
+                           \\[outshine-force-cycle-comment] to
+                           cycle it anyway."))))))))
 
 ;; ;; FIXME max-lisp-eval-depth exceeded error when turned on
 ;; ;; with max-lisp-eval-depth set to 600
@@ -1139,15 +1142,83 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 ;; 	  'outshine-hide-comment-subtrees)
 
 
-;;;;; Use outorg
+;;;;; Use outorg functions
 
-(eval-after-load 'outorg
-  '(defun outshine-use-outorg (fun &optional whole-buffer-p &rest funargs)
-     "Use outorg to call FUN with FUNARGS on subtree.
+(defun outshine-pt-rgxps ()
+  "Return list with 5 regexps, like (rgx0 rgx1 rgx2 rgx3 rgx4).
 
-FUN should be an Org-mode function that acts on the subtree at
-point. Optionally, with WHOLE-BUFFER-P non-nil,
+These regexps, if non-nil, match
+ - rgx0 :: buffer-substring from bol to point
+ - rgx1 :: buffer-substring from bol of previous line to point
+ - rgx2 :: buffer-substring from bol of second previous line to point
+ - rgx3 :: buffer-substring from bol of third previous line to point
+ - rgx4 :: buffer-substring from bol of fourth previous line to point"
+  (let ((cur-buf (current-buffer))
+        (buf-mode major-mode)
+        beg end rgx0 rgx1 rgx2 rgx3 rgx4)
+    (save-excursion
+      (save-restriction
+        (widen)
+        (setq end (point))
+        (save-excursion
+          (setq beg (outline-previous-heading)))
+        (with-temp-buffer
+          (insert-buffer-substring-no-properties
+           cur-buf beg end)
+          (funcall `,buf-mode)
+          (save-excursion
+            (uncomment-region (point-min) (point-max)))
+          (let ((pt (1- (point-max))))
+            (setq rgx0
+                  (regexp-opt
+                   (list
+                    (buffer-substring-no-properties
+                     (point-at-bol) pt))))
+            (when (= (save-excursion (forward-line -1)) 0)
+              (setq rgx1
+                    (regexp-opt
+                     (list
+                      (buffer-substring-no-properties
+                       (save-excursion (forward-line -1) (point))
+                       pt)))))
+            (when (= (save-excursion (forward-line -2)) 0)
+              (setq rgx2
+                    (regexp-opt
+                     (list
+                      (buffer-substring-no-properties
+                       (save-excursion (forward-line -2) (point))
+                       pt)))))
+            (when (= (save-excursion (forward-line -3)) 0)
+              (setq rgx3
+                    (regexp-opt
+                     (list
+                      (buffer-substring-no-properties
+                       (save-excursion (forward-line -3) (point))
+                       pt)))))
+            (when (= (save-excursion (forward-line -4)) 0)
+              (setq rgx4
+                    (regexp-opt
+                     (list
+                      (buffer-substring-no-properties
+                       (save-excursion (forward-line -4) (point))
+                       pt)))))))
+        (list rgx4 rgx3 rgx2 rgx1 rgx0)))))
+  
+
+;; (eval-after-load 'outorg
+;;   '
+
+(defun outshine-use-outorg (fun &optional whole-buffer-p rgxps &rest funargs)
+     "Use outorg to call FUN with FUNARGS on subtree or thing at point.
+
+FUN should be an Org-mode function that acts on the subtree or
+org-element at point. Optionally, with WHOLE-BUFFER-P non-nil,
 `outorg-edit-as-org' can be called on the whole buffer.
+
+RGXPS should be a list of regexps as returned by
+`outshine-pt-rgxps', used to find the
+last buffer position of point in the source file when calling
+this function in the converted Org file.
 
 Sets the variable `outshine-use-outorg-last-headline-marker' so
 that it always contains a point-marker to the last headline this
@@ -1162,10 +1233,27 @@ created before `outorg-edit-as-org' is called on the headline."
        (if whole-buffer-p
 	   (outorg-edit-as-org '(4))
 	 (outorg-edit-as-org))
-       (if funargs
-	   (funcall fun funargs)
-	 (funcall fun))
+       (save-excursion
+	 (if (org-on-heading-p)
+	     (goto-char (point-at-bol))
+	   (outline-previous-heading))
+	 (let ((end-of-subtree
+		(org-element-property :end (org-element-at-point)))
+	       found)
+	   (while (and rgxps (not found))
+	     (if (and (car rgxps)
+		      (re-search-forward
+		       (car rgxps) end-of-subtree 'NOERROR))
+	       (setq found t)
+	       (pop rgxps))))
+	 (if funargs
+	   ;;   (funcall fun funargs)
+	   ;; (funcall fun))
+	     (call-interactively fun funargs)
+	   (call-interactively fun))
        (outorg-copy-edits-and-exit))))
+
+;; )
 
 (defun outshine--set-outorg-last-headline-marker ()
   "Set a point-marker to current header and remove old marker.
@@ -1175,22 +1263,22 @@ Sets the variable `outshine-use-outorg-last-headline-marker'."
        outshine-use-outorg-last-headline-marker)
       (move-marker outshine-use-outorg-last-headline-marker (point))
     (setq outshine-use-outorg-last-headline-marker
-	  (point-marker))))
+          (point-marker))))
 
 (defun outshine-clock-out ()
   "Stop Org-mode clock started with `outshine-use-outorg'."
   (if (integer-or-marker-p
        outshine-use-outorg-last-headline-marker)
       (save-excursion
-	(goto-char
-	 (marker-position
-	  outshine-use-outorg-last-headline-marker))
-	(outshine-use-outorg
-	 (lambda ()
-	   (ignore-errors
-	     (org-clock-cancel))
-	   (org-clock-in)
-	   (org-clock-out))))))
+        (goto-char
+         (marker-position
+          outshine-use-outorg-last-headline-marker))
+        (outshine-use-outorg
+         (lambda ()
+           (ignore-errors
+             (org-clock-cancel))
+           (org-clock-in)
+           (org-clock-out))))))
     
 ;;;;; Hook function
 
@@ -1229,43 +1317,43 @@ Sets the variable `outshine-use-outorg-last-headline-marker'."
   ;; This is called after the check for point in a headline,
   ;; so we can assume we are not in a headline
   (if (and (eq outline-cycle-emulate-tab 'white)
-	   (save-excursion
-	     (beginning-of-line 1) (looking-at "[ \t]+$")))
+           (save-excursion
+             (beginning-of-line 1) (looking-at "[ \t]+$")))
       t
     outline-cycle-emulate-tab))
 
 (defun outline-change-level (delta)
   "Workhorse for `outline-demote' and `outline-promote'."
   (let* ((headlist (outline-headings-list))
-	 (atom (outline-headings-atom headlist))
-	 (re (concat "^" outline-regexp))
-	 (transmode (and transient-mark-mode mark-active))
-	 beg end)
+         (atom (outline-headings-atom headlist))
+         (re (concat "^" outline-regexp))
+         (transmode (and transient-mark-mode mark-active))
+         beg end)
 
     ;; Find the boundaries for this operation
     (save-excursion
       (if transmode
-	  (setq beg (min (point) (mark))
-		end (max (point) (mark)))
-	(outline-back-to-heading)
-	(setq beg (point))
-	(outline-end-of-heading)
-	(outline-end-of-subtree)
-	(setq end (point)))
+          (setq beg (min (point) (mark))
+                end (max (point) (mark)))
+        (outline-back-to-heading)
+        (setq beg (point))
+        (outline-end-of-heading)
+        (outline-end-of-subtree)
+        (setq end (point)))
       (setq beg (move-marker (make-marker) beg)
-	    end (move-marker (make-marker) end))
+            end (move-marker (make-marker) end))
 
       (let (head newhead level newlevel static)
 
-	;; First a dry run to test if there is any trouble ahead.
-	(goto-char beg)
-	(while (re-search-forward re end t)
-	  (outline-change-heading headlist delta atom 'test))
+        ;; First a dry run to test if there is any trouble ahead.
+        (goto-char beg)
+        (while (re-search-forward re end t)
+          (outline-change-heading headlist delta atom 'test))
 
-	;; Now really do replace the headings
-	(goto-char beg)
-	(while (re-search-forward re end t)
-	  (outline-change-heading headlist delta atom))))))
+        ;; Now really do replace the headings
+        (goto-char beg)
+        (while (re-search-forward re end t)
+          (outline-change-heading headlist delta atom))))))
 
 (defun outline-headings-list ()
   "Return a list of relevant headings, either a user/mode defined
@@ -1283,27 +1371,27 @@ list, or an alist derived from scanning the buffer."
 
      (t ;; Check if the buffer contains a complete set of headings
       (let ((re (concat "^" outline-regexp)) head level)
-	(save-excursion
-	  (goto-char (point-min))
-	  (while (re-search-forward re nil t)
-	    (save-excursion
-	      (beginning-of-line 1)
-	      (setq head (outline-cleanup-match (match-string 0))
-		    level (funcall outline-level))
-	      (add-to-list  'headlist (cons head level))))))
+        (save-excursion
+          (goto-char (point-min))
+          (while (re-search-forward re nil t)
+            (save-excursion
+              (beginning-of-line 1)
+              (setq head (outline-cleanup-match (match-string 0))
+                    level (funcall outline-level))
+              (add-to-list  'headlist (cons head level))))))
       ;; Check for uniqueness of levels in the list
       (let* ((hl headlist) entry level seen nonunique)
-	(while (setq entry (car hl))
-	  (setq hl (cdr hl)
-		level (cdr entry))
-	  (if (and (not (outline-static-level-p level))
-		   (member level seen))
-	      ;; We have two entries for the same level.
-	      (add-to-list 'nonunique level))
-	  (add-to-list 'seen level))
-	(if nonunique
-	    (error "Cannot promote/demote: non-unique headings at level %s\nYou may want to configure `outline-promotion-headings'."
-		   (mapconcat 'int-to-string nonunique ","))))))
+        (while (setq entry (car hl))
+          (setq hl (cdr hl)
+                level (cdr entry))
+          (if (and (not (outline-static-level-p level))
+                   (member level seen))
+              ;; We have two entries for the same level.
+              (add-to-list 'nonunique level))
+          (add-to-list 'seen level))
+        (if nonunique
+            (error "Cannot promote/demote: non-unique headings at level %s\nYou may want to configure `outline-promotion-headings'."
+                   (mapconcat 'int-to-string nonunique ","))))))
     ;; OK, return the list
     headlist))
 
@@ -1315,44 +1403,44 @@ if all headlines are composed of a single character.
 If TEST is non-nil, just prepare the change and error if there are problems.
 TEST nil means, really replace old heading with new one."
   (let* ((head (outline-cleanup-match (match-string 0)))
-	 (level (save-excursion
-		  (beginning-of-line 1)
-		  (funcall outline-level)))
-	 (newhead  ; compute the new head
-	  (cond
-	   ((= delta 0) t)
-	   ((outline-static-level-p level) t)
-	   ((null headlist) nil)
-	   ((consp (car headlist))
-	    ;; The headlist is an association list
-	    (or (car (rassoc (+ delta level) headlist))
-		(and atom
-		     (> (+ delta level) 0)
-		     (make-string (+ delta level) atom))))
-	   (t
-	    ;; The headlist is a straight list - grab the correct element.
-	    (let* ((l (length headlist))
-		   (n1 (- l (length (member head headlist)))) ; index old
-		   (n2 (+ delta n1)))                         ; index new
-	      ;; Careful checking
-	      (cond
-	       ((= n1 l) nil)                ; head not found
-	       ((< n2 0) nil)                ; newlevel too low
-	       ((>= n2 l) nil)               ; newlevel too high
-	       ((let* ((tail (nthcdr (min n1 n2) headlist))
-		       (nilpos (- (length tail) (length (memq nil tail)))))
-		  (< nilpos delta))          ; nil element between old and new
-		nil)
-	       (t (nth n2 headlist))))))))      ; OK, we have a match!
+         (level (save-excursion
+                  (beginning-of-line 1)
+                  (funcall outline-level)))
+         (newhead  ; compute the new head
+          (cond
+           ((= delta 0) t)
+           ((outline-static-level-p level) t)
+           ((null headlist) nil)
+           ((consp (car headlist))
+            ;; The headlist is an association list
+            (or (car (rassoc (+ delta level) headlist))
+                (and atom
+                     (> (+ delta level) 0)
+                     (make-string (+ delta level) atom))))
+           (t
+            ;; The headlist is a straight list - grab the correct element.
+            (let* ((l (length headlist))
+                   (n1 (- l (length (member head headlist)))) ; index old
+                   (n2 (+ delta n1)))                         ; index new
+              ;; Careful checking
+              (cond
+               ((= n1 l) nil)                ; head not found
+               ((< n2 0) nil)                ; newlevel too low
+               ((>= n2 l) nil)               ; newlevel too high
+               ((let* ((tail (nthcdr (min n1 n2) headlist))
+                       (nilpos (- (length tail) (length (memq nil tail)))))
+                  (< nilpos delta))          ; nil element between old and new
+                nil)
+               (t (nth n2 headlist))))))))      ; OK, we have a match!
     (if (not newhead)
-	(error "Cannot shift level %d heading \"%s\" to level %d"
-	       level head (+ level delta)))
+        (error "Cannot shift level %d heading \"%s\" to level %d"
+               level head (+ level delta)))
     (if (and (not test) (stringp newhead))
-	(save-excursion
-	  (beginning-of-line 1)
-	  (or (looking-at (concat "[ \t]*\\(" (regexp-quote head) "\\)"))
-	      (error "Please contact maintainer"))
-	  (replace-match (outline-cleanup-match newhead) t t nil 1)))))
+        (save-excursion
+          (beginning-of-line 1)
+          (or (looking-at (concat "[ \t]*\\(" (regexp-quote head) "\\)"))
+              (error "Please contact maintainer"))
+          (replace-match (outline-cleanup-match newhead) t t nil 1)))))
 
 (defun outline-headings-atom (headlist)
   "Use the list created by `outline-headings-list' and check if all
@@ -1361,11 +1449,11 @@ If yes, return this character."
   (if (consp (car headlist))
       ;; this is an alist - it makes sense to check for atomic structure
       (let ((re (concat "\\`"
-			(regexp-quote (substring (car (car headlist)) 0 1))
-			"+\\'")))
-	(if (not (delq nil (mapcar (lambda (x) (not (string-match re (car x))))
-				   headlist)))
-	    (string-to-char (car (car headlist)))))))
+                        (regexp-quote (substring (car (car headlist)) 0 1))
+                        "+\\'")))
+        (if (not (delq nil (mapcar (lambda (x) (not (string-match re (car x))))
+                                   headlist)))
+            (string-to-char (car (car headlist)))))))
 
 (defun outline-cleanup-match (s)
   "Remove text properties and start/end whitespace from a string."
@@ -1396,8 +1484,8 @@ If yes, return this character."
     (show-children keep-levels)
     (condition-case err
       (while (outline-get-next-sibling)
-	(hide-subtree)
-	(show-children keep-levels))
+        (hide-subtree)
+        (show-children keep-levels))
       (error nil))))
 
 (defun outline-hide-other ()
@@ -1405,18 +1493,18 @@ If yes, return this character."
   (interactive)
   (outline-hide-sublevels 1)
   (let ((last (point))
-	(pos (point)))
+        (pos (point)))
     (while (save-excursion
-	     (and (re-search-backward "[\n\r]" nil t)
-		  (eq (following-char) ?\r)))
+             (and (re-search-backward "[\n\r]" nil t)
+                  (eq (following-char) ?\r)))
       (save-excursion
-	(beginning-of-line)
-	(if (eq last (point))
-	    (progn
-	      (outline-next-heading)
-	      (outline-flag-region last (point) ?\n))
-	  (show-children)
-	  (setq last (point)))))))
+        (beginning-of-line)
+        (if (eq last (point))
+            (progn
+              (outline-next-heading)
+              (outline-flag-region last (point) ?\n))
+          (show-children)
+          (setq last (point)))))))
 
 ;;;;;; Commands from `outline-magic'
 
@@ -1426,7 +1514,7 @@ Essentially a much simplified version of `next-line'."
   (interactive)
   (beginning-of-line 2)
   (while (and (not (eobp))
-	      (get-char-property (1- (point)) 'invisible))
+              (get-char-property (1- (point)) 'invisible))
     (beginning-of-line 2)))
 
 (defun outline-move-subtree-up (&optional arg)
@@ -1440,11 +1528,11 @@ Essentially a much simplified version of `next-line'."
   (interactive "p")
   (let* ((headers (or arg 1))
         (re (concat "^" outline-regexp))
-	(movfunc (if (> headers 0) 'outline-get-next-sibling
-		   'outline-get-last-sibling))
-	(ins-point (make-marker))
-	(cnt (abs headers))
-	beg end txt)
+        (movfunc (if (> headers 0) 'outline-get-next-sibling
+                   'outline-get-last-sibling))
+        (ins-point (make-marker))
+        (cnt (abs headers))
+        beg end txt)
     ;; Select the tree
     (outline-back-to-heading)
     (setq beg (point))
@@ -1455,13 +1543,13 @@ Essentially a much simplified version of `next-line'."
     (goto-char beg)
     (while (> cnt 0)
       (or (funcall movfunc)
-	  (progn (goto-char beg)
-		 (error "Cannot move past superior level")))
+          (progn (goto-char beg)
+                 (error "Cannot move past superior level")))
       (setq cnt (1- cnt)))
     (if (> headers 0)
-	;; Moving forward - still need to move over subtree
-	(progn (outline-end-of-subtree)
-	       (if (= (char-after) ?\n) (forward-char 1))))
+        ;; Moving forward - still need to move over subtree
+        (progn (outline-end-of-subtree)
+               (if (= (char-after) ?\n) (forward-char 1))))
     (move-marker ins-point (point))
     (setq txt (buffer-substring beg end))
     (delete-region beg end)
@@ -1515,7 +1603,7 @@ may have changed."
    ((equal arg '(4))
     ;; Run `outline-cycle' as if at the top of the buffer.
     (let ((outshine-org-style-global-cycling-at-bob-p nil)
-	  (current-prefix-arg nil))
+          (current-prefix-arg nil))
     (save-excursion
       (goto-char (point-min))
       (outline-cycle nil))))
@@ -1526,46 +1614,46 @@ may have changed."
      ((or
        ;; outline-magic style behaviour
        (and
-	(bobp)
-	(not outshine-org-style-global-cycling-at-bob-p))
+        (bobp)
+        (not outshine-org-style-global-cycling-at-bob-p))
        ;; org-mode style behaviour
        (and
-	(bobp)
-	(not (outline-on-heading-p))
-	outshine-org-style-global-cycling-at-bob-p))
+        (bobp)
+        (not (outline-on-heading-p))
+        outshine-org-style-global-cycling-at-bob-p))
       (cond
        ((eq last-command 'outline-cycle-overview)
-	;; We just created the overview - now do table of contents
-	;; This can be slow in very large buffers, so indicate action
-	(unless outshine-cycle-silently
+        ;; We just created the overview - now do table of contents
+        ;; This can be slow in very large buffers, so indicate action
+        (unless outshine-cycle-silently
           (message "CONTENTS..."))
-	(save-excursion
-	  ;; Visit all headings and show their offspring
-	  (goto-char (point-max))
-	  (catch 'exit
-	    (while (and (progn (condition-case nil
-				   (outline-previous-visible-heading 1)
-				 (error (goto-char (point-min))))
-			       t)
-			(looking-at outline-regexp))
-	      (show-branches)
-	      (if (bobp) (throw 'exit nil))))
-	  (unless outshine-cycle-silently
+        (save-excursion
+          ;; Visit all headings and show their offspring
+          (goto-char (point-max))
+          (catch 'exit
+            (while (and (progn (condition-case nil
+                                   (outline-previous-visible-heading 1)
+                                 (error (goto-char (point-min))))
+                               t)
+                        (looking-at outline-regexp))
+              (show-branches)
+              (if (bobp) (throw 'exit nil))))
+          (unless outshine-cycle-silently
             (message "CONTENTS...done")))
-	(setq
-	 this-command 'outline-cycle-toc
-	 outshine-current-buffer-visibility-state 'contents))
+        (setq
+         this-command 'outline-cycle-toc
+         outshine-current-buffer-visibility-state 'contents))
        ((eq last-command 'outline-cycle-toc)
-	;; We just showed the table of contents - now show everything
-	(show-all)
-	(unless outshine-cycle-silently
+        ;; We just showed the table of contents - now show everything
+        (show-all)
+        (unless outshine-cycle-silently
           (message "SHOW ALL"))
-	(setq
-	 this-command 'outline-cycle-showall
-	 outshine-current-buffer-visibility-state 'all))
+        (setq
+         this-command 'outline-cycle-showall
+         outshine-current-buffer-visibility-state 'all))
        (t
-	;; Default action: go to overview
-	;; (hide-sublevels 1)
+        ;; Default action: go to overview
+        ;; (hide-sublevels 1)
         (let ((toplevel
                (cond
                 (current-prefix-arg
@@ -1576,46 +1664,46 @@ may have changed."
                  (max 1 (funcall outline-level)))
                 (t 1))))
           (hide-sublevels toplevel))
-	(unless outshine-cycle-silently
+        (unless outshine-cycle-silently
           (message "OVERVIEW"))
-	(setq
-	 this-command 'outline-cycle-overview
-	 outshine-current-buffer-visibility-state 'overview))))
+        (setq
+         this-command 'outline-cycle-overview
+         outshine-current-buffer-visibility-state 'overview))))
 
      ((save-excursion (beginning-of-line 1) (looking-at outline-regexp))
       ;; At a heading: rotate between three different views
       (outline-back-to-heading)
       (let ((goal-column 0) beg eoh eol eos)
-	;; First, some boundaries
-	(save-excursion
-	  (outline-back-to-heading)           (setq beg (point))
-	  (save-excursion (outline-next-line) (setq eol (point)))
-	  (outline-end-of-heading)            (setq eoh (point))
-	  (outline-end-of-subtree)            (setq eos (point)))
-	;; Find out what to do next and set `this-command'
-	(cond
-	 ((= eos eoh)
-	  ;; Nothing is hidden behind this heading
-	  (unless outshine-cycle-silently
+        ;; First, some boundaries
+        (save-excursion
+          (outline-back-to-heading)           (setq beg (point))
+          (save-excursion (outline-next-line) (setq eol (point)))
+          (outline-end-of-heading)            (setq eoh (point))
+          (outline-end-of-subtree)            (setq eos (point)))
+        ;; Find out what to do next and set `this-command'
+        (cond
+         ((= eos eoh)
+          ;; Nothing is hidden behind this heading
+          (unless outshine-cycle-silently
             (message "EMPTY ENTRY")))
-	 ((>= eol eos)
-	  ;; Entire subtree is hidden in one line: open it
-	  (show-entry)
-	  (show-children)
-	  (unless outshine-cycle-silently
+         ((>= eol eos)
+          ;; Entire subtree is hidden in one line: open it
+          (show-entry)
+          (show-children)
+          (unless outshine-cycle-silently
             (message "CHILDREN"))
-	  (setq
-	   this-command 'outline-cycle-children))
-	   ;; outshine-current-buffer-visibility-state 'children))
-	 ((eq last-command 'outline-cycle-children)
-	  ;; We just showed the children, now show everything.
-	  (show-subtree)
-	  (unless outshine-cycle-silently
+          (setq
+           this-command 'outline-cycle-children))
+           ;; outshine-current-buffer-visibility-state 'children))
+         ((eq last-command 'outline-cycle-children)
+          ;; We just showed the children, now show everything.
+          (show-subtree)
+          (unless outshine-cycle-silently
             (message "SUBTREE")))
-	 (t
-	  ;; Default action: hide the subtree.
-	  (hide-subtree)
-	  (unless outshine-cycle-silently
+         (t
+          ;; Default action: hide the subtree.
+          (hide-subtree)
+          (unless outshine-cycle-silently
             (message "FOLDED"))))))
 
      ;; TAB emulation
@@ -1640,11 +1728,11 @@ may have changed."
   if ARG is positive, otherwise write state-change messages."
   (interactive "P")
   (setq outshine-cycle-silently
-	(if (null arg)
-	    (not outshine-cycle-silently)
-	  (> (prefix-numeric-value arg) 0)))
+        (if (null arg)
+            (not outshine-cycle-silently)
+          (> (prefix-numeric-value arg) 0)))
   (message "Silent visibility cycling %s"
-	   (if outshine-cycle-silently "enabled" "disabled")))
+           (if outshine-cycle-silently "enabled" "disabled")))
 
 
 
@@ -1775,38 +1863,38 @@ visible heading when ARG is non-nil, otherwise on the previous
 heading."
   (interactive "P")
   (let* ((com-end-p
-	  (and
-	   outshine-normalized-comment-end
-	   (> (length outshine-normalized-comment-end) 0)))
-	 (comtag (concat ":" outshine-comment-tag ":"))
-	 (comtag-rgxp
-	  (if com-end-p
-	      (concat comtag
-		      " *"
-		      (regexp-quote
-		       outshine-normalized-comment-end)
-		      " *")
-	    (concat comtag " *"))))
+          (and
+           outshine-normalized-comment-end
+           (> (length outshine-normalized-comment-end) 0)))
+         (comtag (concat ":" outshine-comment-tag ":"))
+         (comtag-rgxp
+          (if com-end-p
+              (concat comtag
+                      " *"
+                      (regexp-quote
+                       outshine-normalized-comment-end)
+                      " *")
+            (concat comtag " *"))))
     (unless (outline-on-heading-p)
       (if arg
-	  (outline-previous-visible-heading 1)
-	(outline-previous-heading)))
+          (outline-previous-visible-heading 1)
+        (outline-previous-heading)))
     (end-of-line)
     (cond
      ((looking-back comtag-rgxp)
       (let ((start (match-beginning 0)))
-	(delete-region (1- start) (+ start (length comtag)))))
+        (delete-region (1- start) (+ start (length comtag)))))
      ((and com-end-p
-	   (looking-back
-	    (concat
-	     (regexp-quote outshine-normalized-comment-end) " *")))
+           (looking-back
+            (concat
+             (regexp-quote outshine-normalized-comment-end) " *")))
       (goto-char (match-beginning 0))
        (if (looking-back " ")
-	   (insert (concat comtag " "))
-	 (insert (concat " " comtag))))
+           (insert (concat comtag " "))
+         (insert (concat " " comtag))))
      (t (if (looking-back " ")
-	  (insert comtag)
-	 (insert (concat " " comtag)))))))
+          (insert comtag)
+         (insert (concat " " comtag)))))))
 
 ;; Cycle comment subtrees anyway
 (defun outshine-force-cycle-comment ()
@@ -1851,9 +1939,9 @@ overwritten, and the table is not marked as requiring realignment."
   ;; (outshine-check-before-invisible-edit 'insert)
   (cond
    ((and outshine-use-speed-commands
-	 (setq outshine-speed-command
-	       (run-hook-with-args-until-success
-		'outshine-speed-command-hook (this-command-keys))))
+         (setq outshine-speed-command
+               (run-hook-with-args-until-success
+                'outshine-speed-command-hook (this-command-keys))))
     (cond
      ((commandp outshine-speed-command)
       (setq this-command outshine-speed-command)
@@ -1863,20 +1951,20 @@ overwritten, and the table is not marked as requiring realignment."
      ((and outshine-speed-command (listp outshine-speed-command))
       (eval outshine-speed-command))
      (t (let (outshine-use-speed-commands)
-	  (call-interactively 'outshine-self-insert-command)))))   
+          (call-interactively 'outshine-self-insert-command)))))   
    (t
     (self-insert-command N)
     (if outshine-self-insert-cluster-for-undo
-	(if (not (eq last-command 'outshine-self-insert-command))
-	    (setq outshine-self-insert-command-undo-counter 1)
-	  (if (>= outshine-self-insert-command-undo-counter 20)
-	      (setq outshine-self-insert-command-undo-counter 1)
-	    (and (> outshine-self-insert-command-undo-counter 0)
-		 buffer-undo-list (listp buffer-undo-list)
-		 (not (cadr buffer-undo-list)) ; remove nil entry
-		 (setcdr buffer-undo-list (cddr buffer-undo-list)))
-	    (setq outshine-self-insert-command-undo-counter
-		  (1+ outshine-self-insert-command-undo-counter))))))))
+        (if (not (eq last-command 'outshine-self-insert-command))
+            (setq outshine-self-insert-command-undo-counter 1)
+          (if (>= outshine-self-insert-command-undo-counter 20)
+              (setq outshine-self-insert-command-undo-counter 1)
+            (and (> outshine-self-insert-command-undo-counter 0)
+                 buffer-undo-list (listp buffer-undo-list)
+                 (not (cadr buffer-undo-list)) ; remove nil entry
+                 (setcdr buffer-undo-list (cddr buffer-undo-list)))
+            (setq outshine-self-insert-command-undo-counter
+                  (1+ outshine-self-insert-command-undo-counter))))))))
 
 ;; comply with `delete-selection-mode'
 (put 'outshine-self-insert-command 'delete-selection t)
@@ -1895,6 +1983,20 @@ overwritten, and the table is not marked as requiring realignment."
         (deactivate-mark))
     (message "Not at headline, cannot narrow to subtree")))
 
+(defun outshine-goto ()
+  "Open or reuse *Navi* buffer for fast navigation.
+
+Switch to associated read-only *Navi* buffer for fast and
+convenient buffer navigation without changing visibility state of
+original buffer. Type 'o' (M-x navi-goto-occurrence-other-window)
+to switch fromthe new position in the *Navi* buffer to the same
+position in the original buffer. 
+
+This function is the outshine replacement for `org-goto'."
+  (interactive)
+  (if (require 'navi-mode nil t)
+      (navi-search-and-switch)
+    (message "Install navi-mode.el for this command to work")))
 
 ;;;;; Overridden outline commands
 
@@ -1916,8 +2018,8 @@ This function takes `comment-end' into account."
          (head (substring-no-properties head-with-prop))
          (com-end-p))
     (unless (or (string-match "[ \t]\\'" head)
-		(not (string-match (concat "\\`\\(?:" outline-regexp "\\)")
-				   (concat head " "))))
+                (not (string-match (concat "\\`\\(?:" outline-regexp "\\)")
+                                   (concat head " "))))
       (setq head (concat head " ")))
     (unless (or (not comment-end) (string-equal "" comment-end))
       (setq head (concat head " " outshine-normalized-comment-end))
@@ -2034,6 +2136,1115 @@ i.e. the text following the regexp match until the next space character."
                (imenu-choose-buffer-index
                 "Headline: ")))))
 
+;;;;; Use Outorg for calling Org
+
+;; ;; TEMPLATE A
+;; (defun outshine- ()
+;;   "Call outorg to trigger `org-'."
+;;   (interactive)
+;;   (outshine-use-outorg 'org-))
+
+;; ;; TEMPLATE B
+;; (defun outshine- (&optional arg)
+;;   "Call outorg to trigger `org-'."
+;;   (interactive "P")
+;;   (outshine-use-outorg 'org- nil nil arg))
+
+;; ;; TEMPLATE C
+;; (defun outshine- ()
+;;   "Call outorg to trigger `org-'."
+;;   (interactive)
+;;   (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+;;     (outshine-use-outorg
+;;      'org- nil
+;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; ;; TEMPLATE D
+;; (defun outshine- (&optional arg)
+;;   "Call outorg to trigger `org-'."
+;;   (interactive "P")
+;;   (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+;;     (outshine-use-outorg
+;;      'org- nil
+;;      (unless beg-of-header-p (outshine-pt-rgxps)) arg)))
+
+;; C-c C-a		org-attach
+(defun outshine-attach ()
+  "Call outorg to trigger `org-attach'."
+  (interactive)
+  (outshine-use-outorg 'org-attach))
+
+;; C-c C-b		org-backward-heading-same-level
+
+
+;; C-c C-c		org-ctrl-c-ctrl-c
+(defun outshine-ctrl-c-ctrl-c ()
+  "Call outorg to trigger `org-ctrl-c-ctrl-c'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-ctrl-c-ctrl-c arg
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-d		org-deadline
+(defun outshine-deadline ()
+  "Call outorg to trigger `org-deadline'."
+  (interactive) 
+  (outshine-use-outorg 'org-deadline))
+
+;; C-c C-e		org-export-dispatch
+(defun outshine-export-dispatch ()
+  "Call outorg to trigger `org-export-dispatch'."
+  (interactive)
+  (outshine-use-outorg 'org-export-dispatch))
+
+;; C-c C-f		org-forward-heading-same-level
+;; C-c C-j		org-goto
+;; C-c C-k		org-kill-note-or-show-branches
+
+;; C-c C-l		org-insert-link
+(defun outshine-insert-link ()
+  "Call outorg to trigger `org-insert-link'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-insert-link nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c RET		org-ctrl-c-ret
+
+;; C-c C-o		org-open-at-point
+(defun outshine-open-at-point ()
+  "Call outorg to trigger `org-open-at-point'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-open-at-point nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-q		org-set-tags-command
+(defun outshine-set-tags-command ()
+  "Call outorg to trigger `org-set-tags-command'."
+  (interactive)
+  (outshine-use-outorg 'org-set-tags-command))
+
+;; C-c C-r		org-reveal
+(defun outshine-reveal ()
+  "Call outorg to trigger `org-reveal'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-reveal 'WHOLE-BUFFER-P
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-s		org-schedule
+(defun outshine-schedule ()
+  "Call outorg to trigger `org-schedule'."
+  (interactive)
+  (outshine-use-outorg 'org-schedule))
+
+;; FIXME
+;; Error in post-command-hook (org-add-log-note):
+;; (error "Marker does not point anywhere")
+;; C-c C-t		org-todo
+(defun outshine-todo ()
+  "Call outorg to trigger `org-todo'."
+  (interactive)
+  (outshine-use-outorg 'org-todo))
+
+;; C-c C-v		Prefix Command
+
+;; C-c C-w		org-refile
+(defun outshine-refile ()
+  "Call outorg to trigger `org-refile'."
+  (interactive)
+  (outshine-use-outorg 'org-refile))
+
+;; C-c C-x		Prefix Command
+
+;; C-c C-y		org-evaluate-time-range
+(defun outshine-evaluate-time-range ()
+  "Call outorg to trigger `org-evaluate-time-range'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-evaluate-time-range nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-z		org-add-note
+(defun outshine-add-note ()
+  "Call outorg to trigger `org-add-note'."
+  (interactive)
+  (outshine-use-outorg 'org-add-note))
+
+;; C-c ESC		Prefix Command
+;; C-c C-^		org-up-element
+;; C-c C-_		org-down-element
+
+;; C-c SPC		org-table-blank-field
+(defun outshine-table-blank-field ()
+  "Call outorg to trigger `org-table-blank-field'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-table-blank-field nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c !		org-time-stamp-inactive
+(defun outshine-time-stamp-inactive ()
+  "Call outorg to trigger `org-time-stamp-inactive'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-time-stamp-inactive nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c #		org-update-statistics-cookies
+(defun outshine-update-statistics-cookies ()
+  "Call outorg to trigger `org-update-statistics-cookies'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-update-statistics-cookies arg	; fixme?
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c $		org-archive-subtree
+(defun outshine-archive-subtree ()
+  "Call outorg to trigger `org-archive-subtree'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-archive-subtree arg
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c %		org-mark-ring-push
+(defun outshine-mark-ring-push ()
+  "Call outorg to trigger `org-mark-ring-push'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-mark-ring-push nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c &		org-mark-ring-goto
+(defun outshine-mark-ring-goto ()
+  "Call outorg to trigger `org-mark-ring-goto'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-mark-ring-goto nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c '		org-edit-special
+(defun outshine-edit-special ()
+  "Call outorg to trigger `org-edit-special'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-edit-special nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c *		org-ctrl-c-star
+(defun outshine-ctrl-c-star ()
+  "Call outorg to trigger `org-ctrl-c-star'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-ctrl-c-star nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c +		org-table-sum
+(defun outshine-table-sum ()
+  "Call outorg to trigger `org-table-sum'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-table-sum nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c ,		org-priority
+(defun outshine-priority ()
+  "Call outorg to trigger `org-priority'."
+  (interactive)
+  (outshine-use-outorg 'org-priority))
+
+;; FIXME:
+;; - cursor moves to parent header
+;; - does nothing at bol ?
+;; C-c -		org-ctrl-c-minus
+(defun outshine-ctrl-c-minus ()
+  "Call outorg to trigger `org-ctrl-c-minus'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-ctrl-c-minus nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c .		org-time-stamp
+(defun outshine-time-stamp ()
+  "Call outorg to trigger `org-time-stamp'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-time-stamp nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c /		org-sparse-tree
+(defun outshine-sparse-tree ()
+  "Call outorg to trigger `org-sparse-tree'."
+  (interactive)
+  (outshine-use-outorg 'org-sparse-tree))
+
+;; C-c :		org-toggle-fixed-width
+(defun outshine-toggle-fixed-width ()
+  "Call outorg to trigger `org-toggle-fixed-width'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-toggle-fixed-width nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c ;		org-toggle-comment
+(defun outshine-toggle-comment ()
+  "Call outorg to trigger `org-toggle-comment'."
+  (interactive)
+  (outshine-use-outorg 'org-toggle-comment))
+
+;; C-c <		org-date-from-calendar
+(defun outshine-date-from-calendar ()
+  "Call outorg to trigger `org-date-from-calendar'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-date-from-calendar nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c =		org-table-eval-formula
+(defun outshine-table-eval-formula ()
+  "Call outorg to trigger `org-table-eval-formula'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-table-eval-formula nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c >		org-goto-calendar
+(defun outshine-goto-calendar ()
+  "Call outorg to trigger `org-goto-calendar'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-goto-calendar nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c ?		org-table-field-info
+(defun outshine-table-field-info ()
+  "Call outorg to trigger `org-table-field-info'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-table-field-info nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c @		org-mark-subtree
+(defun outshine-mark-subtree ()
+  "Call outorg to trigger `org-mark-subtree'."
+  (interactive)
+  (outshine-use-outorg 'org-mark-subtree))
+
+;; C-c \		org-match-sparse-tree
+(defun outshine-match-sparse-tree ()
+  "Call outorg to trigger `org-match-sparse-tree'."
+  (interactive)
+  (outshine-use-outorg 'org-match-sparse-tree 'WHOLE-BUFFER-P))
+
+;; C-c ^		org-sort
+(defun outshine-sort ()
+  "Call outorg to trigger `org-sort'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-sort 'WHOLE-BUFFER-P
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c `		org-table-edit-field
+(defun outshine-table-edit-field ()
+  "Call outorg to trigger `org-table-edit-field'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-table-edit-field nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c {		org-table-toggle-formula-debugger
+(defun outshine-table-toggle-formula-debugger ()
+  "Call outorg to trigger `org-table-toggle-formula-debugger'."
+  (interactive)
+  (outshine-use-outorg 'org-table-toggle-formula-debugger))
+
+;; C-c |		org-table-create-or-convert-from-region
+(defun outshine-table-create-or-convert-from-region ()
+  "Call outorg to trigger `org-table-create-or-convert-from-region'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-table-create-or-convert-from-region nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c }		org-table-toggle-coordinate-overlays
+(defun outshine-table-toggle-coordinate-overlays ()
+  "Call outorg to trigger `org-table-toggle-coordinate-overlays'."
+  (interactive)
+  (outshine-use-outorg 'org-table-toggle-coordinate-overlays))
+
+;; C-c ~		org-table-create-with-table.el
+(defun outshine-table-create-with-table.el ()
+  "Call outorg to trigger `org-table-create-with-table.el'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-table-create-with-table.el nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-*		org-list-make-subtree
+(defun outshine-list-make-subtree ()
+  "Call outorg to trigger `org-list-make-subtree'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-list-make-subtree nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c <down>	org-shiftdown
+;; C-c <up>	org-shiftup
+(defun outshine- ()
+  "Call outorg to trigger `org-'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org- nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c TAB		show-children
+;; C-c C-n		outline-next-visible-heading
+;; C-c C-p		outline-previous-visible-heading
+;; C-c C-u		outline-up-heading
+;; C-c ESC		Prefix Command
+;; C-c I		outline-previous-visible-heading
+;; C-c K		outline-next-visible-heading
+;; C-c C-<		outline-promote
+;; C-c C->		outline-demote
+
+;; C-c C-M-l	org-insert-all-links
+(defun outshine-insert-all-links ()
+  "Call outorg to trigger `org-insert-all-links'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-insert-all-links nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c M-b		org-previous-block
+(defun outshine-previous-block ()
+  "Call outorg to trigger `org-previous-block'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-previous-block 'WHOLE-BUFFER-P
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c M-f		org-next-block
+(defun outshine-next-block ()
+  "Call outorg to trigger `org-next-block'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-next-block 'WHOLE-BUFFER-P
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c M-l		org-insert-last-stored-link
+(defun outshine-insert-last-stored-link ()
+  "Call outorg to trigger `org-insert-last-stored-link'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-insert-last-stored-link nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c M-o		tj/mail-subtree
+
+;; C-c M-w		org-copy
+(defun outshine-copy ()
+  "Call outorg to trigger `org-copy'."
+  (interactive)
+  (outshine-use-outorg 'org-copy))
+
+;; C-c C-v C-a	org-babel-sha1-hash
+(defun outshine-babel-sha1-hash ()
+  "Call outorg to trigger `org-babel-sha1-hash'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-babel-sha1-hash nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-v C-b	org-babel-execute-buffer
+(defun outshine-babel-execute-buffer ()
+  "Call outorg to trigger `org-babel-execute-buffer'."
+  (interactive)
+  (outshine-use-outorg 'org-babel-execute-buffer 'WHOLE-BUFFER-P))
+
+;; C-c C-v C-c	org-babel-check-src-block
+(defun outshine-babel-check-src-block ()
+  "Call outorg to trigger `org-babel-check-src-block'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-babel-check-src-block nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-v C-d	org-babel-demarcate-block
+(defun outshine-babel-demarcate-block ()
+  "Call outorg to trigger `org-babel-demarcate-block'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-babel-demarcate-block nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-v C-e	org-babel-execute-maybe
+(defun outshine-babel-execute-maybe ()
+  "Call outorg to trigger `org-babel-execute-maybe'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-babel-execute-maybe nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-v C-f	org-babel-tangle-file
+(defun outshine-babel-tangle-file ()
+  "Call outorg to trigger `org-babel-tangle-file'."
+  (interactive)
+  (outshine-use-outorg 'org-babel-tangle-file 'WHOLE-BUFFER-P))
+
+;; C-c C-v TAB	org-babel-view-src-block-info
+(defun outshine-babel-view-src-block-info ()
+  "Call outorg to trigger `org-babel-view-src-block-info'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-babel-view-src-block-info nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; FIXME:  
+;; split-string: Wrong type argument: stringp, nil
+;; C-c C-v C-j	org-babel-insert-header-arg
+(defun outshine-babel-insert-header-arg ()
+  "Call outorg to trigger `org-babel-insert-header-arg'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-babel-insert-header-arg nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-v C-l	org-babel-load-in-session
+(defun outshine-babel-load-in-session ()
+  "Call outorg to trigger `org-babel-load-in-session'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-babel-load-in-session nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-v C-n	org-babel-next-src-block
+(defun outshine-babel-next-src-block ()
+  "Call outorg to trigger `org-babel-next-src-block'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-babel-next-src-block 'WHOLE-BUFFER-P
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-v C-o	org-babel-open-src-block-result
+(defun outshine-babel-open-src-block-result ()
+  "Call outorg to trigger `org-babel-open-src-block-result'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-babel-open-src-block-result nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-v C-p	org-babel-previous-src-block
+(defun outshine-babel-previous-src-block ()
+  "Call outorg to trigger `org-babel-previous-src-block'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-babel-previous-src-block 'WHOLE-BUFFER-P
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-v C-r	org-babel-goto-named-result
+(defun outshine-babel-goto-named-result ()
+  "Call outorg to trigger `org-babel-goto-named-result'."
+  (interactive)
+  (outshine-use-outorg 'org-babel-goto-named-result
+		       'WHOLE-BUFFER-P))
+
+;; C-c C-v C-s	org-babel-execute-subtree
+(defun outshine-babel-execute-subtree ()
+  "Call outorg to trigger `org-babel-execute-subtree'."
+  (interactive)
+  (outshine-use-outorg 'org-babel-execute-subtree))
+
+;; C-c C-v C-t	org-babel-tangle
+(defun outshine-babel-tangle ()
+  "Call outorg to trigger `org-babel-tangle'."
+  (interactive)
+  (outshine-use-outorg 'org-babel-tangle 'WHOLE-BUFFER-P))
+
+;; C-c C-v C-u	org-babel-goto-src-block-head
+(defun outshine-babel-goto-src-block-head ()
+  "Call outorg to trigger `org-babel-goto-src-block-head'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-babel-goto-src-block-head nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-v C-v	org-babel-expand-src-block
+(defun outshine-babel-expand-src-block ()
+  "Call outorg to trigger `org-babel-expand-src-block'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-babel-expand-src-block nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-v C-x	org-babel-do-key-sequence-in-edit-buffer
+(defun outshine-babel-do-key-sequence-in-edit-buffer ()
+  "Call outorg to trigger `org-babel-do-key-sequence-in-edit-buffer'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-babel-do-key-sequence-in-edit-buffer nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-v C-z	org-babel-switch-to-session
+(defun outshine-babel-switch-to-session ()
+  "Call outorg to trigger `org-babel-switch-to-session'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-babel-switch-to-session nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-v ESC	Prefix Command
+;; C-c C-v I	org-babel-view-src-block-info
+;; C-c C-v a	org-babel-sha1-hash
+;; C-c C-v b	org-babel-execute-buffer
+;; C-c C-v c	org-babel-check-src-block
+;; C-c C-v d	org-babel-demarcate-block
+;; C-c C-v e	org-babel-execute-maybe
+;; C-c C-v f	org-babel-tangle-file
+
+;; C-c C-v g	org-babel-goto-named-src-block
+(defun outshine-babel-goto-named-src-block ()
+  "Call outorg to trigger `org-babel-goto-named-src-block'."
+  (interactive)
+  (outshine-use-outorg 'org-babel-goto-named-src-block
+		       'WHOLE-BUFFER-P))
+
+;; C-c C-v h	org-babel-describe-bindings
+(defun outshine-babel-describe-bindings ()
+  "Call outorg to trigger `org-babel-describe-bindings'."
+  (interactive)
+  (outshine-use-outorg 'org-babel-describe-bindings))
+
+;; C-c C-v i	org-babel-lob-ingest
+(defun outshine-babel-lob-ingest ()
+  "Call outorg to trigger `org-babel-lob-ingest'."
+  (interactive)
+  (outshine-use-outorg 'org-babel-lob-ingest 'WHOLE-BUFFER-P))
+
+;; C-c C-v j	org-babel-insert-header-arg
+
+;; C-c C-v k	org-babel-remove-result-one-or-many
+(defun outshine-babel-remove-result-one-or-many (&optional arg)
+  "Call outorg to trigger `org-babel-remove-result-one-or-many'."
+  (interactive "P")
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-babel-remove-result-one-or-many arg
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-v l	org-babel-load-in-session
+;; C-c C-v n	org-babel-next-src-block
+;; C-c C-v o	org-babel-open-src-block-result
+;; C-c C-v p	org-babel-previous-src-block
+;; C-c C-v r	org-babel-goto-named-result
+;; C-c C-v s	org-babel-execute-subtree
+;; C-c C-v t	org-babel-tangle
+;; C-c C-v u	org-babel-goto-src-block-head
+;; C-c C-v v	org-babel-expand-src-block
+;; C-c C-v x	org-babel-do-key-sequence-in-edit-buffer
+
+;; C-c C-v z	org-babel-switch-to-session-with-code
+(defun outshine-babel-switch-to-session-with-code ()
+  "Call outorg to trigger `org-babel-switch-to-session-with-code'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-babel-switch-to-session-with-code nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-x C-a	org-archive-subtree-default
+(defun outshine-archive-subtree-default ()
+  "Call outorg to trigger `org-archive-subtree-default'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-archive-subtree-default nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-x C-b	org-toggle-checkbox
+(defun outshine-toggle-checkbox ()
+  "Call outorg to trigger `org-toggle-checkbox'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-toggle-checkbox nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-x C-c	org-columns
+(defun outshine-columns ()
+  "Call outorg to trigger `org-columns'."
+  (interactive)
+  (outshine-use-outorg 'org-columns 'WHOLE-BUFFER-P))
+
+;; C-c C-x C-d	org-clock-display
+(defun outshine-clock-display ()
+  "Call outorg to trigger `org-clock-display'."
+  (interactive)
+  (outshine-use-outorg 'org-clock-display 'WHOLE-BUFFER-P))
+
+;; C-c C-x C-f	org-emphasize
+(defun outshine-emphasize ()
+  "Call outorg to trigger `org-emphasize'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-emphasize nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-x TAB	org-clock-in
+(defun outshine-clock-in ()
+  "Call outorg to trigger `org-clock-in'."
+  (interactive)
+  (outshine-use-outorg 'org-clock-in))
+
+;; C-c C-x C-j	org-clock-goto
+(defun outshine-clock-goto ()
+  "Call outorg to trigger `org-clock-goto'."
+  (interactive)
+  (outshine-use-outorg 'org-clock-goto 'WHOLE-BUFFER-P))
+
+;; C-c C-x C-l	org-preview-latex-fragment
+(defun outshine-preview-latex-fragment ()
+  "Call outorg to trigger `org-preview-latex-fragment'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-preview-latex-fragment nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-x RET	Prefix Command
+
+;; C-c C-x C-n	org-next-link
+(defun outshine-next-link ()
+  "Call outorg to trigger `org-next-link'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-next-link 'WHOLE-BUFFER-P
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-x C-o	org-clock-out
+(defun outshine-clock-out ()
+  "Call outorg to trigger `org-clock-out'."
+  (interactive)
+  (outshine-use-outorg 'org-clock-out 'WHOLE-BUFFER-P))
+
+;; C-c C-x C-p	org-previous-link
+(defun outshine-previous-link ()
+  "Call outorg to trigger `org-previous-link'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-previous-link 'WHOLE-BUFFER-P
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-x C-q	org-clock-cancel
+(defun outshine-clock-cancel ()
+  "Call outorg to trigger `org-clock-cancel'."
+  (interactive)
+  (outshine-use-outorg 'org-clock-cancel 'WHOLE-BUFFER-P))
+
+;; C-c C-x C-r	org-clock-report
+(defun outshine-clock-report ()
+  "Call outorg to trigger `org-clock-report'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-clock-report 'WHOLE-BUFFER-P
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-x C-s	org-advertized-archive-subtree
+(defun outshine-advertized-archive-subtree (&optional arg)
+  "Call outorg to trigger `org-advertized-archive-subtree'."
+  (interactive "P")
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-advertized-archive-subtree arg
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-x C-t	org-toggle-time-stamp-overlays
+(defun outshine-toggle-time-stamp-overlays ()
+  "Call outorg to trigger `org-toggle-time-stamp-overlays'."
+  (interactive)
+  (outshine-use-outorg 'org-toggle-time-stamp-overlays
+		       'WHOLE-BUFFER-P))
+
+;; C-c C-x C-u	org-dblock-update
+(defun outshine-dblock-update (&optional arg)
+  "Call outorg to trigger `org-dblock-update'."
+  (interactive "P")
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-dblock-update arg
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-x C-v	org-toggle-inline-images
+(defun outshine-toggle-inline-images ()
+  "Call outorg to trigger `org-toggle-inline-images'."
+  (interactive)
+  (outshine-use-outorg 'org-toggle-inline-images 'WHOLE-BUFFER-P))
+
+;; C-c C-x C-w	org-cut-special
+(defun outshine-cut-special ()
+  "Call outorg to trigger `org-cut-special'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-cut-special 'WHOLE-BUFFER-P
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; FIXME: whole buffer?
+;; C-c C-x C-x	org-clock-in-last
+(defun outshine-clock-in-last ()
+  "Call outorg to trigger `org-clock-in-last'."
+  (interactive)
+  (outshine-use-outorg 'org-clock-in-last))
+
+;; C-c C-x C-y	org-paste-special
+(defun outshine-paste-special ()
+  "Call outorg to trigger `org-paste-special'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-paste-special 'WHOLE-BUFFER-P
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; FIXME: whole buffer?
+;; C-c C-x C-z	org-resolve-clocks
+(defun outshine-resolve-clocks ()
+  "Call outorg to trigger `org-resolve-clocks'."
+  (interactive)
+  (outshine-use-outorg 'org-resolve-clocks))
+
+;; C-c C-x ESC	Prefix Command
+;; C-c C-x !	org-reload
+(defun outshine-reload ()
+  "Call outorg to trigger `org-reload'."
+  (interactive)
+  (outshine-use-outorg 'org-reload))
+
+;; FIXME: does not exist?
+;; C-c C-x ,	org-timer-pause-or-continue
+;; C-c C-x -	org-timer-item
+(defun outshine-timer-item ()
+  "Call outorg to trigger `org-timer-item'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-timer-item nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-x .	org-timer
+(defun outshine-timer ()
+  "Call outorg to trigger `org-timer'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-timer nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; FIXME: whole buffer?
+;; C-c C-x 0	org-timer-start
+(defun outshine-timer-start ()
+  "Call outorg to trigger `org-timer-start'."
+  (interactive)
+  (outshine-use-outorg 'org-timer-start))
+
+;; FIXME: whole buffer?
+;; C-c C-x :	org-timer-cancel-timer
+(defun outshine-timer-cancel-timer ()
+  "Call outorg to trigger `org-timer-cancel-timer'."
+  (interactive)
+  (outshine-use-outorg 'org-timer-cancel-timer))
+
+;; FIXME: whole buffer?
+;; C-c C-x ;	org-timer-set-timer
+(defun outshine-timer-set-timer ()
+  "Call outorg to trigger `org-timer-set-timer'."
+  (interactive)
+  (outshine-use-outorg 'org-timer-set-timer))
+
+;; C-c C-x <	org-agenda-set-restriction-lock
+(defun outshine-agenda-set-restriction-lock ()
+  "Call outorg to trigger `org-agenda-set-restriction-lock'."
+  (interactive)
+  (outshine-use-outorg 'org-agenda-set-restriction-lock
+		       'WHOLE-BUFFER-P))
+
+;; C-c C-x >	org-agenda-remove-restriction-lock
+(defun outshine-agenda-remove-restriction-lock ()
+  "Call outorg to trigger `org-agenda-remove-restriction-lock'."
+  (interactive)
+  (outshine-use-outorg 'org-agenda-remove-restriction-lock
+		       'WHOLE-BUFFER-P))
+
+;; C-c C-x A	org-archive-to-archive-sibling
+(defun outshine-archive-to-archive-sibling ()
+  "Call outorg to trigger `org-archive-to-archive-sibling'."
+  (interactive)
+  (outshine-use-outorg 'org-archive-to-archive-sibling
+		       'WHOLE-BUFFER-P))
+
+;; C-c C-x D	org-shiftmetadown
+;; C-c C-x E	org-inc-effort
+(defun outshine-inc-effort ()
+  "Call outorg to trigger `org-inc-effort'."
+  (interactive)
+  (outshine-use-outorg 'org-inc-effort))
+
+;; C-c C-x G	org-feed-goto-inbox
+(defun outshine-feed-goto-inbox ()
+  "Call outorg to trigger `org-feed-goto-inbox'."
+  (interactive)
+  (outshine-use-outorg 'org-feed-goto-inbox 'WHOLE-BUFFER-P))
+
+;; C-c C-x L	org-shiftmetaleft
+
+;; C-c C-x M	org-insert-todo-heading
+(defun outshine-insert-todo-heading (&optional arg)
+  "Call outorg to trigger `org-insert-todo-heading'."
+  (interactive "P")
+  (outshine-use-outorg 'org-insert-todo-heading
+		       (= (prefix-numeric-value arg) 16)))
+
+;; C-c C-x P	org-set-property-and-value
+(defun outshine-set-property-and-value ()
+  "Call outorg to trigger `org-set-property-and-value'."
+  (interactive)
+  (outshine-use-outorg 'org-set-property-and-value))
+
+;; C-c C-x R	org-shiftmetaright
+;; C-c C-x U	org-shiftmetaup
+
+;; C-c C-x [	org-reftex-citation
+(defun outshine-reftex-citation ()
+  "Call outorg to trigger `org-reftex-citation'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-reftex-citation 'WHOLE-BUFFER-P
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-x \	org-toggle-pretty-entities
+(defun outshine-toggle-pretty-entities ()
+  "Call outorg to trigger `org-toggle-pretty-entities'."
+  (interactive)
+  (outshine-use-outorg 'org-toggle-pretty-entities
+		       'WHOLE-BUFFER-P))
+;; FIXME: whole buffer?
+;; C-c C-x _	org-timer-stop
+(defun outshine-timer-stop ()
+  "Call outorg to trigger `org-timer-stop'."
+  (interactive)
+  (outshine-use-outorg 'org-timer-stop))
+
+;; C-c C-x a	org-toggle-archive-tag
+(defun outshine-toggle-archive-tag ()
+  "Call outorg to trigger `org-toggle-archive-tag'."
+  (interactive)
+  (outshine-use-outorg 'org-toggle-archive-tag))
+
+;; C-c C-x b	org-tree-to-indirect-buffer
+(defun outshine-tree-to-indirect-buffer (&optional arg)
+  "Call outorg to trigger `org-tree-to-indirect-buffer'."
+  (interactive "P")
+  (outshine-use-outorg 'org-tree-to-indirect-buffer arg))
+
+;; C-c C-x c	org-clone-subtree-with-time-shift
+(defun outshine-clone-subtree-with-time-shift ()
+  "Call outorg to trigger `org-clone-subtree-with-time-shift'."
+  (interactive)
+  (outshine-use-outorg 'org-clone-subtree-with-time-shift))
+
+;; C-c C-x d	org-insert-drawer
+(defun outshine-insert-drawer ()
+  "Call outorg to trigger `org-insert-drawer'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-insert-drawer nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-x e	org-set-effort
+(defun outshine-set-effort ()
+  "Call outorg to trigger `org-set-effort'."
+  (interactive)
+  (outshine-use-outorg 'org-set-effort))
+
+;; C-c C-x f	org-footnote-action
+(defun outshine-footnote-action ()
+  "Call outorg to trigger `org-footnote-action'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-footnote-action 'WHOLE-BUFFER-P
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-x g	org-feed-update-all
+(defun outshine-feed-update-all ()
+  "Call outorg to trigger `org-feed-update-all'."
+  (interactive)
+  (outshine-use-outorg 'org-feed-update-all))
+
+;; C-c C-x i	org-insert-columns-dblock
+(defun outshine-insert-columns-dblock ()
+  "Call outorg to trigger `org-insert-columns-dblock'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-insert-columns-dblock nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-x l	org-metaleft
+;; C-c C-x m	org-meta-return
+
+;; C-c C-x o	org-toggle-ordered-property
+(defun outshine-toggle-ordered-property ()
+  "Call outorg to trigger `org-toggle-ordered-property'."
+  (interactive)
+  (outshine-use-outorg 'org-toggle-ordered-property))
+
+;; C-c C-x p	org-set-property
+(defun outshine-set-property ()
+  "Call outorg to trigger `org-set-property'."
+  (interactive)
+  (outshine-use-outorg 'org-set-property))
+
+;; C-c C-x q	org-toggle-tags-groups
+(defun outshine-toggle-tags-groups ()
+  "Call outorg to trigger `org-toggle-tags-groups'."
+  (interactive)
+  (outshine-use-outorg 'org-toggle-tags-groups))
+
+;; C-c C-x r	org-metaright
+;; C-c C-x u	org-metaup
+
+;; C-c C-x v	org-copy-visible
+(defun outshine-copy-visible ()
+  "Call outorg to trigger `org-copy-visible'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-copy-visible 'WHOLE-BUFFER-P
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-x <left>	org-shiftcontrolleft
+;; C-c C-x <right>			org-shiftcontrolright
+
+;; C-c M-#		outorg-edit-as-org
+;; C-c M-+		outorg-edit-comments-and-propagate-changes
+;; C-c M-a		show-all
+;; C-c M-c		hide-entry
+;; C-c M-e		show-entry
+;; C-c M-k		show-branches
+;; C-c M-p		outshine-imenu
+;; C-c M-q		outline-hide-sublevels
+;; C-c M-t		hide-body
+;; C-c M-u		outline-up-heading
+
+;; C-c C-v C-M-h	org-babel-mark-block
+(defun outshine-babel-mark-block ()
+  "Call outorg to trigger `org-babel-mark-block'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-babel-mark-block nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+
+;; C-c C-x C-M-v	org-redisplay-inline-images
+(defun outshine-redisplay-inline-images ()
+  "Call outorg to trigger `org-redisplay-inline-images'."
+  (interactive)
+  (outshine-use-outorg 'org-redisplay-inline-images
+		       'WHOLE-BUFFER-P))
+
+;; C-c C-x M-w	org-copy-special
+(defun outshine-copy-special ()
+  "Call outorg to trigger `org-copy-special'."
+  (interactive)
+  (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
+    (outshine-use-outorg
+     'org-copy-special nil
+     (unless beg-of-header-p (outshine-pt-rgxps)))))
+
+;; C-c C-x RET g	org-mobile-pull
+(defun outshine-mobile-pull ()
+  "Call outorg to trigger `org-mobile-pull'."
+  (interactive)
+  (outshine-use-outorg 'org-mobile-pull))
+
+;; C-c C-x RET p	org-mobile-push
+(defun outshine-mobile-push ()
+  "Call outorg to trigger `org-mobile-push'."
+  (interactive)
+  (outshine-use-outorg 'org-mobile-push))
+
+;; <remap> <backward-paragraph>	org-backward-paragraph
+;; <remap> <comment-dwim>		org-comment-dwim
+;; <remap> <delete-backward-char>	org-delete-backward-char
+;; <remap> <delete-char>		org-delete-char
+;; <remap> <forward-paragraph>	org-forward-paragraph
+;; <remap> <open-line>		org-open-line
+;; <remap> <outline-backward-same-level>
+;; 				org-backward-heading-same-level
+;; <remap> <outline-demote>	org-demote-subtree
+;; <remap> <outline-forward-same-level>
+;; 				org-forward-heading-same-level
+;; <remap> <outline-insert-heading>
+;; 				org-ctrl-c-ret
+;; <remap> <outline-mark-subtree>	org-mark-subtree
+;; <remap> <outline-promote>	org-promote-subtree
+;; <remap> <self-insert-command>	org-self-insert-command
+;; <remap> <show-branches>		org-kill-note-or-show-branches
+;; <remap> <show-subtree>		org-show-subtree
+;; <remap> <transpose-words>	org-transpose-words
+
 
 ;;; Menus and Keybindings
 
@@ -2113,7 +3324,8 @@ i.e. the text following the regexp match until the next space character."
      ["Edit As Org" outorg-edit-as-org t]))
 
 ;; add "Outshine" menu item
-(easy-menu-add outshine-menu outline-minor-mode-map)
+
+;; (easy-menu-add outshine-menu outline-minor-mode-map)
 ;; get rid of "Outline" menu item
 (define-key outline-minor-mode-map [menu-bar outline] 'undefined)
 
@@ -2144,6 +3356,7 @@ i.e. the text following the regexp match until the next space character."
    (not (outline-on-heading-p))
    outshine-org-style-global-cycling-at-bob-p)
   (outline-on-heading-p)))
+
 ;; works on the console too
 (define-key
   outline-minor-mode-map (kbd "M-TAB") 'outshine-cycle-buffer)
@@ -2186,7 +3399,6 @@ i.e. the text following the regexp match until the next space character."
   ;; outline-minor-mode-map (kbd "M-<down>")
   ;; outline-minor-mode-map (kbd "<M-down>")
   'outline-next-visible-heading)
-
 
 ;;;;; Other Keybindings
 
@@ -2235,7 +3447,260 @@ i.e. the text following the regexp match until the next space character."
   (define-key map "`" 'outorg-edit-comments-and-propagate-changes)
   ;; best used with prefix-key 'M-#'
   (define-key map "\M-+" 'outorg-edit-comments-and-propagate-changes)
-  (define-key map "+" 'outorg-edit-comments-and-propagate-changes))
+  (define-key map "+" 'outorg-edit-comments-and-propagate-changes)
+  ;; outshine-use-outorg commands:
+  ;; best used with prefix-key 'C-c'
+  (define-key map "\C-j" 'outshine-goto)
+  (define-key map "\C-o" 'outshine-open-at-point)
+
+    ;; ("g" . (outshine-use-outorg 'org-refile))
+    ;; (" " . (outshine-use-outorg
+    ;;      (lambda ()
+    ;;        (message
+    ;;         "%s" (substring-no-properties
+    ;;               (org-display-outline-path)))
+    ;;         (sit-for 1))
+    ;;      'WHOLE-BUFFER-P))
+    ;; ("=" . (outshine-use-outorg 'org-columns))
+    ;; ("^" . (outshine-use-outorg 'org-sort))
+    ;; ;; ("a" . (outshine-use-outorg
+    ;; ;;           'org-archive-subtree-default-with-confirmation))
+    ;; ("I" . (outshine-use-outorg 'org-clock-in))
+    ;; ("O" . outshine-clock-out)
+    ;; ("Meta Data Editing")
+    ;; ("t" . (outshine-use-outorg 'org-todo))
+    ;; ("," . (outshine-use-outorg 'org-priority))
+    ;; ("0" . (outshine-use-outorg (lambda () (org-priority ?\ ))))
+    ;; ("1" . (outshine-use-outorg (lambda () (org-priority ?A))))
+    ;; ("2" . (outshine-use-outorg (lambda () (org-priority ?B))))
+    ;; ("3" . (outshine-use-outorg (lambda () (org-priority ?C))))
+    ;; (":" . (outshine-use-outorg 'org-set-tags-command))
+    ;; ("e" . (outshine-use-outorg 'org-set-effort))
+    ;; ("E" . (outshine-use-outorg 'org-inc-effort))
+
+;; C-c C-a		org-attach
+;; C-c C-b		org-backward-heading-same-level
+;; C-c C-c		org-ctrl-c-ctrl-c
+;; C-c C-d		org-deadline
+;; C-c C-e		org-export-dispatch
+;; C-c C-f		org-forward-heading-same-level
+;; C-c C-j		org-goto
+;; C-c C-k		org-kill-note-or-show-branches
+;; C-c C-l		org-insert-link
+;; C-c RET		org-ctrl-c-ret
+;; C-c C-o		org-open-at-point
+;; C-c C-q		org-set-tags-command
+;; C-c C-r		org-reveal
+;; C-c C-s		org-schedule
+;; C-c C-t		org-todo
+;; C-c C-v		Prefix Command
+;; C-c C-w		org-refile
+;; C-c C-x		Prefix Command
+;; C-c C-y		org-evaluate-time-range
+;; C-c C-z		org-add-note
+;; C-c ESC		Prefix Command
+;; C-c C-^		org-up-element
+;; C-c C-_		org-down-element
+;; C-c SPC		org-table-blank-field
+;; C-c !		org-time-stamp-inactive
+;; C-c #		org-update-statistics-cookies
+;; C-c $		org-archive-subtree
+;; C-c %		org-mark-ring-push
+;; C-c &		org-mark-ring-goto
+;; C-c '		org-edit-special
+;; C-c *		org-ctrl-c-star
+;; C-c +		org-table-sum
+;; C-c ,		org-priority
+;; C-c -		org-ctrl-c-minus
+;; C-c .		org-time-stamp
+;; C-c /		org-sparse-tree
+;; C-c :		org-toggle-fixed-width
+;; C-c ;		org-toggle-comment
+;; C-c <		org-date-from-calendar
+;; C-c =		org-table-eval-formula
+;; C-c >		org-goto-calendar
+;; C-c ?		org-table-field-info
+;; C-c @		org-mark-subtree
+;; C-c \		org-match-sparse-tree
+;; C-c ^		org-sort
+;; C-c `		org-table-edit-field
+;; C-c {		org-table-toggle-formula-debugger
+;; C-c |		org-table-create-or-convert-from-region
+;; C-c }		org-table-toggle-coordinate-overlays
+;; C-c ~		org-table-create-with-table.el
+;; C-c C-*		org-list-make-subtree
+;; C-c <down>	org-shiftdown
+;; C-c <up>	org-shiftup
+
+;; <remap> <backward-paragraph>	org-backward-paragraph
+;; <remap> <comment-dwim>		org-comment-dwim
+;; <remap> <delete-backward-char>	org-delete-backward-char
+;; <remap> <delete-char>		org-delete-char
+;; <remap> <forward-paragraph>	org-forward-paragraph
+;; <remap> <open-line>		org-open-line
+;; <remap> <outline-backward-same-level>
+;; 				org-backward-heading-same-level
+;; <remap> <outline-demote>	org-demote-subtree
+;; <remap> <outline-forward-same-level>
+;; 				org-forward-heading-same-level
+;; <remap> <outline-insert-heading>
+;; 				org-ctrl-c-ret
+;; <remap> <outline-mark-subtree>	org-mark-subtree
+;; <remap> <outline-promote>	org-promote-subtree
+;; <remap> <self-insert-command>	org-self-insert-command
+;; <remap> <show-branches>		org-kill-note-or-show-branches
+;; <remap> <show-subtree>		org-show-subtree
+;; <remap> <transpose-words>	org-transpose-words
+
+;; C-c TAB		show-children
+;; C-c C-n		outline-next-visible-heading
+;; C-c C-p		outline-previous-visible-heading
+;; C-c C-u		outline-up-heading
+;; C-c ESC		Prefix Command
+;; C-c I		outline-previous-visible-heading
+;; C-c K		outline-next-visible-heading
+;; C-c C-<		outline-promote
+;; C-c C->		outline-demote
+
+;; C-c C-M-l	org-insert-all-links
+;; C-c M-b		org-previous-block
+;; C-c M-f		org-next-block
+;; C-c M-l		org-insert-last-stored-link
+;; C-c M-o		tj/mail-subtree
+;; C-c M-w		org-copy
+
+;; C-c C-v C-a	org-babel-sha1-hash
+;; C-c C-v C-b	org-babel-execute-buffer
+;; C-c C-v C-c	org-babel-check-src-block
+;; C-c C-v C-d	org-babel-demarcate-block
+;; C-c C-v C-e	org-babel-execute-maybe
+;; C-c C-v C-f	org-babel-tangle-file
+;; C-c C-v TAB	org-babel-view-src-block-info
+;; C-c C-v C-j	org-babel-insert-header-arg
+;; C-c C-v C-l	org-babel-load-in-session
+;; C-c C-v C-n	org-babel-next-src-block
+;; C-c C-v C-o	org-babel-open-src-block-result
+;; C-c C-v C-p	org-babel-previous-src-block
+;; C-c C-v C-r	org-babel-goto-named-result
+;; C-c C-v C-s	org-babel-execute-subtree
+;; C-c C-v C-t	org-babel-tangle
+;; C-c C-v C-u	org-babel-goto-src-block-head
+;; C-c C-v C-v	org-babel-expand-src-block
+;; C-c C-v C-x	org-babel-do-key-sequence-in-edit-buffer
+;; C-c C-v C-z	org-babel-switch-to-session
+;; C-c C-v ESC	Prefix Command
+;; C-c C-v I	org-babel-view-src-block-info
+;; C-c C-v a	org-babel-sha1-hash
+;; C-c C-v b	org-babel-execute-buffer
+;; C-c C-v c	org-babel-check-src-block
+;; C-c C-v d	org-babel-demarcate-block
+;; C-c C-v e	org-babel-execute-maybe
+;; C-c C-v f	org-babel-tangle-file
+;; C-c C-v g	org-babel-goto-named-src-block
+;; C-c C-v h	org-babel-describe-bindings
+;; C-c C-v i	org-babel-lob-ingest
+;; C-c C-v j	org-babel-insert-header-arg
+;; C-c C-v k	org-babel-remove-result-one-or-many
+;; C-c C-v l	org-babel-load-in-session
+;; C-c C-v n	org-babel-next-src-block
+;; C-c C-v o	org-babel-open-src-block-result
+;; C-c C-v p	org-babel-previous-src-block
+;; C-c C-v r	org-babel-goto-named-result
+;; C-c C-v s	org-babel-execute-subtree
+;; C-c C-v t	org-babel-tangle
+;; C-c C-v u	org-babel-goto-src-block-head
+;; C-c C-v v	org-babel-expand-src-block
+;; C-c C-v x	org-babel-do-key-sequence-in-edit-buffer
+;; C-c C-v z	org-babel-switch-to-session-with-code
+
+;; C-c C-x C-a	org-archive-subtree-default
+;; C-c C-x C-b	org-toggle-checkbox
+;; C-c C-x C-c	org-columns
+;; C-c C-x C-d	org-clock-display
+;; C-c C-x C-f	org-emphasize
+;; C-c C-x TAB	org-clock-in
+;; C-c C-x C-j	org-clock-goto
+;; C-c C-x C-l	org-preview-latex-fragment
+;; C-c C-x RET	Prefix Command
+;; C-c C-x C-n	org-next-link
+;; C-c C-x C-o	org-clock-out
+;; C-c C-x C-p	org-previous-link
+;; C-c C-x C-q	org-clock-cancel
+;; C-c C-x C-r	org-clock-report
+;; C-c C-x C-s	org-advertized-archive-subtree
+;; C-c C-x C-t	org-toggle-time-stamp-overlays
+;; C-c C-x C-u	org-dblock-update
+;; C-c C-x C-v	org-toggle-inline-images
+;; C-c C-x C-w	org-cut-special
+;; C-c C-x C-x	org-clock-in-last
+;; C-c C-x C-y	org-paste-special
+;; C-c C-x C-z	org-resolve-clocks
+;; C-c C-x ESC	Prefix Command
+;; C-c C-x !	org-reload
+;; C-c C-x ,	org-timer-pause-or-continue
+;; C-c C-x -	org-timer-item
+;; C-c C-x .	org-timer
+;; C-c C-x 0	org-timer-start
+;; C-c C-x :	org-timer-cancel-timer
+;; C-c C-x ;	org-timer-set-timer
+;; C-c C-x <	org-agenda-set-restriction-lock
+;; C-c C-x >	org-agenda-remove-restriction-lock
+;; C-c C-x A	org-archive-to-archive-sibling
+;; C-c C-x D	org-shiftmetadown
+;; C-c C-x E	org-inc-effort
+;; C-c C-x G	org-feed-goto-inbox
+;; C-c C-x L	org-shiftmetaleft
+;; C-c C-x M	org-insert-todo-heading
+;; C-c C-x P	org-set-property-and-value
+;; C-c C-x R	org-shiftmetaright
+;; C-c C-x U	org-shiftmetaup
+;; C-c C-x [	org-reftex-citation
+;; C-c C-x \	org-toggle-pretty-entities
+;; C-c C-x _	org-timer-stop
+;; C-c C-x a	org-toggle-archive-tag
+;; C-c C-x b	org-tree-to-indirect-buffer
+;; C-c C-x c	org-clone-subtree-with-time-shift
+;; C-c C-x d	org-insert-drawer
+;; C-c C-x e	org-set-effort
+;; C-c C-x f	org-footnote-action
+;; C-c C-x g	org-feed-update-all
+;; C-c C-x i	org-insert-columns-dblock
+;; C-c C-x l	org-metaleft
+;; C-c C-x m	org-meta-return
+;; C-c C-x o	org-toggle-ordered-property
+;; C-c C-x p	org-set-property
+;; C-c C-x q	org-toggle-tags-groups
+;; C-c C-x r	org-metaright
+;; C-c C-x u	org-metaup
+;; C-c C-x v	org-copy-visible
+;; C-c C-x <left>	org-shiftcontrolleft
+;; C-c C-x <right>			org-shiftcontrolright
+
+;; C-c M-#		outorg-edit-as-org
+;; C-c M-+		outorg-edit-comments-and-propagate-changes
+;; C-c M-a		show-all
+;; C-c M-c		hide-entry
+;; C-c M-e		show-entry
+;; C-c M-k		show-branches
+;; C-c M-p		outshine-imenu
+;; C-c M-q		outline-hide-sublevels
+;; C-c M-t		hide-body
+;; C-c M-u		outline-up-heading
+
+;; C-c C-v C-M-h	org-babel-mark-block
+
+;; C-c C-x C-M-v	org-redisplay-inline-images
+;; C-c C-x M-w	org-copy-special
+
+;; C-c C-x RET g	org-mobile-pull
+;; C-c C-x RET p	org-mobile-push
+
+;; outshine-use-outorg commands:
+;; best used with prefix-key 'M-#'
+(define-key map "\M-j" 'outshine-goto)
+;; ;; works currently only for headlines at point, i.e. links
+(define-key map "\M-o" 'outshine-open-at-point)
+)
 
 ;;; Run hooks and provide
 
