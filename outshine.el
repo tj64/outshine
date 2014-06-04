@@ -2309,7 +2309,7 @@ i.e. the text following the regexp match until the next space character."
   (interactive)
   (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
     (outshine-use-outorg
-     'org-update-statistics-cookies arg	; fixme?
+     'org-update-statistics-cookies nil
      (unless beg-of-header-p (outshine-pt-rgxps)))))
 
 ;; C-c $		org-archive-subtree
@@ -2318,7 +2318,7 @@ i.e. the text following the regexp match until the next space character."
   (interactive)
   (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
     (outshine-use-outorg
-     'org-archive-subtree arg
+     'org-archive-subtree nil
      (unless beg-of-header-p (outshine-pt-rgxps)))))
 
 ;; C-c %		org-mark-ring-push
@@ -3406,157 +3406,32 @@ i.e. the text following the regexp match until the next space character."
 
 ;;;;; Other Keybindings
 
+;;;;;; [Prefix]
+
+;; Put this in your init.el. The prefix can only be changed before
+;; outline (minor) mode is loaded!
+
+;; #+begin_example
+;;  (defvar outline-minor-mode-prefix "\M-#")
+;; #+end_example
+
+;;;;;; [Subprefix]
+
 ;; Set the outline-minor-mode-prefix key in your init-file
 ;; before loading outline-mode 
 (let ((map (lookup-key outline-minor-mode-map outline-minor-mode-prefix)))
-
   ;; define sub-prefix
   ;; 1st sub-prefix for 'C-c' prefix, 2nd for 'M-#' prefix
   ;; (define-key map (kbd "C-v") nil)
   (define-key map (kbd "M-+") nil)
-
   ;; (define-key map (kbd "C-x") nil)
   (define-key map (kbd "M-#") nil)
 
-  ;; FIXME: aren't the following 4 bindings from `outline-mode-easy-bindings'
-  ;; violating Emacs conventions and might break user settings?
-  (outshine-define-key-with-fallback
-   outline-minor-mode-map (kbd "J")
-   (outline-hide-more) (outline-on-heading-p))
-  (outshine-define-key-with-fallback
-   outline-minor-mode-map (kbd "L")
-   (outline-show-more) (outline-on-heading-p))
-  (define-key map (kbd "I") 'outline-previous-visible-heading)
-  (define-key map (kbd "K") 'outline-next-visible-heading)
+;;;;;; [M-# Punctuation]
 
-  ;; NAVIGATION AND VISIBILITY CYCLING
-  ;; 1st binding for 'C-c' prefix, 2nd for 'M-#' prefix
-  ;; (define-key map (kbd "C-t") 'hide-body)
-  (define-key map (kbd "M-t") 'hide-body)
-
-  ;; (define-key map (kbd "C-a") 'show-all)
-  (define-key map (kbd "M-a") 'show-all)
-
-  ;; (define-key map (kbd "C-c") 'hide-entry)
-  (define-key map (kbd "M-c") 'hide-entry)
-
-  ;; (define-key map (kbd "C-e") 'show-entry)
-  (define-key map (kbd "M-e") 'show-entry)
-
-  ;; (define-key map (kbd "C-l") 'hide-leaves)
-  (define-key map (kbd "M-l") 'hide-leaves)
-
-  ;; (define-key map (kbd "C-k") 'show-branches)
-  (define-key map (kbd "M-k") 'show-branches)
-
-  ;; (define-key map (kbd "C-q") 'outline-hide-sublevels)
-  (define-key map (kbd "M-q") 'outline-hide-sublevels)
-
-  ;; (define-key map (kbd "C-o") 'outline-hide-other)
-  (define-key map (kbd "M-o") 'outline-hide-other)
-
-  ;; (define-key map (kbd "C-u") 'outline-up-heading)
-  (define-key map (kbd "M-u") 'outline-up-heading)
-
-  ;; (define-key map (kbd "C-+") 'outshine-imenu-with-navi-regexp)
-  ;; (define-key map (kbd "M-+") 'outshine-imenu-with-navi-regexp)
-
-  ;; (define-key map (kbd "C-p") 'outshine-imenu)
-  (define-key map (kbd "M-p") 'outshine-imenu)
-
-  ;; CALL OUTORG
-  ;; 1st binding for 'C-c' prefix, 2nd for 'M-#' prefix
-
-  (define-key map (kbd "'") 'outorg-edit-as-org)
-  (define-key map (kbd "M-# #") 'outorg-edit-as-org)
-  (define-key map (kbd "M-# M-#") 'outorg-edit-as-org)
-
-  ;; edit comment-section with `outorg' and propagate changes
-  ;; (define-key map (kbd "C-v '")
-    'outorg-edit-comments-and-propagate-changes)
-  (define-key map (kbd "M-# M-+")
-    'outorg-edit-comments-and-propagate-changes)
-  (define-key map (kbd "M-# +")
-    'outorg-edit-comments-and-propagate-changes)
-
-  ;; USE OUTORG TO CALL ORG
-  ;; 1st binding for 'C-c' prefix, 2nd for 'M-#' prefix
-
-  ;; Org Navigation and Structure Editing
-
-  ;; (define-key map (kbd "C-b")
-  ;;   'outshine-backward-heading-same-level)
-  ;; (define-key map (kbd "M-b")
-  ;;   'outshine-backward-heading-same-level)
-
-  ;; (define-key map (kbd "C-f")
-  ;;   'outshine-forward-heading-same-level)
-  ;; (define-key map (kbd "M-f")
-  ;;   'outshine-forward-heading-same-level)
-
-  ;; (define-key map (kbd "C-^") 'outshine-up-element)
-  ;; (define-key map (kbd "M-^") 'outshine-up-element)
-
-  ;; (define-key map (kbd "C-_") 'outshine-down-element)
-  ;; (define-key map (kbd "M-_") 'outshine-down-element)
-
-  ;; (define-key map (kbd "<up>") 'outshine-shiftup)
-  ;; (define-key map (kbd "<down>") 'outshine-shiftdown)
-
-  ;; (define-key map (kbd "C-j") 'outshine-goto)
-  (define-key map (kbd "M-j") 'outshine-goto)
-
-  ;; (define-key map (kbd "C-o") 'outshine-open-at-point)
-  (define-key map (kbd "M-o") 'outshine-open-at-point)
-
-  ;; (define-key map (kbd "C-a") 'outshine-attach)
-  (define-key map (kbd "M-a") 'outshine-attach)
-
-  ;; (define-key map (kbd "C-c") 'outshine-ctrl-c-ctrl-c)
-  (define-key map (kbd "M-c") 'outshine-ctrl-c-ctrl-c)
-
-  ;; (define-key map (kbd "C-d") 'outshine-deadline)
-  (define-key map (kbd "M-d") 'outshine-deadline)
-
-  ;; (define-key map (kbd "C-e") 'outshine-export-dispatch)
-  (define-key map (kbd "M-e") 'outshine-export-dispatch)
-
-  ;; (define-key map (kbd "C-k") 'outshine-kill-note-or-show-branches)
-  (define-key map (kbd "M-k") 'outshine-kill-note-or-show-branches)
-
-  ;; (define-key map (kbd "C-l") 'outshine-insert-link)
-  (define-key map (kbd "M-l") 'outshine-insert-link)
-
-  ;; (define-key map (kbd "RET") 'outshine-ctrl-c-ret)
-
-  ;; (define-key map (kbd "C-q") 'outshine-set-tags-command)
-  (define-key map (kbd "M-q") 'outshine-set-tags-command)
-
-  ;; (define-key map (kbd "C-r") 'outshine-reveal)
-  (define-key map (kbd "M-r") 'outshine-reveal)
-
-  ;; (define-key map (kbd "C-s") 'outshine-schedule)
-  (define-key map (kbd "M-s") 'outshine-schedule)
-
-  ;; (define-key map (kbd "C-t") 'outshine-todo)
-  (define-key map (kbd "M-t") 'outshine-todo)
-
-  ;; (define-key map (kbd "C-v") 'Prefix Command)
-
-  ;; (define-key map (kbd "C-w") 'outshine-refile)
-  (define-key map (kbd "M-w") 'outshine-refile)
-
-  ;; (define-key map (kbd "C-x") 'Prefix Command)
-
-  ;; (define-key map (kbd "C-y") 'outshine-evaluate-time-range)
-  (define-key map (kbd "M-y") 'outshine-evaluate-time-range)
-
-  ;; (define-key map (kbd "C-z") 'outshine-add-note)
-  (define-key map (kbd "M-z") 'outshine-add-note)
-  ;; (define-key map (kbd "ESC") 'Prefix Command)
+  (define-key map (kbd "#") 'outorg-edit-as-org)
   (define-key map (kbd "SPC") 'outshine-table-blank-field)
   (define-key map (kbd "!") 'outshine-time-stamp-inactive)
-  (define-key map (kbd "#") 'outshine-update-statistics-cookies)
   (define-key map (kbd "$") 'outshine-archive-subtree)
   (define-key map (kbd "%") 'outshine-mark-ring-push)
   (define-key map (kbd "&") 'outshine-mark-ring-goto)
@@ -3584,413 +3459,390 @@ i.e. the text following the regexp match until the next space character."
     'outshine-table-toggle-coordinate-overlays)
   (define-key map (kbd "~") 'outshine-table-create-with-table.el)
 
+;;;;;; [M-# Letter]
+
+  (outshine-define-key-with-fallback
+   outline-minor-mode-map (kbd "J")
+   (outline-hide-more) (outline-on-heading-p))
+  (outshine-define-key-with-fallback
+   outline-minor-mode-map (kbd "L")
+   (outline-show-more) (outline-on-heading-p))
+  (define-key map (kbd "I") 'outline-previous-visible-heading)
+  (define-key map (kbd "K") 'outline-next-visible-heading)
+
+;;;;;; [M-# letter]
+
+
+;;;;;; [M-# M-Punctuation]
+
+  ;; (define-key map (kbd "C-^") 'outshine-up-element)
+  ;; (define-key map (kbd "M-^") 'outshine-up-element)
+
+  ;; (define-key map (kbd "C-_") 'outshine-down-element)
+  ;; (define-key map (kbd "M-_") 'outshine-down-element)
+
+
+  ;; (define-key map (kbd "C-x C-M-v")
+  ;;   'outshine-redisplay-inline-images)
+  (define-key map (kbd "M-# C-M-v")
+    'outshine-redisplay-inline-images)
+  ;; (define-key map (kbd "C-x RET g") 'outshine-mobile-pull)
+  (define-key map (kbd "M-# RET g") 'outshine-mobile-pull)
+  ;; (define-key map (kbd "C-x RET p") 'outshine-mobile-push)
+  (define-key map (kbd "M-# RET p") 'outshine-mobile-push)
+  ;; (define-key map (kbd "C-c C-x RET g") 'outshine-mobile-pull)
+  ;; (define-key map (kbd "C-c C-x RET p") 'outshine-mobile-push)
+
+
+;;;;;; [M-# M-letter]
+
+  ;; (define-key map (kbd "C-t") 'hide-body)
+  (define-key map (kbd "M-t") 'hide-body)
+  ;; (define-key map (kbd "C-a") 'show-all)
+  (define-key map (kbd "M-a") 'show-all)
+  ;; (define-key map (kbd "C-c") 'hide-entry)
+  (define-key map (kbd "M-c") 'hide-entry)
+  ;; (define-key map (kbd "C-e") 'show-entry)
+  (define-key map (kbd "M-e") 'show-entry)
+  ;; (define-key map (kbd "C-l") 'hide-leaves)
+  (define-key map (kbd "M-l") 'hide-leaves)
+  ;; (define-key map (kbd "C-k") 'show-branches)
+  (define-key map (kbd "M-k") 'show-branches)
+  ;; (define-key map (kbd "C-q") 'outline-hide-sublevels)
+  (define-key map (kbd "M-q") 'outline-hide-sublevels)
+  ;; (define-key map (kbd "C-o") 'outline-hide-other)
+  (define-key map (kbd "M-o") 'outline-hide-other)
+  ;; (define-key map (kbd "C-u") 'outline-up-heading)
+  (define-key map (kbd "M-u") 'outline-up-heading)
+  ;; (define-key map (kbd "C-+") 'outshine-imenu-with-navi-regexp)
+  ;; (define-key map (kbd "M-+") 'outshine-imenu-with-navi-regexp)
+  ;; (define-key map (kbd "C-p") 'outshine-imenu)
+  (define-key map (kbd "M-p") 'outshine-imenu)
+  ;; USE OUTORG TO CALL ORG
+  ;; 1st binding for 'C-c' prefix, 2nd for 'M-#' prefix
+  ;; (define-key map (kbd "C-j") 'outshine-goto)
+  (define-key map (kbd "M-j") 'outshine-goto)
+  ;; (define-key map (kbd "C-o") 'outshine-open-at-point)
+  (define-key map (kbd "M-o") 'outshine-open-at-point)
+  ;; (define-key map (kbd "C-a") 'outshine-attach)
+  (define-key map (kbd "M-a") 'outshine-attach)
+  ;; (define-key map (kbd "C-c") 'outshine-ctrl-c-ctrl-c)
+  (define-key map (kbd "M-c") 'outshine-ctrl-c-ctrl-c)
+  ;; (define-key map (kbd "C-d") 'outshine-deadline)
+  (define-key map (kbd "M-d") 'outshine-deadline)
+  ;; (define-key map (kbd "C-e") 'outshine-export-dispatch)
+  (define-key map (kbd "M-e") 'outshine-export-dispatch)
+  ;; (define-key map (kbd "C-k")
+  ;;   'outshine-kill-note-or-show-branches)
+  (define-key map (kbd "M-k") 'outshine-kill-note-or-show-branches)
+  ;; (define-key map (kbd "C-l") 'outshine-insert-link)
+  (define-key map (kbd "M-l") 'outshine-insert-link)
+  ;; (define-key map (kbd "RET") 'outshine-ctrl-c-ret)
+  ;; (define-key map (kbd "C-q") 'outshine-set-tags-command)
+  (define-key map (kbd "M-q") 'outshine-set-tags-command)
+  ;; (define-key map (kbd "C-r") 'outshine-reveal)
+  (define-key map (kbd "M-r") 'outshine-reveal)
+  ;; (define-key map (kbd "C-s") 'outshine-schedule)
+  (define-key map (kbd "M-s") 'outshine-schedule)
+  ;; (define-key map (kbd "C-t") 'outshine-todo)
+  (define-key map (kbd "M-t") 'outshine-todo)
+  ;; (define-key map (kbd "C-v") 'Prefix Command)
+  ;; (define-key map (kbd "C-w") 'outshine-refile)
+  (define-key map (kbd "M-w") 'outshine-refile)
+  ;; (define-key map (kbd "C-x") 'Prefix Command)
+  ;; (define-key map (kbd "C-y") 'outshine-evaluate-time-range)
+  (define-key map (kbd "M-y") 'outshine-evaluate-time-range)
+  ;; (define-key map (kbd "C-z") 'outshine-add-note)
+  (define-key map (kbd "M-z") 'outshine-add-note)
+  ;; (define-key map (kbd "ESC") 'Prefix Command)
   ;; (define-key map (kbd "C-*") 'outshine-list-make-subtree)
   (define-key map (kbd "M-*") 'outshine-list-make-subtree)
-
-;; <remap> <backward-paragraph>	org-backward-paragraph
-;; <remap> <comment-dwim>		org-comment-dwim
-;; <remap> <delete-backward-char>	org-delete-backward-char
-;; <remap> <delete-char>		org-delete-char
-;; <remap> <forward-paragraph>	org-forward-paragraph
-;; <remap> <open-line>		org-open-line
-;; <remap> <outline-backward-same-level>
-;; 				org-backward-heading-same-level
-;; <remap> <outline-demote>	org-demote-subtree
-;; <remap> <outline-forward-same-level>
-;; 				org-forward-heading-same-level
-;; <remap> <outline-insert-heading>
-;; 				org-ctrl-c-ret
-;; <remap> <outline-mark-subtree>	org-mark-subtree
-;; <remap> <outline-promote>	org-promote-subtree
-;; <remap> <self-insert-command>	org-self-insert-command
-;; <remap> <show-branches>		org-kill-note-or-show-branches
-;; <remap> <show-subtree>		org-show-subtree
-;; <remap> <transpose-words>	org-transpose-words
-
-;; C-c TAB		show-children
-;; C-c C-n		outline-next-visible-heading
-;; C-c C-p		outline-previous-visible-heading
-;; C-c C-u		outline-up-heading
-;; C-c ESC		Prefix Command
-;; C-c I		outline-previous-visible-heading
-;; C-c K		outline-next-visible-heading
-;; C-c C-<		outline-promote
-;; C-c C->		outline-demote
-
   (define-key map (kbd "C-M-l") 'outshine-insert-all-links)
   (define-key map (kbd "M-b") 'outshine-previous-block)
   (define-key map (kbd "M-f") 'outshine-next-block)
   (define-key map (kbd "M-l") 'outshine-insert-last-stored-link)
-;; C-c M-o		tj/mail-subtree
+  ;; C-c M-o		tj/mail-subtree
   (define-key map (kbd "M-w") 'outshine-copy)
 
-  ;; Org Babel
-  ;; (define-key map (kbd "C-v C-a") 'outshine-babel-sha1-hash)
-  (define-key map (kbd "M-v M-a") 'outshine-babel-sha1-hash)
+  ;; (define-key map (kbd "C-b")
+  ;;   'outshine-backward-heading-same-level)
+  ;; (define-key map (kbd "M-b")
+  ;;   'outshine-backward-heading-same-level)
 
-  ;; (define-key map (kbd "C-v C-b") 'outshine-babel-execute-buffer)
-  (define-key map (kbd "M-v M-b") 'outshine-babel-execute-buffer)
+  ;; (define-key map (kbd "C-f")
+  ;;   'outshine-forward-heading-same-level)
+  ;; (define-key map (kbd "M-f")
+  ;;   'outshine-forward-heading-same-level)
 
-  ;; (define-key map (kbd "C-v C-c") 'outshine-babel-check-src-block)
-  (define-key map (kbd "M-v M-c") 'outshine-babel-check-src-block)
 
-  ;; (define-key map (kbd "C-v C-d") 'outshine-babel-demarcate-block)
-  (define-key map (kbd "M-v M-d") 'outshine-babel-demarcate-block)
+;;;;;; [M-# M-# Punctuation]
 
-  ;; (define-key map (kbd "C-v C-e") 'outshine-babel-execute-maybe)
-  (define-key map (kbd "M-v M-e") 'outshine-babel-execute-maybe)
-
-  ;; (define-key map (kbd "C-v C-f") 'outshine-babel-tangle-file)
-  (define-key map (kbd "M-v M-f") 'outshine-babel-tangle-file)
-
-  ;; (define-key map (kbd "C-v TAB") 'outshine-babel-view-src-block-info)
-  (define-key map (kbd "M-v TAB") 'outshine-babel-view-src-block-info)
-
-  ;; (define-key map (kbd "C-v C-j") 'outshine-babel-insert-header-arg)
-  (define-key map (kbd "M-v M-j") 'outshine-babel-insert-header-arg)
-
-  ;; (define-key map (kbd "C-v C-l") 'outshine-babel-load-in-session)
-  (define-key map (kbd "M-v M-l") 'outshine-babel-load-in-session)
-
-  ;; (define-key map (kbd "C-v C-n") 'outshine-babel-next-src-block)
-  (define-key map (kbd "M-v M-n") 'outshine-babel-next-src-block)
-
-  ;; (define-key map (kbd "C-v C-o") 'outshine-babel-open-src-block-result)
-  (define-key map (kbd "M-v M-o") 'outshine-babel-open-src-block-result)
-
-  ;; (define-key map (kbd "C-v C-p") 'outshine-babel-previous-src-block)
-  (define-key map (kbd "M-v M-p") 'outshine-babel-previous-src-block)
-
-  ;; (define-key map (kbd "C-v C-r") 'outshine-babel-goto-named-result)
-  (define-key map (kbd "M-v M-r") 'outshine-babel-goto-named-result)
-
-  ;; (define-key map (kbd "C-v C-s") 'outshine-babel-execute-subtree)
-  (define-key map (kbd "M-v M-s") 'outshine-babel-execute-subtree)
-
-  ;; (define-key map (kbd "C-v C-t") 'outshine-babel-tangle)
-  (define-key map (kbd "M-v M-t") 'outshine-babel-tangle)
-
-  ;; (define-key map (kbd "C-v C-u") 'outshine-babel-goto-src-block-head)
-  (define-key map (kbd "M-v M-u") 'outshine-babel-goto-src-block-head)
-
-  ;; (define-key map (kbd "C-v C-v") 'outshine-babel-expand-src-block)
-  (define-key map (kbd "M-v M-v") 'outshine-babel-expand-src-block)
-
-  ;; (define-key map (kbd "C-v C-x") 'outshine-babel-do-key-sequence-in-edit-buffer)
-  (define-key map (kbd "M-v M-x") 'outshine-babel-do-key-sequence-in-edit-buffer)
-
-  ;; (define-key map (kbd "C-v C-z") 'outshine-babel-switch-to-session)
-  (define-key map (kbd "M-v M-z") 'outshine-babel-switch-to-session)
-
-
-;; C-c C-v ESC	Prefix Command
-  ;; (define-key map (kbd "C-v I") 'outshine-babel-view-src-block-info)
-  (define-key map (kbd "M-v I") 'outshine-babel-view-src-block-info)
-
-  ;; (define-key map (kbd "C-v a") 'outshine-babel-sha1-hash)
-  (define-key map (kbd "M-v a") 'outshine-babel-sha1-hash)
-
-  ;; (define-key map (kbd "C-v b") 'outshine-babel-execute-buffer)
-  (define-key map (kbd "M-v b") 'outshine-babel-execute-buffer)
-
-  ;; (define-key map (kbd "C-v c") 'outshine-babel-check-src-block)
-  (define-key map (kbd "M-v c") 'outshine-babel-check-src-block)
-
-  ;; (define-key map (kbd "C-v d") 'outshine-babel-demarcate-block)
-  (define-key map (kbd "M-v d") 'outshine-babel-demarcate-block)
-
-  ;; (define-key map (kbd "C-v e") 'outshine-babel-execute-maybe)
-  (define-key map (kbd "M-v e") 'outshine-babel-execute-maybe)
-
-  ;; (define-key map (kbd "C-v f") 'outshine-babel-tangle-file)
-  (define-key map (kbd "M-v f") 'outshine-babel-tangle-file)
-
-  ;; (define-key map (kbd "C-v g") 'outshine-babel-goto-named-src-block)
-  (define-key map (kbd "M-v g") 'outshine-babel-goto-named-src-block)
-
-  ;; (define-key map (kbd "C-v h") 'outshine-babel-describe-bindings)
-  (define-key map (kbd "M-v h") 'outshine-babel-describe-bindings)
-
-  ;; (define-key map (kbd "C-v i") 'outshine-babel-lob-ingest)
-  (define-key map (kbd "M-v i") 'outshine-babel-lob-ingest)
-
-  ;; (define-key map (kbd "C-v j") 'outshine-babel-insert-header-arg)
-  (define-key map (kbd "M-v j") 'outshine-babel-insert-header-arg)
-
-  ;; (define-key map (kbd "C-v k") 'outshine-babel-remove-result-one-or-many)
-  (define-key map (kbd "M-v k") 'outshine-babel-remove-result-one-or-many)
-
-  ;; (define-key map (kbd "C-v l") 'outshine-babel-load-in-session)
-  (define-key map (kbd "M-v l") 'outshine-babel-load-in-session)
-
-  ;; (define-key map (kbd "C-v n") 'outshine-babel-next-src-block)
-  (define-key map (kbd "M-v n") 'outshine-babel-next-src-block)
-
-  ;; (define-key map (kbd "C-v o") 'outshine-babel-open-src-block-result)
-  (define-key map (kbd "M-v o") 'outshine-babel-open-src-block-result)
-
-  ;; (define-key map (kbd "C-v p") 'outshine-babel-previous-src-block)
-  (define-key map (kbd "M-v p") 'outshine-babel-previous-src-block)
-
-  ;; (define-key map (kbd "C-v r") 'outshine-babel-goto-named-result)
-  (define-key map (kbd "M-v r") 'outshine-babel-goto-named-result)
-
-  ;; (define-key map (kbd "C-v s") 'outshine-babel-execute-subtree)
-  (define-key map (kbd "M-v s") 'outshine-babel-execute-subtree)
-
-  ;; (define-key map (kbd "C-v t") 'outshine-babel-tangle)
-  (define-key map (kbd "M-v t") 'outshine-babel-tangle)
-
-  ;; (define-key map (kbd "C-v u") 'outshine-babel-goto-src-block-head)
-  (define-key map (kbd "M-v u") 'outshine-babel-goto-src-block-head)
-
-  ;; (define-key map (kbd "C-v v") 'outshine-babel-expand-src-block)
-  (define-key map (kbd "M-v v") 'outshine-babel-expand-src-block)
-
-  ;; (define-key map (kbd "C-v x") 'outshine-babel-do-key-sequence-in-edit-buffer)
-  (define-key map (kbd "M-v x") 'outshine-babel-do-key-sequence-in-edit-buffer)
-
-  ;; (define-key map (kbd "C-v z") 'outshine-babel-switch-to-session-with-code)
-  (define-key map (kbd "M-v z") 'outshine-babel-switch-to-session-with-code)
-
-  ;; (define-key map (kbd "C-x C-a") 'outshine-archive-subtree-default)
-  (define-key map (kbd "M-x M-a") 'outshine-archive-subtree-default)
-
-  ;; (define-key map (kbd "C-x C-b") 'outshine-toggle-checkbox)
-  (define-key map (kbd "M-x M-b") 'outshine-toggle-checkbox)
-
-  ;; (define-key map (kbd "C-x C-c") 'outshine-columns)
-  (define-key map (kbd "M-x M-c") 'outshine-columns)
-
-  ;; (define-key map (kbd "C-x C-d") 'outshine-clock-display)
-  (define-key map (kbd "M-x M-d") 'outshine-clock-display)
-
-  ;; (define-key map (kbd "C-x C-f") 'outshine-emphasize)
-  (define-key map (kbd "M-x M-f") 'outshine-emphasize)
-
-  ;; (define-key map (kbd "C-x TAB") 'outshine-clock-in)
-  (define-key map (kbd "M-x TAB") 'outshine-clock-in)
-
-  ;; (define-key map (kbd "C-x C-j") 'outshine-clock-goto)
-  (define-key map (kbd "M-x M-j") 'outshine-clock-goto)
-
-  ;; (define-key map (kbd "C-x C-l") 'outshine-preview-latex-fragment)
-  (define-key map (kbd "M-x M-l") 'outshine-preview-latex-fragment)
-
-
-;; C-c C-x RET	Prefix Command
-  ;; (define-key map (kbd "C-x C-n") 'outshine-next-link)
-  (define-key map (kbd "M-x M-n") 'outshine-next-link)
-
-  ;; (define-key map (kbd "C-x C-o") 'outshine-clock-out)
-  (define-key map (kbd "M-x M-o") 'outshine-clock-out)
-
-  ;; (define-key map (kbd "C-x C-p") 'outshine-previous-link)
-  (define-key map (kbd "M-x M-p") 'outshine-previous-link)
-
-  ;; (define-key map (kbd "C-x C-q") 'outshine-clock-cancel)
-  (define-key map (kbd "M-x M-q") 'outshine-clock-cancel)
-
-  ;; (define-key map (kbd "C-x C-r") 'outshine-clock-report)
-  (define-key map (kbd "M-x M-r") 'outshine-clock-report)
-
-  ;; (define-key map (kbd "C-x C-s") 'outshine-advertized-archive-subtree)
-  (define-key map (kbd "M-x M-s") 'outshine-advertized-archive-subtree)
-
-  ;; (define-key map (kbd "C-x C-t") 'outshine-toggle-time-stamp-overlays)
-  (define-key map (kbd "M-x M-t") 'outshine-toggle-time-stamp-overlays)
-
-  ;; (define-key map (kbd "C-x C-u") 'outshine-dblock-update)
-  (define-key map (kbd "M-x M-u") 'outshine-dblock-update)
-
-  ;; (define-key map (kbd "C-x C-v") 'outshine-toggle-inline-images)
-  (define-key map (kbd "M-x M-v") 'outshine-toggle-inline-images)
-
-  ;; (define-key map (kbd "C-x C-w") 'outshine-cut-special)
-  (define-key map (kbd "M-x M-w") 'outshine-cut-special)
-
-  ;; (define-key map (kbd "C-x C-x") 'outshine-clock-in-last)
-  (define-key map (kbd "M-x M-x") 'outshine-clock-in-last)
-
-  ;; (define-key map (kbd "C-x C-y") 'outshine-paste-special)
-  (define-key map (kbd "M-x M-y") 'outshine-paste-special)
-
-  ;; (define-key map (kbd "C-x C-z") 'outshine-resolve-clocks)
-  (define-key map (kbd "M-x M-z") 'outshine-resolve-clocks)
-
-
-;; C-c C-x ESC	Prefix Command
+  (define-key map (kbd "M-# #") 'outshine-update-statistics-cookies)
+  (define-key map (kbd "M-# +")
+    'outorg-edit-comments-and-propagate-changes)
   ;; (define-key map (kbd "C-x !") 'outshine-reload)
-  (define-key map (kbd "M-x !") 'outshine-reload)
-
-  ;; (define-key map (kbd "C-x ,") 'outshine-timer-pause-or-continue)
-  (define-key map (kbd "M-x ,") 'outshine-timer-pause-or-continue)
-
-  ;; (define-key map (kbd "C-x -") 'outshine-timer-item)
-  (define-key map (kbd "M-x -") 'outshine-timer-item)
-
-  ;; (define-key map (kbd "C-x .") 'outshine-timer)
-  (define-key map (kbd "M-x .") 'outshine-timer)
-
-  ;; (define-key map (kbd "C-x 0") 'outshine-timer-start)
-  (define-key map (kbd "M-x 0") 'outshine-timer-start)
-
-  ;; (define-key map (kbd "C-x :") 'outshine-timer-cancel-timer)
-  (define-key map (kbd "M-x :") 'outshine-timer-cancel-timer)
-
-  ;; (define-key map (kbd "C-x ;") 'outshine-timer-set-timer)
-  (define-key map (kbd "M-x ;") 'outshine-timer-set-timer)
-
-  ;; (define-key map (kbd "C-x <") 'outshine-agenda-set-restriction-lock)
-  (define-key map (kbd "M-x <") 'outshine-agenda-set-restriction-lock)
-
-  ;; (define-key map (kbd "C-x >") 'outshine-agenda-remove-restriction-lock)
-  (define-key map (kbd "M-x >") 'outshine-agenda-remove-restriction-lock)
-
-  ;; (define-key map (kbd "C-x A") 'outshine-archive-to-archive-sibling)
-  (define-key map (kbd "M-x A") 'outshine-archive-to-archive-sibling)
-
-  ;; (define-key map (kbd "C-x D") 'outshine-shiftmetadown)
-  (define-key map (kbd "M-x D") 'outshine-shiftmetadown)
-
-  ;; (define-key map (kbd "C-x E") 'outshine-inc-effort)
-  (define-key map (kbd "M-x E") 'outshine-inc-effort)
-
-  ;; (define-key map (kbd "C-x G") 'outshine-feed-goto-inbox)
-  (define-key map (kbd "M-x G") 'outshine-feed-goto-inbox)
-
-  ;; (define-key map (kbd "C-x L") 'outshine-shiftmetaleft)
-  (define-key map (kbd "M-x L") 'outshine-shiftmetaleft)
-
-  ;; (define-key map (kbd "C-x M") 'outshine-insert-todo-heading)
-  (define-key map (kbd "M-x M") 'outshine-insert-todo-heading)
-
-  ;; (define-key map (kbd "C-x P") 'outshine-set-property-and-value)
-  (define-key map (kbd "M-x P") 'outshine-set-property-and-value)
-
-  ;; (define-key map (kbd "C-x R") 'outshine-shiftmetaright)
-  (define-key map (kbd "M-x R") 'outshine-shiftmetaright)
-
-  ;; (define-key map (kbd "C-x U") 'outshine-shiftmetaup)
-  (define-key map (kbd "M-x U") 'outshine-shiftmetaup)
-
+  (define-key map (kbd "M-# !") 'outshine-reload)
   ;; (define-key map (kbd "C-x [") 'outshine-reftex-citation)
-  (define-key map (kbd "M-x [") 'outshine-reftex-citation)
-
-  ;; (define-key map (kbd "C-x \\") 'outshine-toggle-pretty-entities)
-  (define-key map (kbd "M-x \\") 'outshine-toggle-pretty-entities)
-
+  (define-key map (kbd "M-# [") 'outshine-reftex-citation)
+  ;; (define-key map (kbd "C-x \\")
+  ;;   'outshine-toggle-pretty-entities)
+  (define-key map (kbd "M-# \\") 'outshine-toggle-pretty-entities)
   ;; (define-key map (kbd "C-x _") 'outshine-timer-stop)
-  (define-key map (kbd "M-x _") 'outshine-timer-stop)
+  (define-key map (kbd "M-# _") 'outshine-timer-stop)
+  ;; (define-key map (kbd "C-x ,")
+  ;;   'outshine-timer-pause-or-continue)
+  (define-key map (kbd "M-# ,") 'outshine-timer-pause-or-continue)
+  ;; (define-key map (kbd "C-x -") 'outshine-timer-item)
+  (define-key map (kbd "M-# -") 'outshine-timer-item)
+  ;; (define-key map (kbd "C-x .") 'outshine-timer)
+  (define-key map (kbd "M-# .") 'outshine-timer)
+  ;; (define-key map (kbd "C-x 0") 'outshine-timer-start)
+  (define-key map (kbd "M-# 0") 'outshine-timer-start)
+  ;; (define-key map (kbd "C-x :") 'outshine-timer-cancel-timer)
+  (define-key map (kbd "M-# :") 'outshine-timer-cancel-timer)
+  ;; (define-key map (kbd "C-x ;") 'outshine-timer-set-timer)
+  (define-key map (kbd "M-# ;") 'outshine-timer-set-timer)
+  ;; (define-key map (kbd "C-x <")
+  ;;   'outshine-agenda-set-restriction-lock)
+  (define-key map (kbd "M-# <")
+    'outshine-agenda-set-restriction-lock)
+  ;; (define-key map (kbd "C-x >")
+  ;;   'outshine-agenda-remove-restriction-lock)
+  (define-key map (kbd "M-# >")
+    'outshine-agenda-remove-restriction-lock)
+  ;; (define-key map (kbd "C-x TAB") 'outshine-clock-in)
+  (define-key map (kbd "M-# TAB") 'outshine-clock-in)
+
+;;;;;; [M-# M-# Letter]
+
+  ;; (define-key map (kbd "C-x A")
+  ;;   'outshine-archive-to-archive-sibling)
+  (define-key map (kbd "M-# A")
+    'outshine-archive-to-archive-sibling)
+  ;; (define-key map (kbd "C-x D") 'outshine-shiftmetadown)
+  (define-key map (kbd "M-# D") 'outshine-shiftmetadown)
+  ;; (define-key map (kbd "C-x E") 'outshine-inc-effort)
+  (define-key map (kbd "M-# E") 'outshine-inc-effort)
+  ;; (define-key map (kbd "C-x G") 'outshine-feed-goto-inbox)
+  (define-key map (kbd "M-# G") 'outshine-feed-goto-inbox)
+  ;; (define-key map (kbd "C-x L") 'outshine-shiftmetaleft)
+  (define-key map (kbd "M-# L") 'outshine-shiftmetaleft)
+  ;; (define-key map (kbd "C-x M") 'outshine-insert-todo-heading)
+  (define-key map (kbd "M-# M") 'outshine-insert-todo-heading)
+  ;; (define-key map (kbd "C-x P") 'outshine-set-property-and-value)
+  (define-key map (kbd "M-# P") 'outshine-set-property-and-value)
+  ;; (define-key map (kbd "C-x R") 'outshine-shiftmetaright)
+  (define-key map (kbd "M-# R") 'outshine-shiftmetaright)
+  ;; (define-key map (kbd "C-x U") 'outshine-shiftmetaup)
+  (define-key map (kbd "M-# U") 'outshine-shiftmetaup)
+
+;;;;;; [M-# M-# letter]
 
   ;; (define-key map (kbd "C-x a") 'outshine-toggle-archive-tag)
-  (define-key map (kbd "M-x a") 'outshine-toggle-archive-tag)
-
-  ;; (define-key map (kbd "C-x b") 'outshine-tree-to-indirect-buffer)
-  (define-key map (kbd "M-x b") 'outshine-tree-to-indirect-buffer)
-
-  ;; (define-key map (kbd "C-x c") 'outshine-clone-subtree-with-time-shift)
-  (define-key map (kbd "M-x c") 'outshine-clone-subtree-with-time-shift)
-
+  (define-key map (kbd "M-# a") 'outshine-toggle-archive-tag)
+  ;; (define-key map (kbd "C-x b")
+  ;;   'outshine-tree-to-indirect-buffer)
+  (define-key map (kbd "M-# b") 'outshine-tree-to-indirect-buffer)
+  ;; (define-key map (kbd "C-x c")
+  ;;   'outshine-clone-subtree-with-time-shift)
+  (define-key map (kbd "M-# c") 'outshine-clone-subtree-with-time-shift)
   ;; (define-key map (kbd "C-x d") 'outshine-insert-drawer)
-  (define-key map (kbd "M-x d") 'outshine-insert-drawer)
-
+  (define-key map (kbd "M-# d") 'outshine-insert-drawer)
   ;; (define-key map (kbd "C-x e") 'outshine-set-effort)
-  (define-key map (kbd "M-x e") 'outshine-set-effort)
-
+  (define-key map (kbd "M-# e") 'outshine-set-effort)
   ;; (define-key map (kbd "C-x f") 'outshine-footnote-action)
-  (define-key map (kbd "M-x f") 'outshine-footnote-action)
-
+  (define-key map (kbd "M-# f") 'outshine-footnote-action)
   ;; (define-key map (kbd "C-x g") 'outshine-feed-update-all)
-  (define-key map (kbd "M-x g") 'outshine-feed-update-all)
-
+  (define-key map (kbd "M-# g") 'outshine-feed-update-all)
   ;; (define-key map (kbd "C-x i") 'outshine-insert-columns-dblock)
-  (define-key map (kbd "M-x i") 'outshine-insert-columns-dblock)
-
+  (define-key map (kbd "M-# i") 'outshine-insert-columns-dblock)
   ;; (define-key map (kbd "C-x l") 'outshine-metaleft)
-  (define-key map (kbd "M-x l") 'outshine-metaleft)
-
+  (define-key map (kbd "M-# l") 'outshine-metaleft)
   ;; (define-key map (kbd "C-x m") 'outshine-meta-return)
-  (define-key map (kbd "M-x m") 'outshine-meta-return)
-
-  ;; (define-key map (kbd "C-x o") 'outshine-toggle-ordered-property)
-  (define-key map (kbd "M-x o") 'outshine-toggle-ordered-property)
-
+  (define-key map (kbd "M-# m") 'outshine-meta-return)
+  ;; (define-key map (kbd "C-x o")
+  ;;   'outshine-toggle-ordered-property)
+  (define-key map (kbd "M-# o") 'outshine-toggle-ordered-property)
   ;; (define-key map (kbd "C-x p") 'outshine-set-property)
-  (define-key map (kbd "M-x p") 'outshine-set-property)
-
+  (define-key map (kbd "M-# p") 'outshine-set-property)
   ;; (define-key map (kbd "C-x q") 'outshine-toggle-tags-groups)
-  (define-key map (kbd "M-x q") 'outshine-toggle-tags-groups)
-
+  (define-key map (kbd "M-# q") 'outshine-toggle-tags-groups)
   ;; (define-key map (kbd "C-x r") 'outshine-metaright)
-  (define-key map (kbd "M-x r") 'outshine-metaright)
-
+  (define-key map (kbd "M-# r") 'outshine-metaright)
   ;; (define-key map (kbd "C-x u") 'outshine-metaup)
-  (define-key map (kbd "M-x u") 'outshine-metaup)
-
+  (define-key map (kbd "M-# u") 'outshine-metaup)
   ;; (define-key map (kbd "C-x v") 'outshine-copy-visible)
-  (define-key map (kbd "M-x v") 'outshine-copy-visible)
+  (define-key map (kbd "M-# v") 'outshine-copy-visible)
 
-;; C-c C-x <left>	org-shiftcontrolleft
-;; C-c C-x <right>			org-shiftcontrolright
+;;;;;; [M-# M-# M-letter]
 
-;; C-c M-#		outorg-edit-as-org
-;; C-c M-+		outorg-edit-comments-and-propagate-changes
-;; C-c M-a		show-all
-;; C-c M-c		hide-entry
-;; C-c M-e		show-entry
-;; C-c M-k		show-branches
-;; C-c M-p		outshine-imenu
-;; C-c M-q		outline-hide-sublevels
-;; C-c M-t		hide-body
-;; C-c M-u		outline-up-heading
+  ;; (define-key map (kbd "C-x C-a")
+  ;;   'outshine-archive-subtree-default)
+  (define-key map (kbd "M-# M-a") 'outshine-archive-subtree-default)
+  ;; (define-key map (kbd "C-x C-b") 'outshine-toggle-checkbox)
+  (define-key map (kbd "M-# M-b") 'outshine-toggle-checkbox)
+  ;; (define-key map (kbd "C-x C-c") 'outshine-columns)
+  (define-key map (kbd "M-# M-c") 'outshine-columns)
+  ;; (define-key map (kbd "C-x C-d") 'outshine-clock-display)
+  (define-key map (kbd "M-# M-d") 'outshine-clock-display)
+  ;; (define-key map (kbd "C-x C-f") 'outshine-emphasize)
+  (define-key map (kbd "M-# M-f") 'outshine-emphasize)
+  ;; (define-key map (kbd "C-x C-j") 'outshine-clock-goto)
+  (define-key map (kbd "M-# M-j") 'outshine-clock-goto)
+  ;; (define-key map (kbd "C-x C-l")
+  ;;   'outshine-preview-latex-fragment)
+  (define-key map (kbd "M-# M-l") 'outshine-preview-latex-fragment)
+  ;; (define-key map (kbd "C-x C-n") 'outshine-next-link)
+  (define-key map (kbd "M-# M-n") 'outshine-next-link)
+  ;; (define-key map (kbd "C-x C-o") 'outshine-clock-out)
+  (define-key map (kbd "M-# M-o") 'outshine-clock-out)
+  ;; (define-key map (kbd "C-x C-p") 'outshine-previous-link)
+  (define-key map (kbd "M-# M-p") 'outshine-previous-link)
+  ;; (define-key map (kbd "C-x C-q") 'outshine-clock-cancel)
+  (define-key map (kbd "M-# M-q") 'outshine-clock-cancel)
+  ;; (define-key map (kbd "C-x C-r") 'outshine-clock-report)
+  (define-key map (kbd "M-# M-r") 'outshine-clock-report)
+  ;; (define-key map (kbd "C-x C-s")
+  ;;   'outshine-advertized-archive-subtree)
+  (define-key map (kbd "M-# M-s")
+    'outshine-advertized-archive-subtree)
+  ;; (define-key map (kbd "C-x C-t")
+  ;;   'outshine-toggle-time-stamp-overlays)
+  (define-key map (kbd "M-# M-t")
+    'outshine-toggle-time-stamp-overlays)
+  ;; (define-key map (kbd "C-x C-u") 'outshine-dblock-update)
+  (define-key map (kbd "M-# M-u") 'outshine-dblock-update)
+  ;; (define-key map (kbd "C-x C-v") 'outshine-toggle-inline-images)
+  (define-key map (kbd "M-# M-v") 'outshine-toggle-inline-images)
+  ;; (define-key map (kbd "C-x C-k") 'outshine-cut-special)
+  (define-key map (kbd "M-# M-k") 'outshine-cut-special)
+  ;; (define-key map (kbd "C-x M-w") 'outshine-copy-special)
+  (define-key map (kbd "M-# M-w") 'outshine-copy-special)
+  ;; (define-key map (kbd "C-x C-x") 'outshine-clock-in-last)
+  (define-key map (kbd "M-# M-x") 'outshine-clock-in-last)
+  ;; (define-key map (kbd "C-x C-y") 'outshine-paste-special)
+  (define-key map (kbd "M-# M-y") 'outshine-paste-special)
+  ;; (define-key map (kbd "C-x C-z") 'outshine-resolve-clocks)
+  (define-key map (kbd "M-# M-z") 'outshine-resolve-clocks)
+
+;;;;;; [M-# M-+ Punctuation]
+
+  ;; (define-key map (kbd "C-v TAB")
+  ;;   'outshine-babel-view-src-block-info)
+  (define-key map (kbd "M-+ TAB")
+    'outshine-babel-view-src-block-info)
+
+;;;;;; [M-# M-+ Letter]
+
+  ;; (define-key map (kbd "C-v I") 'outshine-babel-view-src-block-info)
+  (define-key map (kbd "M-+ I") 'outshine-babel-view-src-block-info)
+
+;;;;;; [M-# M-+ letter]
+
+  ;; (define-key map (kbd "C-v a") 'outshine-babel-sha1-hash)
+  (define-key map (kbd "M-+ a") 'outshine-babel-sha1-hash)
+  ;; (define-key map (kbd "C-v b") 'outshine-babel-execute-buffer)
+  (define-key map (kbd "M-+ b") 'outshine-babel-execute-buffer)
+  ;; (define-key map (kbd "C-v c") 'outshine-babel-check-src-block)
+  (define-key map (kbd "M-+ c") 'outshine-babel-check-src-block)
+  ;; (define-key map (kbd "C-v d") 'outshine-babel-demarcate-block)
+  (define-key map (kbd "M-+ d") 'outshine-babel-demarcate-block)
+  ;; (define-key map (kbd "C-v e") 'outshine-babel-execute-maybe)
+  (define-key map (kbd "M-+ e") 'outshine-babel-execute-maybe)
+  ;; (define-key map (kbd "C-v f") 'outshine-babel-tangle-file)
+  (define-key map (kbd "M-+ f") 'outshine-babel-tangle-file)
+  ;; (define-key map (kbd "C-v g") 'outshine-babel-goto-named-src-block)
+  (define-key map (kbd "M-+ g") 'outshine-babel-goto-named-src-block)
+  ;; (define-key map (kbd "C-v h") 'outshine-babel-describe-bindings)
+  (define-key map (kbd "M-+ h") 'outshine-babel-describe-bindings)
+  ;; (define-key map (kbd "C-v i") 'outshine-babel-lob-ingest)
+  (define-key map (kbd "M-+ i") 'outshine-babel-lob-ingest)
+  ;; (define-key map (kbd "C-v j") 'outshine-babel-insert-header-arg)
+  (define-key map (kbd "M-+ j") 'outshine-babel-insert-header-arg)
+  ;; (define-key map (kbd "C-v k") 'outshine-babel-remove-result-one-or-many)
+  (define-key map (kbd "M-+ k") 'outshine-babel-remove-result-one-or-many)
+  ;; (define-key map (kbd "C-v l") 'outshine-babel-load-in-session)
+  (define-key map (kbd "M-+ l") 'outshine-babel-load-in-session)
+  ;; (define-key map (kbd "C-v n") 'outshine-babel-next-src-block)
+  (define-key map (kbd "M-+ n") 'outshine-babel-next-src-block)
+  ;; (define-key map (kbd "C-v o") 'outshine-babel-open-src-block-result)
+  (define-key map (kbd "M-+ o") 'outshine-babel-open-src-block-result)
+  ;; (define-key map (kbd "C-v p") 'outshine-babel-previous-src-block)
+  (define-key map (kbd "M-+ p") 'outshine-babel-previous-src-block)
+  ;; (define-key map (kbd "C-v r") 'outshine-babel-goto-named-result)
+  (define-key map (kbd "M-+ r") 'outshine-babel-goto-named-result)
+  ;; (define-key map (kbd "C-v s") 'outshine-babel-execute-subtree)
+  (define-key map (kbd "M-+ s") 'outshine-babel-execute-subtree)
+  ;; (define-key map (kbd "C-v t") 'outshine-babel-tangle)
+  (define-key map (kbd "M-+ t") 'outshine-babel-tangle)
+  ;; (define-key map (kbd "C-v u") 'outshine-babel-goto-src-block-head)
+  (define-key map (kbd "M-+ u") 'outshine-babel-goto-src-block-head)
+  ;; (define-key map (kbd "C-v v") 'outshine-babel-expand-src-block)
+  (define-key map (kbd "M-+ v") 'outshine-babel-expand-src-block)
+  ;; (define-key map (kbd "C-v x") 'outshine-babel-do-key-sequence-in-edit-buffer)
+  (define-key map (kbd "M-+ x") 'outshine-babel-do-key-sequence-in-edit-buffer)
+  ;; (define-key map (kbd "C-v z") 'outshine-babel-switch-to-session-with-code)
+  (define-key map (kbd "M-+ z") 'outshine-babel-switch-to-session-with-code)
+
+;;;;;; [M-# M-+ M-Punctuation]
+
+  ;; (define-key map (kbd "C-v '")
+  ;;   'outorg-edit-comments-and-propagate-changes)
+  (define-key map (kbd "M-# M-+")
+    'outorg-edit-comments-and-propagate-changes)
+
+;;;;;; [M-# M-+ M-letter]
+
+  ;; (define-key map (kbd "C-v C-a") 'outshine-babel-sha1-hash)
+  (define-key map (kbd "M-+ M-a") 'outshine-babel-sha1-hash)
+  ;; (define-key map (kbd "C-v C-b") 'outshine-babel-execute-buffer)
+  (define-key map (kbd "M-+ M-b") 'outshine-babel-execute-buffer)
+  ;; (define-key map (kbd "C-v C-c")
+  ;;   'outshine-babel-check-src-block)
+  (define-key map (kbd "M-+ M-c") 'outshine-babel-check-src-block)
+  ;; (define-key map (kbd "C-v C-d")
+  ;;   'outshine-babel-demarcate-block)
+  (define-key map (kbd "M-+ M-d") 'outshine-babel-demarcate-block)
+  ;; (define-key map (kbd "C-v C-e") 'outshine-babel-execute-maybe)
+  (define-key map (kbd "M-+ M-e") 'outshine-babel-execute-maybe)
+  ;; (define-key map (kbd "C-v C-f") 'outshine-babel-tangle-file)
+  (define-key map (kbd "M-+ M-f") 'outshine-babel-tangle-file)
+  ;; (define-key map (kbd "C-v C-j")
+  ;;  'outshine-babel-insert-header-arg)
+  (define-key map (kbd "M-+ M-j") 'outshine-babel-insert-header-arg)
+  ;; (define-key map (kbd "C-v C-l") 'outshine-babel-load-in-session)
+  (define-key map (kbd "M-+ M-l") 'outshine-babel-load-in-session)
+  ;; (define-key map (kbd "C-v C-n") 'outshine-babel-next-src-block)
+  (define-key map (kbd "M-+ M-n") 'outshine-babel-next-src-block)
+  ;; (define-key map (kbd "C-v C-o") 'outshine-babel-open-src-block-result)
+  (define-key map (kbd "M-+ M-o") 'outshine-babel-open-src-block-result)
+  ;; (define-key map (kbd "C-v C-p") 'outshine-babel-previous-src-block)
+  (define-key map (kbd "M-+ M-p") 'outshine-babel-previous-src-block)
+  ;; (define-key map (kbd "C-v C-r") 'outshine-babel-goto-named-result)
+  (define-key map (kbd "M-+ M-r") 'outshine-babel-goto-named-result)
+  ;; (define-key map (kbd "C-v C-s") 'outshine-babel-execute-subtree)
+  (define-key map (kbd "M-+ M-s") 'outshine-babel-execute-subtree)
+  ;; (define-key map (kbd "C-v C-t") 'outshine-babel-tangle)
+  (define-key map (kbd "M-+ M-t") 'outshine-babel-tangle)
+  ;; (define-key map (kbd "C-v C-u") 'outshine-babel-goto-src-block-head)
+  (define-key map (kbd "M-+ M-u") 'outshine-babel-goto-src-block-head)
+  ;; (define-key map (kbd "C-v C-v") 'outshine-babel-expand-src-block)
+  (define-key map (kbd "M-+ M-v") 'outshine-babel-expand-src-block)
+  ;; (define-key map (kbd "C-v C-x") 'outshine-babel-do-key-sequence-in-edit-buffer)
+  (define-key map (kbd "M-+ M-x") 'outshine-babel-do-key-sequence-in-edit-buffer)
+  ;; (define-key map (kbd "C-v C-z") 'outshine-babel-switch-to-session)
+  (define-key map (kbd "M-+ M-z") 'outshine-babel-switch-to-session)
 
   ;; (define-key map (kbd "C-v C-M-h") 'outshine-babel-mark-block)
-  (define-key map (kbd "M-v C-M-h") 'outshine-babel-mark-block)
-
-  ;; (define-key map (kbd "C-x C-M-v")
-    'outshine-redisplay-inline-images)
-  (define-key map (kbd "M-x C-M-v")
-    'outshine-redisplay-inline-images)
-
-  ;; (define-key map (kbd "C-x M-w") 'outshine-copy-special)
-  (define-key map (kbd "M-x M-w") 'outshine-copy-special)
-
-  ;; (define-key map (kbd "C-x RET g") 'outshine-mobile-pull)
-  (define-key map (kbd "M-x RET g") 'outshine-mobile-pull)
-
-  ;; (define-key map (kbd "C-x RET p") 'outshine-mobile-push)
-  (define-key map (kbd "M-x RET p") 'outshine-mobile-push)
-
-  ;; (define-key map (kbd "C-c C-x RET g") 'outshine-mobile-pull)
-  ;; (define-key map (kbd "C-c C-x RET p") 'outshine-mobile-push)
-
-    ;; ("g" . (outshine-use-outorg 'org-refile))
-    ;; (" " . (outshine-use-outorg
-    ;;      (lambda ()
-    ;;        (message
-    ;;         "%s" (substring-no-properties
-    ;;               (org-display-outline-path)))
-    ;;         (sit-for 1))
-    ;;      'WHOLE-BUFFER-P))
-    ;; ("=" . (outshine-use-outorg 'org-columns))
-    ;; ("^" . (outshine-use-outorg 'org-sort))
-    ;; ;; ("a" . (outshine-use-outorg
-    ;; ;;           'org-archive-subtree-default-with-confirmation))
-    ;; ("I" . (outshine-use-outorg 'org-clock-in))
-    ;; ("O" . outshine-clock-out)
-    ;; ("Meta Data Editing")
-    ;; ("t" . (outshine-use-outorg 'org-todo))
-    ;; ("," . (outshine-use-outorg 'org-priority))
-    ;; ("0" . (outshine-use-outorg (lambda () (org-priority ?\ ))))
-    ;; ("1" . (outshine-use-outorg (lambda () (org-priority ?A))))
-    ;; ("2" . (outshine-use-outorg (lambda () (org-priority ?B))))
-    ;; ("3" . (outshine-use-outorg (lambda () (org-priority ?C))))
-    ;; (":" . (outshine-use-outorg 'org-set-tags-command))
-    ;; ("e" . (outshine-use-outorg 'org-set-effort))
-    ;; ("E" . (outshine-use-outorg 'org-inc-effort))
+  (define-key map (kbd "M-+ C-M-h") 'outshine-babel-mark-block)
 
 )
+
+;; (define-key map (kbd "<up>") 'outshine-shiftup)
+;; (define-key map (kbd "<down>") 'outshine-shiftdown)
+;; C-c C-x <left>	org-shiftcontrolleft
+;; C-c C-x <right>      org-shiftcontrolright
+
 
 ;;; Run hooks and provide
 
