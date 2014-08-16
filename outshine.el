@@ -188,14 +188,14 @@ Used to override any major-mode specific file-local settings")
     ("Outline Visibility")
     ("c" . outline-cycle)
     ("C" . outshine-cycle-buffer)
-    ;; FIXME needs to be improved!
-    (" " . (outshine-use-outorg
-            (lambda ()
-              (message
-               "%s" (substring-no-properties
-                     (org-display-outline-path)))
-               (sit-for 1))
-            'WHOLE-BUFFER-P))
+    ;; ;; FIXME needs to be improved!
+    ;; (" " . (outshine-use-outorg
+    ;;         (lambda ()
+    ;;           (message
+    ;;            "%s" (substring-no-properties
+    ;;                  (org-display-outline-path)))
+    ;;            (sit-for 1))
+    ;;         'WHOLE-BUFFER-P))
     ("r" . outshine-narrow-to-subtree)
     ("w" . widen)
     ("=" . outshine-columns)
@@ -1207,12 +1207,20 @@ These regexps, if non-nil, match
                        pt)))))))
         (list rgx4 rgx3 rgx2 rgx1 rgx0)))))
   
+;; courtesy of Pascal Bourguignon
+(defun outshine-use-outorg-finish-store-log-note ()
+  "Finish store-log-note and exit recursive edit"
+  (message "...entering outorg-finish-function")
+  (setq outorg-org-finish-function-called-p t)
+  (org-store-log-note)
+  (outorg-copy-edits-and-exit))
+  ;; (exit-recursive-edit))
 
 ;; (eval-after-load 'outorg
 ;;   '
 
 (defun outshine-use-outorg (fun &optional whole-buffer-p rgxps &rest funargs)
-     "Use outorg to call FUN with FUNARGS on subtree or thing at point.
+  "Use outorg to call FUN with FUNARGS on subtree or thing at point.
 
 FUN should be an Org-mode function that acts on the subtree or
 org-element at point. Optionally, with WHOLE-BUFFER-P non-nil,
@@ -1229,32 +1237,52 @@ function was called upon.
 
 The old marker is removed first. Then a new point-marker is
 created before `outorg-edit-as-org' is called on the headline."
-     (save-excursion
-       (unless (outline-on-heading-p)
-	 (outline-previous-heading))
-       (outshine--set-outorg-last-headline-marker)
-       (if whole-buffer-p
-	   (outorg-edit-as-org '(4))
-	 (outorg-edit-as-org))
-       (save-excursion
-	 (if (org-on-heading-p)
-	     (goto-char (point-at-bol))
-	   (outline-previous-heading))
-	 (let ((end-of-subtree
-		(org-element-property :end (org-element-at-point)))
-	       found)
-	   (while (and rgxps (not found))
-	     (if (and (car rgxps)
-		      (re-search-forward
-		       (car rgxps) end-of-subtree 'NOERROR))
-	       (setq found t)
-	       (pop rgxps))))
-	 (if funargs
-	   ;;   (funcall fun funargs)
-	   ;; (funcall fun))
-	     (call-interactively fun funargs)
-	   (call-interactively fun))
-       (outorg-copy-edits-and-exit))))
+  (save-excursion
+    (unless (outline-on-heading-p)
+      (outline-previous-heading))
+    (outshine--set-outorg-last-headline-marker)
+    (if whole-buffer-p
+	(outorg-edit-as-org '(4))
+      (outorg-edit-as-org))
+
+    ;; FIXME replace this (regexp matching) with copied markers
+    (save-excursion
+      (if (org-on-heading-p)
+	  (goto-char (point-at-bol))
+	(outline-previous-heading))
+      ;; FIXME better use outline-end-of-subtree?
+      (let ((end-of-subtree
+	     (org-element-property :end (org-element-at-point)))
+	    found)
+	(while (and rgxps (not found))
+	  (if (and (car rgxps)
+		   (re-search-forward
+		    (car rgxps) end-of-subtree 'NOERROR))
+	      (setq found t)
+	    (pop rgxps))))
+
+      ;; (add-hook 'post-command-hook
+      ;; 		'outorg-copy-edits-and-exit
+      ;; 		 nil 'LOCAL)
+      (if funargs
+	  (funcall fun funargs)
+	(call-interactively fun))
+
+      ;; (message "marker-buf: %s" (marker-buffer org-log-note-marker))
+      ;; (message "marker-pos: %s" org-log-note-marker)
+      ;; (message "marker-buf: %s"
+      ;; 	       (marker-buffer org-log-note-return-to))
+      ;; (message "marker-pos: %s" org-log-note-return-to)
+
+      (if (not (marker-buffer org-log-note-marker))
+	  (outorg-copy-edits-and-exit)
+      	(org-add-log-note)
+	(org-set-local
+	 'org-finish-function
+	 'outshine-use-outorg-finish-store-log-note)
+	(message "org-finish-function: %s" org-finish-function)))))
+
+      ;; (outorg-copy-edits-and-exit))))
 
 ;; )
 
@@ -1267,21 +1295,6 @@ Sets the variable `outshine-use-outorg-last-headline-marker'."
       (move-marker outshine-use-outorg-last-headline-marker (point))
     (setq outshine-use-outorg-last-headline-marker
           (point-marker))))
-
-(defun outshine-clock-out ()
-  "Stop Org-mode clock started with `outshine-use-outorg'."
-  (if (integer-or-marker-p
-       outshine-use-outorg-last-headline-marker)
-      (save-excursion
-        (goto-char
-         (marker-position
-          outshine-use-outorg-last-headline-marker))
-        (outshine-use-outorg
-         (lambda ()
-           (ignore-errors
-             (org-clock-cancel))
-           (org-clock-in)
-           (org-clock-out))))))
     
 ;;;;; Hook function
 
@@ -2181,9 +2194,9 @@ i.e. the text following the regexp match until the next space character."
 
 
 ;; C-c C-c		org-ctrl-c-ctrl-c
-(defun outshine-ctrl-c-ctrl-c ()
+(defun outshine-ctrl-c-ctrl-c (&optional arg)
   "Call outorg to trigger `org-ctrl-c-ctrl-c'."
-  (interactive)
+  (interactive "P")
   (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
     (outshine-use-outorg
      'org-ctrl-c-ctrl-c arg
@@ -2529,16 +2542,6 @@ i.e. the text following the regexp match until the next space character."
      'org- nil
      (unless beg-of-header-p (outshine-pt-rgxps)))))
 
-;; C-c TAB		show-children
-;; C-c C-n		outline-next-visible-heading
-;; C-c C-p		outline-previous-visible-heading
-;; C-c C-u		outline-up-heading
-;; C-c ESC		Prefix Command
-;; C-c I		outline-previous-visible-heading
-;; C-c K		outline-next-visible-heading
-;; C-c C-<		outline-promote
-;; C-c C->		outline-demote
-
 ;; C-c C-M-l	org-insert-all-links
 (defun outshine-insert-all-links ()
   "Call outorg to trigger `org-insert-all-links'."
@@ -2872,11 +2875,29 @@ i.e. the text following the regexp match until the next space character."
      'org-next-link 'WHOLE-BUFFER-P
      (unless beg-of-header-p (outshine-pt-rgxps)))))
 
+;; ;; C-c C-x C-o	org-clock-out
+;; (defun outshine-clock-out ()
+;;   "Call outorg to trigger `org-clock-out'."
+;;   (interactive)
+;;   (outshine-use-outorg 'org-clock-out 'WHOLE-BUFFER-P))
+
 ;; C-c C-x C-o	org-clock-out
 (defun outshine-clock-out ()
-  "Call outorg to trigger `org-clock-out'."
+  "Stop Org-mode clock started with `outshine-use-outorg'."
   (interactive)
-  (outshine-use-outorg 'org-clock-out 'WHOLE-BUFFER-P))
+  (if (integer-or-marker-p
+       outshine-use-outorg-last-headline-marker)
+      (save-excursion
+        (goto-char
+         (marker-position
+          outshine-use-outorg-last-headline-marker))
+        (outshine-use-outorg
+         (lambda ()
+	   (interactive)
+	   (ignore-errors (org-clock-cancel))
+           (org-clock-in)
+	   (org-clock-out))
+	 'WHOLE-BUFFER-P))))
 
 ;; C-c C-x C-p	org-previous-link
 (defun outshine-previous-link ()
@@ -3461,14 +3482,14 @@ i.e. the text following the regexp match until the next space character."
 
 ;;;;;; [M-# Letter]
 
-  (outshine-define-key-with-fallback
-   outline-minor-mode-map (kbd "J")
-   (outline-hide-more) (outline-on-heading-p))
-  (outshine-define-key-with-fallback
-   outline-minor-mode-map (kbd "L")
-   (outline-show-more) (outline-on-heading-p))
-  (define-key map (kbd "I") 'outline-previous-visible-heading)
-  (define-key map (kbd "K") 'outline-next-visible-heading)
+  ;; (outshine-define-key-with-fallback
+  ;;  outline-minor-mode-map (kbd "J")
+  ;;  (outline-hide-more) (outline-on-heading-p))
+  ;; (outshine-define-key-with-fallback
+  ;;  outline-minor-mode-map (kbd "L")
+  ;;  (outline-show-more) (outline-on-heading-p))
+  ;; (define-key map (kbd "I") 'outline-previous-visible-heading)
+  ;; (define-key map (kbd "K") 'outline-next-visible-heading)
 
 ;;;;;; [M-# letter]
 
