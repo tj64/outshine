@@ -251,7 +251,7 @@ Used to override any major-mode specific file-local settings")
 A comment subtree does not open during visibility cycling.")
 
 (defconst outshine-latex-documentclass-regexp
-  "^[[:space:]]*\\\\documentclass\\(\\[.+]\\){0,1}{\\(.+\\)}"
+  "^[[:space:]]*\\\\documentclass\\(?:\\[.+]\\)?{\\(.+\\)}"
   "Regexp matching the document class in a latex doc (in submatch
   1)")
 
@@ -1546,7 +1546,7 @@ latex-mode) and just use it."
 	(save-restriction
 	  (widen)
 	  (goto-char (point-min))
-	  (re-search-forward navi-latex-documentclass-regexp
+	  (re-search-forward outshine-latex-documentclass-regexp
 			     nil 'NOERROR 1)
 	  (org-no-properties (match-string 1))))))))
 
