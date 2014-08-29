@@ -250,6 +250,11 @@ Used to override any major-mode specific file-local settings")
   "The tag that marks a subtree as comment.
 A comment subtree does not open during visibility cycling.")
 
+(defconst outshine-latex-documentclass-regexp
+  "^[[:space:]]*\\\\documentclass\\(\\[.+]\\){0,1}{\\(.+\\)}"
+  "Regexp matching the document class in a latex doc (in submatch
+  1)")
+
 ;;;; Vars
 
 ;; "\C-c" conflicts with other modes like e.g. ESS
@@ -685,6 +690,42 @@ characters will be undone together.
 This is configurable, because there is some impact on typing performance."
   :group 'outshine
   :type 'boolean)
+
+(defcustom outshine-latex-classes
+  '(("scrbook" . ((1 . "^[[:space:]]*\\\\part\\*?{\\(.+\\)}")
+		  (2 . "^[[:space:]]*\\\\chapter\\*?{\\(.+\\)}")
+		  (3 . "^[[:space:]]*\\\\section\\*?{\\(.+\\)}")
+		  (4 . "^[[:space:]]*\\\\subsection\\*?{\\(.+\\)}")
+		  (5 . "^[[:space:]]*\\\\subsubsection\\*?{\\(.+\\)}")
+		  (6 . "^[[:space:]]*\\\\paragraph\\*?{\\(.+\\)}")
+		  (7 . "^[[:space:]]*\\\\subparagraph\\*?{\\(.+\\)}")))
+    ("book" . ((1 . "^[[:space:]]*\\\\part\\*?{\\(.+\\)}")
+	       (2 . "^[[:space:]]*\\\\chapter\\*?{\\(.+\\)}")
+	       (3 . "^[[:space:]]*\\\\section\\*?{\\(.+\\)}")
+	       (4 . "^[[:space:]]*\\\\subsection\\*?{\\(.+\\)}")
+	       (5 . "^[[:space:]]*\\\\subsubsection\\*?{\\(.+\\)}")))
+    ("report" . ((1 . "^[[:space:]]*\\\\part\\*?{\\(.+\\)}")
+		 (2 . "^[[:space:]]*\\\\chapter\\*?{\\(.+\\)}")
+		 (3 . "^[[:space:]]*\\\\section\\*?{\\(.+\\)}")
+		 (4 . "^[[:space:]]*\\\\subsection\\*?{\\(.+\\)}")
+		 (5 . "^[[:space:]]*\\\\subsubsection\\*?{\\(.+\\)}")))
+    ("scrartcl" . ((1 . "^[[:space:]]*\\\\section\\*?{\\(.+\\)}")
+		   (2 . "^[[:space:]]*\\\\subsection\\*?{\\(.+\\)}")
+		   (3 . "^[[:space:]]*\\\\subsubsection\\*?{\\(.+\\)}")
+		   (4 . "^[[:space:]]*\\\\paragraph\\*?{\\(.+\\)}")
+		   (5 . "^[[:space:]]*\\\\subparagraph\\*?{\\(.+\\)}")))
+    ("article" . ((1 . "^[[:space:]]*\\\\section\\*?{\\(.+\\)}")
+		  (2 . "^[[:space:]]*\\\\subsection\\*?{\\(.+\\)}")
+		  (3 . "^[[:space:]]*\\\\subsubsection\\*?{\\(.+\\)}")
+		  (4 . "^[[:space:]]*\\\\paragraph\\*?{\\(.+\\)}")
+		  (5 . "^[[:space:]]*\\\\subparagraph\\*?{\\(.+\\)}"))))
+  "Sectioning structure of LaTeX classes.
+For each class, the outline level and a regexp matching the latex
+section are given (with section title in submatch 1)."
+  :group 'outshine
+  :type '(alist :key-type string
+                :value-type alist)) 
+
 
 ;;; Defuns
 ;;;; Functions
@@ -1483,6 +1524,31 @@ If yes, return this character."
   "Test if a level should not be changed by level promotion/demotion."
   (>= level 1000))
 
+;;;;; Special Case Latex-Mode
+
+(defun outshine-get-latex-documentclass (&optional buf-or-name no-check-p)
+  "Return latex document class of current-buffer.
+If BUF-OR-NAME is non-nil, use it instead of current buffer. If
+NO-CHECK-P is non-nil, assume BUF-OR-NAME is ok (i.e. live and in
+latex-mode) and just use it."
+  (catch 'exit
+  (let ((buf (cond
+	      ((and buf-or-name no-check-p) buf-or-name)
+	      ((and buf-or-name
+		    (buffer-live-p buf-or-name)
+		    (with-current-buffer buf-or-name
+		      (eq major-mode 'latex-mode)))
+	       buf-or-name)
+	      ((eq major-mode 'latex-mode) (current-buffer))
+	      (t (throw 'exit nil)))))
+    (with-current-buffer buf
+      (save-excursion
+	(save-restriction
+	  (widen)
+	  (goto-char (point-min))
+	  (re-search-forward navi-latex-documentclass-regexp
+			     nil 'NOERROR 1)
+	  (org-no-properties (match-string 1))))))))
 
 ;;;; Commands
 ;;;;; Additional outline commands
@@ -2151,6 +2217,67 @@ i.e. the text following the regexp match until the next space character."
       (funcall 'imenu
                (imenu-choose-buffer-index
                 "Headline: ")))))
+
+;;;;; Special Case Latex-mode
+
+(defun outshine-insert-headers-in-latex-buffer (&optional buf-or-name no-preamble-p)
+  "Insert outshine-headers in latex-buffer.
+Use current-buffer, unless BUF-OR-NAME is given. Add a 1st-level
+preamble header unless NO-PREAMBLE-P is non-nil."
+  (interactive
+   (when current-prefix-arg
+     (list (read-buffer "Latex-buffer: ")
+	   (y-or-n-p "Skip preamble "))))
+  (catch 'exit-let
+    (let* ((buf (cond
+		 ((and buf-or-name
+		       (buffer-live-p (get-buffer buf-or-name)) 
+		       (with-current-buffer buf-or-name
+			 (eq major-mode 'latex-mode)))
+		  buf-or-name)
+		 ((eq major-mode 'latex-mode) (current-buffer))
+		 (t (throw 'exit-let nil))))
+	   (doc-class (outshine-get-latex-documentclass
+		       buf 'NO-CHECK-P))
+	   (section-alist (cdr (assoc doc-class
+				      outshine-latex-classes))))
+      (with-current-buffer buf
+	(save-excursion
+	  (save-restriction
+	    (widen)
+	    (goto-char (point-min))
+	    (unless no-preamble-p
+	      (insert
+	       (concat
+		(outshine-calc-outline-string-at-level 1)
+		"Preamble\n")))
+	    (while (re-search-forward
+		    (concat 
+		     "\\("
+		     "\\\\part{\\|"
+		     "\\\\chapter{\\|"
+		     "\\\\section{\\|"
+		     "\\\\subsection{\\|"
+		     "\\\\subsubsection{\\|"
+		     "\\\\paragraph{\\|"
+		     "\\\\subparagraph{"
+		     "\\)") nil t)
+	      (save-excursion
+		(beginning-of-line)
+		(let ((rgxps (mapcar 'cdr section-alist)))
+		  (while rgxps
+		    (let ((rgxp (pop rgxps)))
+		      (when (looking-at rgxp)
+			(let ((title (match-string 1)))
+			  (insert
+			   (concat
+			    "\n"
+			    (outshine-calc-outline-string-at-level
+			     (car
+			      (rassoc rgxp section-alist)))
+			    title
+			    "\n"))
+			  (setq rgxps nil))))))))))))))
 
 ;;;;; Use Outorg for calling Org
 
