@@ -2326,7 +2326,7 @@ preamble header unless NO-PREAMBLE-P is non-nil."
 			    "\n"))
 			  (setq rgxps nil))))))))))))))
 
-(defun outshine-latex-command-on-current-subtree ()
+(defun outshine-TeX-command-region-on-subtree ()
   "Mark subtree and run `TeX-command-region'."
   (interactive)
   (save-excursion
