@@ -2326,6 +2326,14 @@ preamble header unless NO-PREAMBLE-P is non-nil."
 			    "\n"))
 			  (setq rgxps nil))))))))))))))
 
+(defun outshine-latex-command-on-current-subtree ()
+  "Mark subtree and run `TeX-command-region'."
+  (interactive)
+  (save-excursion
+    (outline-mark-subtree)
+    (call-interactively 'TeX-command-region))
+  (deactivate-mark))
+
 ;;;;; Use Outorg for calling Org
 
 ;; ;; TEMPLATE A
