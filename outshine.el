@@ -2220,6 +2220,53 @@ i.e. the text following the regexp match until the next space character."
 
 ;;;;; Special Case Latex-mode
 
+(defun outshine-insert-header-for-latex-section-at-point (&optional buf-or-name)
+  "Insert outshine-header for section at point in latex-buffer.
+Use current-buffer, unless BUF-OR-NAME is given."
+  (interactive
+   (when current-prefix-arg
+     (list (read-buffer "Latex-buffer: "))))
+  (catch 'exit-let
+    (let* ((buf (cond
+		 ((and buf-or-name
+		       (buffer-live-p (get-buffer buf-or-name)) 
+		       (with-current-buffer buf-or-name
+			 (eq major-mode 'latex-mode)))
+		  buf-or-name)
+		 ((eq major-mode 'latex-mode) (current-buffer))
+		 (t (throw 'exit-let nil))))
+	   (doc-class (outshine-get-latex-documentclass
+		       buf 'NO-CHECK-P))
+	   (section-alist (cdr (assoc doc-class
+				      outshine-latex-classes))))
+      (when (looking-at
+	     (concat "^[[:space:]]*"
+		     "\\("
+		     "\\\\part{\\|"
+		     "\\\\chapter{\\|"
+		     "\\\\section{\\|"
+		     "\\\\subsection{\\|"
+		     "\\\\subsubsection{\\|"
+		     "\\\\paragraph{\\|"
+		     "\\\\subparagraph{"
+		     "\\)"))
+	(save-excursion
+	  (beginning-of-line)
+	  (let ((rgxps (mapcar 'cdr section-alist)))
+	    (while rgxps
+	      (let ((rgxp (pop rgxps)))
+		(when (looking-at rgxp)
+		  (let ((title (match-string 1)))
+		    (insert
+		     (concat
+		      "\n"
+		      (outshine-calc-outline-string-at-level
+		       (car
+			(rassoc rgxp section-alist)))
+		      title
+		      "\n"))
+		    (setq rgxps nil)))))))))))
+
 (defun outshine-insert-headers-in-latex-buffer (&optional buf-or-name no-preamble-p)
   "Insert outshine-headers in latex-buffer.
 Use current-buffer, unless BUF-OR-NAME is given. Add a 1st-level
