@@ -2326,10 +2326,20 @@ preamble header unless NO-PREAMBLE-P is non-nil."
 			    "\n"))
 			  (setq rgxps nil))))))))))))))
 
-(defun outshine-TeX-command-region-on-subtree ()
-  "Mark subtree and run `TeX-command-region'."
-  (interactive)
+(defun outshine-TeX-command-region-on-subtree (&optional arg)
+  "Mark subtree and run `TeX-command-region'.
+With one prefix ARG, try to move up one level before marking the
+subtree, with two prefix ARGs, try to move up two levels before
+marking subtree (and subsequently run the tex command)."
+  (interactive "p")
   (save-excursion
+    (case arg
+      (4 (ignore-errors
+	   (outline-up-heading 1 t)))
+      (16 (ignore-errors
+	    (outline-up-heading 2 t)))
+      (t nil))
+    (message "%s" (point))
     (outline-mark-subtree)
     (call-interactively 'TeX-command-region))
   (deactivate-mark))
