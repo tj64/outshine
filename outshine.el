@@ -2222,7 +2222,8 @@ i.e. the text following the regexp match until the next space character."
 
 (defun outshine-latex-insert-header (&optional buf-or-name pt-or-marker)
   "Insert outshine-header for section at point in latex-buffer.
-Use current-buffer, unless BUF-OR-NAME is given."
+Use current-buffer, unless BUF-OR-NAME is given. Move to
+PT-OR-MARKER first if given."
   (interactive
    (when current-prefix-arg
      (list (read-buffer "Latex-buffer: "))))
@@ -2271,7 +2272,7 @@ Use current-buffer, unless BUF-OR-NAME is given."
 			(setq rgxps nil)))))))))))))
 
 (defun outshine-latex-insert-headers-in-buffer (&optional buf-or-name no-preamble-p)
-  "Insert outshine-headers in latex-buffer.
+  "Insert outshine-headers for all sections in latex-mode buffer.
 Use current-buffer, unless BUF-OR-NAME is given. Add a 1st-level
 preamble header unless NO-PREAMBLE-P is non-nil."
   (interactive
