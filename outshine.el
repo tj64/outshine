@@ -2220,7 +2220,7 @@ i.e. the text following the regexp match until the next space character."
 
 ;;;;; Special Case Latex-mode
 
-(defun outshine-insert-header-for-latex-section-at-point (&optional buf-or-name)
+(defun outshine-latex-insert-header (&optional buf-or-name pt-or-marker)
   "Insert outshine-header for section at point in latex-buffer.
 Use current-buffer, unless BUF-OR-NAME is given."
   (interactive
@@ -2239,35 +2239,38 @@ Use current-buffer, unless BUF-OR-NAME is given."
 		       buf 'NO-CHECK-P))
 	   (section-alist (cdr (assoc doc-class
 				      outshine-latex-classes))))
-      (when (looking-at
-	     (concat "^[[:space:]]*"
-		     "\\("
-		     "\\\\part{\\|"
-		     "\\\\chapter{\\|"
-		     "\\\\section{\\|"
-		     "\\\\subsection{\\|"
-		     "\\\\subsubsection{\\|"
-		     "\\\\paragraph{\\|"
-		     "\\\\subparagraph{"
-		     "\\)"))
+      (when pt-or-marker
 	(save-excursion
-	  (beginning-of-line)
-	  (let ((rgxps (mapcar 'cdr section-alist)))
-	    (while rgxps
-	      (let ((rgxp (pop rgxps)))
-		(when (looking-at rgxp)
-		  (let ((title (match-string 1)))
-		    (insert
-		     (concat
-		      "\n"
-		      (outshine-calc-outline-string-at-level
-		       (car
-			(rassoc rgxp section-alist)))
-		      title
-		      "\n"))
-		    (setq rgxps nil)))))))))))
+	  (goto-char pt-or-marker)
+	  (when (looking-at
+		 (concat "^[[:space:]]*"
+			 "\\("
+			 "\\\\part{\\|"
+			 "\\\\chapter{\\|"
+			 "\\\\section{\\|"
+			 "\\\\subsection{\\|"
+			 "\\\\subsubsection{\\|"
+			 "\\\\paragraph{\\|"
+			 "\\\\subparagraph{"
+			 "\\)"))
+	    (save-excursion
+	      (beginning-of-line)
+	      (let ((rgxps (mapcar 'cdr section-alist)))
+		(while rgxps
+		  (let ((rgxp (pop rgxps)))
+		    (when (looking-at rgxp)
+		      (let ((title (match-string 1)))
+			(insert
+			 (concat
+			  "\n"
+			  (outshine-calc-outline-string-at-level
+			   (car
+			    (rassoc rgxp section-alist)))
+			  title
+			  "\n"))
+			(setq rgxps nil)))))))))))))
 
-(defun outshine-insert-headers-in-latex-buffer (&optional buf-or-name no-preamble-p)
+(defun outshine-latex-insert-headers-in-buffer (&optional buf-or-name no-preamble-p)
   "Insert outshine-headers in latex-buffer.
 Use current-buffer, unless BUF-OR-NAME is given. Add a 1st-level
 preamble header unless NO-PREAMBLE-P is non-nil."
