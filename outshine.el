@@ -2240,36 +2240,39 @@ PT-OR-MARKER first if given."
 		       buf 'NO-CHECK-P))
 	   (section-alist (cdr (assoc doc-class
 				      outshine-latex-classes))))
-      (when pt-or-marker
+      (with-current-buffer buf
 	(save-excursion
-	  (goto-char pt-or-marker)
-	  (when (looking-at
-		 (concat "^[[:space:]]*"
-			 "\\("
-			 "\\\\part{\\|"
-			 "\\\\chapter{\\|"
-			 "\\\\section{\\|"
-			 "\\\\subsection{\\|"
-			 "\\\\subsubsection{\\|"
-			 "\\\\paragraph{\\|"
-			 "\\\\subparagraph{"
-			 "\\)"))
-	    (save-excursion
-	      (beginning-of-line)
-	      (let ((rgxps (mapcar 'cdr section-alist)))
-		(while rgxps
-		  (let ((rgxp (pop rgxps)))
-		    (when (looking-at rgxp)
-		      (let ((title (match-string 1)))
-			(insert
-			 (concat
-			  "\n"
-			  (outshine-calc-outline-string-at-level
-			   (car
-			    (rassoc rgxp section-alist)))
-			  title
-			  "\n"))
-			(setq rgxps nil)))))))))))))
+	  (save-restriction
+	    (widen)
+	    (when pt-or-marker
+	      (goto-char pt-or-marker))
+	    (when (looking-at
+		   (concat "^[[:space:]]*"
+			   "\\("
+			   "\\\\part{\\|"
+			   "\\\\chapter{\\|"
+			   "\\\\section{\\|"
+			   "\\\\subsection{\\|"
+			   "\\\\subsubsection{\\|"
+			   "\\\\paragraph{\\|"
+			   "\\\\subparagraph{"
+			   "\\)"))
+	      (save-excursion
+		(beginning-of-line)
+		(let ((rgxps (mapcar 'cdr section-alist)))
+		  (while rgxps
+		    (let ((rgxp (pop rgxps)))
+		      (when (looking-at rgxp)
+			(let ((title (match-string 1)))
+			  (insert
+			   (concat
+			    "\n"
+			    (outshine-calc-outline-string-at-level
+			     (car
+			      (rassoc rgxp section-alist)))
+			    title
+			    "\n"))
+			  (setq rgxps nil)))))))))))))))
 
 (defun outshine-latex-insert-headers-in-buffer (&optional buf-or-name no-preamble-p)
   "Insert outshine-headers for all sections in latex-mode buffer.
