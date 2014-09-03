@@ -2272,7 +2272,7 @@ PT-OR-MARKER first if given."
 			      (rassoc rgxp section-alist)))
 			    title
 			    "\n"))
-			  (setq rgxps nil)))))))))))))))
+			  (setq rgxps nil))))))))))))))
 
 (defun outshine-latex-insert-headers-in-buffer (&optional buf-or-name no-preamble-p)
   "Insert outshine-headers for all sections in latex-mode buffer.
