@@ -142,6 +142,12 @@
 ;; necessary before Emacs 24.3
 (require 'newcomment)
 
+(declare-function outorg-edit-as-org "outorg")
+(declare-function outorg-copy-edits-and-exit "outorg")
+(declare-function navi-map-keyboard-to-key "navi-mode")
+(declare-function navi-get-regexp "navi-mode")
+(declare-function idomenu "idomenu")
+
 ;;; Variables
 ;;;; Consts
 
@@ -326,6 +332,8 @@ them set by set, separated by a nil element.  See the example for
   "Stores current visibility state of buffer.")
 (make-variable-buffer-local
  'outshine-use-outorg-last-headline-marker)
+
+(defvar outshine-imenu-preliminary-generic-expression nil)
 
 ;;;; Hooks
 
@@ -1185,12 +1193,13 @@ Sets the variable `outshine-use-outorg-last-headline-marker'."
 	(goto-char
 	 (marker-position
 	  outshine-use-outorg-last-headline-marker))
-	(outshine-use-outorg
-	 (lambda ()
-	   (ignore-errors
-	     (org-clock-cancel))
-	   (org-clock-in)
-	   (org-clock-out))))))
+	(when (fboundp 'outshine-use-outorg)
+	  (outshine-use-outorg
+	   (lambda ()
+	     (ignore-errors
+	       (org-clock-cancel))
+	     (org-clock-in)
+	     (org-clock-out)))))))
     
 ;;;;; Hook function
 
