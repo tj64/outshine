@@ -1268,9 +1268,9 @@ org-element at point. Optionally, with WHOLE-BUFFER-P non-nil,
 `outorg-edit-as-org' can be called on the whole buffer.
 
 RGXPS should be a list of regexps as returned by
-`outshine-pt-rgxps', used to find the
-last buffer position of point in the source file when calling
-this function in the converted Org file.
+`outshine-pt-rgxps', used to find the last buffer position of
+point in the source file when calling this function in the
+converted Org file. [TODO => replace this with markers]
 
 Sets the variable `outshine-use-outorg-last-headline-marker' so
 that it always contains a point-marker to the last headline this
