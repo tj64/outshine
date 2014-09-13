@@ -292,19 +292,19 @@ Used to override any major-mode specific file-local settings")
     ("f" . (outshine-speed-move-safe
             'outline-forward-same-level))
     ;; [X]
-    ("b" . (outshine-speed-move-safe
-            'outline-backward-same-level))
-    ;; [X] FIXME gets stuck in the edit buffer
-    ("F" . outshine-next-block)
-    ;; [X] FIXME gets stuck in the edit buffer
-    ("B" . outshine-previous-block)
-    ;; [ ]
     ("u" . (outshine-speed-move-safe
             'outline-up-heading))
+    ;; [X]
+    ("b" . (outshine-speed-move-safe
+            'outline-backward-same-level))
+    ;; ;; [ ] FIXME gets stuck in the edit buffer
+    ;; ("F" . outshine-next-block)
+    ;; ;; [ ] FIXME gets stuck in the edit buffer
+    ;; ("B" . outshine-previous-block)
     ;; [ ]
-    ("j" . outshine-goto)
+    ("j" . outshine-navi)
     ;; [ ]
-    ("J" . outshine-use-outorg-goto)
+    ("J" . outshine-goto)
     ;; [ ]
     ("g" . outshine-refile)
     ;; [ ]
@@ -2259,7 +2259,7 @@ overwritten, and the table is not marked as requiring realignment."
         (deactivate-mark))
     (message "Not at headline, cannot narrow to subtree")))
 
-(defun outshine-goto ()
+(defun outshine-navi ()
   "Open or reuse *Navi* buffer for fast navigation.
 
 Switch to associated read-only *Navi* buffer for fast and
@@ -2613,14 +2613,14 @@ marking subtree (and subsequently run the tex command)."
 (defun outshine-goto ()
   "Call outorg to trigger `org-goto'."
   (interactive) 
-  (outshine-use-outorg 'outshine--org-goto t))
+  (outshine-use-outorg 'org-goto t t))
 
-(defun outshine--org-goto ()
-  "Call `org-goto' after setting `buffer-undo-list' to t."
-  (interactive)
-  (unless buffer-undo-list
-    (setq buffer-undo-list '((1 . 1))))
-  (call-interactively 'org-goto))
+;; (defun outshine--org-goto ()
+;;   "Call `org-goto' after setting `buffer-undo-list' to t."
+;;   (interactive)
+;;   (unless buffer-undo-list
+;;     (setq buffer-undo-list '((1 . 1))))
+;;   (call-interactively 'org-goto))
 
 ;; ;; C-c C-k		org-kill-note-or-show-branches
 
@@ -2964,19 +2964,25 @@ marking subtree (and subsequently run the tex command)."
 ;;      'org-previous-block 'WHOLE-BUFFER-P
 ;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
 
-;; C-c M-b		org-previous-block
-(defun outshine-previous-block (&optional arg)
-  "Call outorg to trigger `org-previous-block' in subtree.
-With prefix ARG, call function on whole buffer."
-  (interactive "P")
-  (outshine-use-outorg 'org-previous-block arg 'SET-UNDO-P))
+;; ;; C-c M-b		org-previous-block
+;; (defun outshine-previous-block ()
+;;   "Call outorg to trigger `org-previous-block' in subtree.
+;; With prefix ARG, call function on whole buffer."
+;;   (interactive)
+;;   (outshine-use-outorg
+;;    (lambda ()
+;;      (interactive)
+;;      (org-with-wide-buffer
+;;       (show-all)
+;;       (org-previous-block 1)))
+;;    'WHOLE-BUFFER-P 'SET-UNDO-P))
 
-;; C-c M-f		org-next-block
-(defun outshine-next-block (&optional arg)
-  "Call outorg to trigger `org-next-block' in subtree.
-With prefix ARG, call function on whole buffer."
-  (interactive "P")
-  (outshine-use-outorg 'org-next-block arg 'SET-UNDO-P))
+;; ;; C-c M-f		org-next-block
+;; (defun outshine-next-block (&optional arg)
+;;   "Call outorg to trigger `org-next-block' in subtree.
+;; With prefix ARG, call function on whole buffer."
+;;   (interactive "P")
+;;   (outshine-use-outorg 'org-next-block arg 'SET-UNDO-P))
 
 ;; ;; C-c M-l		org-insert-last-stored-link
 ;; (defun outshine-insert-last-stored-link ()
@@ -3988,8 +3994,8 @@ With prefix ARG, call function on whole buffer."
   ;; (define-key map (kbd "C-*") 'outshine-list-make-subtree)
   (define-key map (kbd "M-*") 'outshine-list-make-subtree)
   (define-key map (kbd "C-M-l") 'outshine-insert-all-links)
-  (define-key map (kbd "M-b") 'outshine-previous-block)
-  (define-key map (kbd "M-f") 'outshine-next-block)
+  ;; (define-key map (kbd "M-b") 'outshine-previous-block)
+  ;; (define-key map (kbd "M-f") 'outshine-next-block)
   (define-key map (kbd "M-l") 'outshine-insert-last-stored-link)
   ;; C-c M-o		tj/mail-subtree
   (define-key map (kbd "M-w") 'outshine-copy)
