@@ -282,16 +282,16 @@ Used to override any major-mode specific file-local settings")
 (defconst outshine-speed-commands-default
   '(
     ("Outline Navigation")
-    ;; [ ]
+    ;; [X]
     ("n" . (outshine-speed-move-safe
             'outline-next-visible-heading))
-    ;; [ ]
+    ;; [X]
     ("p" . (outshine-speed-move-safe
             'outline-previous-visible-heading))
-    ;; [ ]
+    ;; [X]
     ("f" . (outshine-speed-move-safe
             'outline-forward-same-level))
-    ;; [ ]
+    ;; [X]
     ("b" . (outshine-speed-move-safe
             'outline-backward-same-level))
     ;; ("F" . outshine-next-block)
@@ -311,7 +311,7 @@ Used to override any major-mode specific file-local settings")
     ("c" . outline-cycle)
     ;; [ ]
     ("C" . outshine-cycle-buffer)
-    ;; [ ]
+    ;; [X]
     (" " . (outshine-use-outorg
 	    'org-display-outline-path
             'WHOLE-BUFFER-P))
