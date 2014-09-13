@@ -282,76 +282,124 @@ Used to override any major-mode specific file-local settings")
 (defconst outshine-speed-commands-default
   '(
     ("Outline Navigation")
+    ;; [ ]
     ("n" . (outshine-speed-move-safe
             'outline-next-visible-heading))
+    ;; [ ]
     ("p" . (outshine-speed-move-safe
             'outline-previous-visible-heading))
+    ;; [ ]
     ("f" . (outshine-speed-move-safe
             'outline-forward-same-level))
+    ;; [ ]
     ("b" . (outshine-speed-move-safe
             'outline-backward-same-level))
     ;; ("F" . outshine-next-block)
     ;; ("B" . outshine-previous-block)
+    ;; [ ]
     ("u" . (outshine-speed-move-safe
             'outline-up-heading))
+    ;; [ ]
     ("j" . outshine-goto)
+    ;; [ ]
     ("J" . outshine-use-outorg-goto)
+    ;; [ ]
     ("g" . outshine-refile)
+    ;; [ ]
     ("Outline Visibility")
+    ;; [ ]
     ("c" . outline-cycle)
+    ;; [ ]
     ("C" . outshine-cycle-buffer)
+    ;; [ ]
     (" " . (outshine-use-outorg
 	    'org-display-outline-path
             'WHOLE-BUFFER-P))
+    ;; [ ]
     ("r" . outshine-narrow-to-subtree)
+    ;; [ ]
     ("w" . widen)
+    ;; [ ]
     ("=" . outshine-columns)
+    ;; [ ]
     ("Outline Structure Editing")
+    ;; [ ]
     ("^" . outline-move-subtree-up)
+    ;; [ ]
     ("<" . outline-move-subtree-down)
     ;; ("r" . outshine-metaright)
     ;; ("l" . outshine-metaleft)
+    ;; [ ]
     ("+" . outline-demote)
+    ;; [ ]
     ("-" . outline-promote)
+    ;; [ ]
     ("i" . outshine-insert-heading)
+    ;; [ ]
     ;; ("i" . (progn (forward-char 1)
     ;;            (call-interactively
     ;;             'outshine-insert-heading-respect-content)))
+    ;; [ ]
     ("^" . outshine-sort)
+    ;; [ ]
     ;; ("a" . (outshine-use-outorg
     ;;      'org-archive-subtree-default-with-confirmation))
+    ;; [ ]
     ("m" . outline-mark-subtree)
+    ;; [ ]
     ;; ("#" . outshine-toggle-comment)
+    ;; [ ]
     ("Clock Commands")
     ;; FIXME need improvements!
+    ;; [ ]
     ("I" . outshine-clock-in)
+    ;; [ ]
     ("O" . outshine-clock-out)
+    ;; [ ]
     ("Meta Data Editing")
+    ;; [ ]
     ("t" . outshine-todo)
+    ;; [ ]
     ("," . outshine-priority)
+    ;; [ ]
     ("0" . (outshine-use-outorg
 	    (lambda () (interactive) (org-priority ?\ ))))
+    ;; [ ]
     ("1" . (outshine-use-outorg
 	    (lambda () (interactive) (org-priority ?A))))
+    ;; [ ]
     ("2" . (outshine-use-outorg
 	    (lambda () (interactive) (org-priority ?B))))
+    ;; [ ]
     ("3" . (outshine-use-outorg
 	    (lambda () (interactive) (org-priority ?C))))
+    ;; [ ]
     (":" . outshine-set-tags-command)
+    ;; [ ]
     ("e" . outshine-set-effort)
+    ;; [ ]
     ("E" . outshine-inc-effort)
+    ;; [ ]
     ;; ("W" . (lambda(m) (interactive "sMinutes before warning: ")
     ;;       (outshine-entry-put (point) "APPT_WARNTIME" m)))
     ;; ("Agenda Views etc")
+    ;; [ ]
     ("v" . org-agenda)
+    ;; [ ]
     ("/" . outshine-sparse-tree)
+    ;; [ ]
     ("Misc")
+    ;; [ ]
     ("o" . outshine-open-at-point)
+    ;; [ ]
     ("?" . outshine-speed-command-help)
+    ;; [ ]
     ("<" . (outshine-agenda-set-restriction-lock))
+    ;; [ ]
     (">" . (outshine-agenda-remove-restriction-lock))
     )
   "The default speed commands.")
+
 
 (defconst outshine-comment-tag "comment"
   "The tag that marks a subtree as comment.
