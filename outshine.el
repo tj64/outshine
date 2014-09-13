@@ -294,8 +294,10 @@ Used to override any major-mode specific file-local settings")
     ;; [X]
     ("b" . (outshine-speed-move-safe
             'outline-backward-same-level))
-    ;; ("F" . outshine-next-block)
-    ;; ("B" . outshine-previous-block)
+    ;; [X] FIXME gets stuck in the edit buffer
+    ("F" . outshine-next-block)
+    ;; [X] FIXME gets stuck in the edit buffer
+    ("B" . outshine-previous-block)
     ;; [ ]
     ("u" . (outshine-speed-move-safe
             'outline-up-heading))
@@ -1412,11 +1414,18 @@ These regexps, if non-nil, match
   (outorg-copy-edits-and-exit))
   ;; (exit-recursive-edit))
 
-(defun outshine-use-outorg (fun &optional whole-buffer-p &rest funargs)
+(defun outshine-use-outorg (fun &optional whole-buffer-p set-undo-p &rest funargs)
   "Use outorg to call FUN with FUNARGS on subtree or thing at point.
 
 FUN should be an Org-mode function that acts on the subtree or
 org-element at point. Optionally, with WHOLE-BUFFER-P non-nil,
+`outorg-edit-as-org' can be called on the whole buffer.
+
+When SET-UNDO-P is non-nil, treat *outorg-edit-buffer* as
+modified even if `buffer-undo-list'is nil. This is useful for
+calling Org-functions that move point but don't modify the
+buffer, because it will cause point in the code-buffer to move to
+the same position.
 
 Sets the variable `outshine-use-outorg-last-headline-marker' so
 that it always contains a point-marker to the last headline this
@@ -1431,10 +1440,14 @@ on the headline."
 	(outorg-edit-as-org '(4))
       (outorg-edit-as-org))
     (setq outorg-called-via-outshine-use-outorg-p t)
+    (when set-undo-p
+      (setq outorg-set-buffer-undo-list-p t))
     (goto-char outorg-edit-buffer-point-marker)
     (if funargs
 	(funcall fun funargs)
       (call-interactively fun))))
+    ;; (when (equal (buffer-name) "*outorg-edit-buffer*")
+    ;;   (call-interactively 'outorg-copy-edits-and-exit))))
 
     ;; (if (not (marker-buffer org-log-note-marker))
     ;; 	(outorg-copy-edits-and-exit)
@@ -2943,7 +2956,6 @@ marking subtree (and subsequently run the tex command)."
 ;;      'org-insert-all-links nil
 ;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
 
-;; ;; C-c M-b		org-previous-block
 ;; (defun outshine-previous-block ()
 ;;   "Call outorg to trigger `org-previous-block'."
 ;;   (interactive)
@@ -2952,14 +2964,19 @@ marking subtree (and subsequently run the tex command)."
 ;;      'org-previous-block 'WHOLE-BUFFER-P
 ;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
 
-;; ;; C-c M-f		org-next-block
-;; (defun outshine-next-block ()
-;;   "Call outorg to trigger `org-next-block'."
-;;   (interactive)
-;;   (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
-;;     (outshine-use-outorg
-;;      'org-next-block 'WHOLE-BUFFER-P
-;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
+;; C-c M-b		org-previous-block
+(defun outshine-previous-block (&optional arg)
+  "Call outorg to trigger `org-previous-block' in subtree.
+With prefix ARG, call function on whole buffer."
+  (interactive "P")
+  (outshine-use-outorg 'org-previous-block arg 'SET-UNDO-P))
+
+;; C-c M-f		org-next-block
+(defun outshine-next-block (&optional arg)
+  "Call outorg to trigger `org-next-block' in subtree.
+With prefix ARG, call function on whole buffer."
+  (interactive "P")
+  (outshine-use-outorg 'org-next-block arg 'SET-UNDO-P))
 
 ;; ;; C-c M-l		org-insert-last-stored-link
 ;; (defun outshine-insert-last-stored-link ()
