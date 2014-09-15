@@ -301,7 +301,7 @@ Used to override any major-mode specific file-local settings")
     ;; ("F" . outshine-next-block)
     ;; ;; [ ] FIXME gets stuck in the edit buffer
     ;; ("B" . outshine-previous-block)
-    ;; [ ]
+    ;; [X]
     ("j" . outshine-navi)
     ;; [ ]
     ("J" . outshine-goto)
@@ -309,17 +309,17 @@ Used to override any major-mode specific file-local settings")
     ("g" . outshine-refile)
     ;; [ ]
     ("Outline Visibility")
-    ;; [ ]
+    ;; [X]
     ("c" . outline-cycle)
-    ;; [ ]
+    ;; [X]
     ("C" . outshine-cycle-buffer)
     ;; [X]
     (" " . (outshine-use-outorg
 	    'org-display-outline-path
             'WHOLE-BUFFER-P))
-    ;; [ ]
+    ;; [X]
     ("r" . outshine-narrow-to-subtree)
-    ;; [ ]
+    ;; [X]
     ("w" . widen)
     ;; [ ]
     ("=" . outshine-columns)
@@ -1414,14 +1414,14 @@ These regexps, if non-nil, match
   (outorg-copy-edits-and-exit))
   ;; (exit-recursive-edit))
 
-(defun outshine-use-outorg (fun &optional whole-buffer-p set-undo-p &rest funargs)
+(defun outshine-use-outorg (fun &optional whole-buffer-p set-modified-p &rest funargs)
   "Use outorg to call FUN with FUNARGS on subtree or thing at point.
 
 FUN should be an Org-mode function that acts on the subtree or
 org-element at point. Optionally, with WHOLE-BUFFER-P non-nil,
 `outorg-edit-as-org' can be called on the whole buffer.
 
-When SET-UNDO-P is non-nil, treat *outorg-edit-buffer* as
+When SET-MODIFIED-P is non-nil, treat *outorg-edit-buffer* as
 modified even if `buffer-undo-list'is nil. This is useful for
 calling Org-functions that move point but don't modify the
 buffer, because it will cause point in the code-buffer to move to
@@ -1435,18 +1435,18 @@ on the headline."
   (save-excursion
     (unless (outline-on-heading-p)
       (outline-previous-heading))
-    (outshine--set-outorg-last-headline-marker)
+    (outshine--set-outorg-last-headline-marker))
     (if whole-buffer-p
 	(outorg-edit-as-org '(4))
       (outorg-edit-as-org))
     (setq outorg-called-via-outshine-use-outorg-p t)
-    (when set-undo-p
-      (setq outorg-set-buffer-undo-list-p t))
+    (when set-modified-p
+      (setq outorg-treat-buffer-as-modified-p t))
     (goto-char outorg-edit-buffer-point-marker)
     (if funargs
 	(funcall fun funargs)
       (call-interactively fun))
-    (outorg-copy-edits-and-exit)))
+    (outorg-copy-edits-and-exit))
 
 (defun outshine--set-outorg-last-headline-marker ()
   "Set a point-marker to current header and remove old marker.
