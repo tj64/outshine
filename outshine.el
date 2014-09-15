@@ -380,20 +380,25 @@ Used to override any major-mode specific file-local settings")
 	    (lambda () (interactive) (org-priority ?C))))
     ;; [X]
     (":" . outshine-set-tags-command)
-    ;; [X]
-    ("e" . outshine-set-effort)
-    ;; [X]
-    ("E" . outshine-inc-effort)
     ;; [ ]
     ;; ("W" . (lambda(m) (interactive "sMinutes before warning: ")
     ;;       (outshine-entry-put (point) "APPT_WARNTIME" m)))
-    ;; ("Agenda Views etc")
+    ("Properties and Effort")
     ;; [X]
     ("y" . outshine-set-property)
     ;; [X]
     ("Y" . outshine-set-property-and-value)
+    ;; [X]
+    ("e" . outshine-set-effort)
+    ;; [X]
+    ("E" . outshine-inc-effort)
+    ;; ("Agenda Views etc")
     ;; [ ]
     ("v" . org-agenda)
+    ;; [ ]
+    ("<" . (outshine-agenda-set-restriction-lock))
+    ;; [ ]
+    (">" . (outshine-agenda-remove-restriction-lock))
     ;; ;; CANCELLED makes no sense
     ;; ("/" . outshine-sparse-tree)
     ;; [ ]
@@ -402,10 +407,6 @@ Used to override any major-mode specific file-local settings")
     ("o" . outshine-open-at-point)
     ;; [X]
     ("?" . outshine-speed-command-help)
-    ;; [ ]
-    ("<" . (outshine-agenda-set-restriction-lock))
-    ;; [ ]
-    (">" . (outshine-agenda-remove-restriction-lock))
     )
   "The default speed commands.")
 
@@ -3454,19 +3455,19 @@ Similar semantics to `org-next-block'."
 ;;   (interactive)
 ;;   (outshine-use-outorg 'org-timer-set-timer))
 
-;; ;; C-c C-x <	org-agenda-set-restriction-lock
-;; (defun outshine-agenda-set-restriction-lock ()
-;;   "Call outorg to trigger `org-agenda-set-restriction-lock'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-agenda-set-restriction-lock
-;; 		       'WHOLE-BUFFER-P))
+;; C-c C-x <	org-agenda-set-restriction-lock
+(defun outshine-agenda-set-restriction-lock (&optional arg)
+  "Call outorg to trigger `org-agenda-set-restriction-lock'."
+  (interactive "P")
+  (outshine-use-outorg
+   'org-agenda-set-restriction-lock (equal arg '(4))) nil arg)
 
-;; ;; C-c C-x >	org-agenda-remove-restriction-lock
-;; (defun outshine-agenda-remove-restriction-lock ()
-;;   "Call outorg to trigger `org-agenda-remove-restriction-lock'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-agenda-remove-restriction-lock
-;; 		       'WHOLE-BUFFER-P))
+;; C-c C-x >	org-agenda-remove-restriction-lock
+(defun outshine-agenda-remove-restriction-lock ()
+  "Call outorg to trigger `org-agenda-remove-restriction-lock'."
+  (interactive)
+  (outshine-use-outorg 'org-agenda-remove-restriction-lock
+		       'WHOLE-BUFFER-P))
 
 ;; ;; C-c C-x A	org-archive-to-archive-sibling
 ;; (defun outshine-archive-to-archive-sibling ()
