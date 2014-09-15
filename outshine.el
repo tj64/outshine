@@ -297,10 +297,10 @@ Used to override any major-mode specific file-local settings")
     ;; [X]
     ("b" . (outshine-speed-move-safe
             'outline-backward-same-level))
-    ;; ;; [ ] FIXME gets stuck in the edit buffer
-    ;; ("F" . outshine-next-block)
-    ;; ;; [ ] FIXME gets stuck in the edit buffer
-    ;; ("B" . outshine-previous-block)
+    ;; [X] similar semantics
+    ("F" . outshine-next-block)
+    ;; [X] similar semantics
+    ("B" . outshine-previous-block)
     ;; [X]
     ("j" . outshine-navi)
     ;; [X]
@@ -333,8 +333,8 @@ Used to override any major-mode specific file-local settings")
     ("-" . outline-promote)
     ;; [X]
     ("i" . outshine-insert-heading)
-    ;; [ ]
-    ("^" . outshine-sort)
+    ;; [X] FIXME handle markers, special cases
+    ("^" . outshine-sort-entries)
     ;; [ ]
     ;; ("a" . (outshine-use-outorg
     ;;      'org-archive-subtree-default-with-confirmation))
@@ -349,6 +349,11 @@ Used to override any major-mode specific file-local settings")
     ("I" . outshine-clock-in)
     ;; [ ]
     ("O" . outshine-clock-out)
+    ("Date & Time Commands")
+    ;; [X]
+    ("." . outshine-time-stamp)
+    ;; [X]
+    ("!" . outshine-time-stamp-inactive)
     ("Meta Data Editing")
     ;; [ ]
     ("t" . outshine-todo)
@@ -2677,14 +2682,28 @@ REFERENCE-BUFFER."
 ;;      'org-table-blank-field nil
 ;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
 
-;; ;; C-c !		org-time-stamp-inactive
-;; (defun outshine-time-stamp-inactive ()
-;;   "Call outorg to trigger `org-time-stamp-inactive'."
-;;   (interactive)
-;;   (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
-;;     (outshine-use-outorg
-;;      'org-time-stamp-inactive nil
-;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
+;; C-c !		org-time-stamp-inactive
+(defun outshine-time-stamp-inactive (&optional arg)
+  "Call outorg to trigger `org-time-stamp-inactive'."
+  (interactive "P")
+  (outshine-use-outorg 
+   (lambda ()
+     (interactive)
+     (if (not (org-on-heading-p))
+	 	 (if arg
+		     (org-time-stamp-inactive arg)
+		   (org-time-stamp))
+       (or
+	(and
+	 (re-search-forward org-element--timestamp-regexp nil t)
+	 (ignore-errors (goto-char (match-beginning 0))))
+	(and
+	 (re-search-forward org-complex-heading-regexp nil t)
+	 (ignore-errors (goto-char (match-end 4)))))
+       (insert-char ? )
+       (if arg
+	   (org-time-stamp-inactive arg)
+	 (org-time-stamp-inactive))))))
 
 ;; ;; C-c #		org-update-statistics-cookies
 ;; (defun outshine-update-statistics-cookies ()
@@ -2767,14 +2786,24 @@ REFERENCE-BUFFER."
 ;;      'org-ctrl-c-minus nil
 ;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
 
-;; ;; C-c .		org-time-stamp
-;; (defun outshine-time-stamp ()
-;;   "Call outorg to trigger `org-time-stamp'."
-;;   (interactive)
-;;   (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
-;;     (outshine-use-outorg
-;;      'org-time-stamp nil
-;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
+;; C-c .		org-time-stamp
+(defun outshine-time-stamp (&optional arg)
+  "Call outorg to trigger `org-time-stamp'."
+  (interactive "P")
+  (outshine-use-outorg 
+   (lambda ()
+     (interactive)
+     (if (not (org-on-heading-p))
+	 (if arg (org-time-stamp arg) (org-time-stamp nil))
+       (or
+	(and
+	 (re-search-forward org-element--timestamp-regexp nil t)
+	 (ignore-errors (goto-char (match-beginning 0))))
+	(and
+	 (re-search-forward org-complex-heading-regexp nil t)
+	 (ignore-errors (goto-char (match-end 4)))))
+       (insert-char ? )
+       	 (if arg (org-time-stamp arg) (org-time-stamp nil))))))
 
 ;; CANCELLED makes no sense
 ;; ;; C-c /		org-sparse-tree
@@ -2846,12 +2875,13 @@ REFERENCE-BUFFER."
 ;;   (interactive)
 ;;   (outshine-use-outorg 'org-match-sparse-tree 'WHOLE-BUFFER-P))
 
-;; ;; C-c ^		org-sort
-(defun outshine-sort ()
-  "Call outorg to trigger `org-sort'."
-  (interactive)
-  (outshine-use-outorg
-   'org-sort 'WHOLE-BUFFER-P))
+;; FIXME handle markers for sorting regionso2
+;; C-c ^		org-sort
+(defun outshine-sort-entries (&optional arg)
+  "Call outorg to trigger `org-sort'.
+With prefix ARG, use whole buffer."
+  (interactive "P")
+  (outshine-use-outorg 'org-sort-entries arg))
 
 ;; ;; C-c `		org-table-edit-field
 ;; (defun outshine-table-edit-field ()
@@ -2929,24 +2959,18 @@ REFERENCE-BUFFER."
 ;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
 
 ;; ;; C-c M-b		org-previous-block
-;; (defun outshine-previous-block ()
-;;   "Call outorg to trigger `org-previous-block' in subtree.
-;; With prefix ARG, call function on whole buffer."
-;;   (interactive)
-;;   (outshine-use-outorg
-;;    (lambda ()
-;;      (interactive)
-;;      (org-with-wide-buffer
-;;       (show-all)
-;;       (org-previous-block 1)))
-;;    'WHOLE-BUFFER-P 'SET-UNDO-P))
+(defun outshine-previous-block ()
+  "Call outorg to trigger `forward-comment' in subtree.
+Similar semantics to `org-previous-block'."
+  (interactive)
+  (forward-comment -10000))
 
-;; ;; C-c M-f		org-next-block
-;; (defun outshine-next-block (&optional arg)
-;;   "Call outorg to trigger `org-next-block' in subtree.
-;; With prefix ARG, call function on whole buffer."
-;;   (interactive "P")
-;;   (outshine-use-outorg 'org-next-block arg 'SET-UNDO-P))
+;; C-c M-f		org-next-block
+(defun outshine-next-block ()
+  "Call outorg to trigger `forward-comment' in subtree.
+Similar semantics to `org-next-block'."
+  (interactive)
+  (forward-comment 10000))
 
 ;; ;; C-c M-l		org-insert-last-stored-link
 ;; (defun outshine-insert-last-stored-link ()
@@ -3852,7 +3876,7 @@ REFERENCE-BUFFER."
   (define-key map (kbd "?") 'outshine-table-field-info)
   (define-key map (kbd "@") 'outshine-mark-subtree)
   (define-key map (kbd "\\") 'outshine-match-sparse-tree)
-  (define-key map (kbd "^") 'outshine-sort)
+  (define-key map (kbd "^") 'outshine-sort-entries)
   (define-key map (kbd "`") 'outshine-table-edit-field)
   (define-key map (kbd "{") 'outshine-table-toggle-formula-debugger)
   (define-key map (kbd "|")
@@ -3960,8 +3984,8 @@ REFERENCE-BUFFER."
   ;; (define-key map (kbd "C-*") 'outshine-list-make-subtree)
   (define-key map (kbd "M-*") 'outshine-list-make-subtree)
   (define-key map (kbd "C-M-l") 'outshine-insert-all-links)
-  ;; (define-key map (kbd "M-b") 'outshine-previous-block)
-  ;; (define-key map (kbd "M-f") 'outshine-next-block)
+  (define-key map (kbd "M-b") 'outshine-previous-block)
+  (define-key map (kbd "M-f") 'outshine-next-block)
   (define-key map (kbd "M-l") 'outshine-insert-last-stored-link)
   ;; C-c M-o		tj/mail-subtree
   (define-key map (kbd "M-w") 'outshine-copy)
