@@ -303,11 +303,10 @@ Used to override any major-mode specific file-local settings")
     ;; ("B" . outshine-previous-block)
     ;; [X]
     ("j" . outshine-navi)
-    ;; [ ]
+    ;; [X]
     ("J" . outshine-goto)
     ;; [ ]
     ("g" . outshine-refile)
-    ;; [ ]
     ("Outline Visibility")
     ;; [X]
     ("c" . outline-cycle)
@@ -323,30 +322,23 @@ Used to override any major-mode specific file-local settings")
     ("w" . widen)
     ;; [ ]
     ("=" . outshine-columns)
-    ;; [ ]
     ("Outline Structure Editing")
-    ;; [ ]
-    ("^" . outline-move-subtree-up)
-    ;; [ ]
-    ("<" . outline-move-subtree-down)
-    ;; ("r" . outshine-metaright)
-    ;; ("l" . outshine-metaleft)
-    ;; [ ]
+    ;; [X] FIXME error with oldschool elisp headers
+    ("U" . outline-move-subtree-up)
+    ;; [X] FIXME error with oldschool elisp headers
+    ("D" . outline-move-subtree-down)
+    ;; [X]
     ("+" . outline-demote)
-    ;; [ ]
+    ;; [X]
     ("-" . outline-promote)
-    ;; [ ]
+    ;; [X]
     ("i" . outshine-insert-heading)
-    ;; [ ]
-    ;; ("i" . (progn (forward-char 1)
-    ;;            (call-interactively
-    ;;             'outshine-insert-heading-respect-content)))
     ;; [ ]
     ("^" . outshine-sort)
     ;; [ ]
     ;; ("a" . (outshine-use-outorg
     ;;      'org-archive-subtree-default-with-confirmation))
-    ;; [ ]
+    ;; [X]
     ("m" . outline-mark-subtree)
     ;; [ ]
     ;; ("#" . outshine-toggle-comment)
@@ -361,25 +353,25 @@ Used to override any major-mode specific file-local settings")
     ("Meta Data Editing")
     ;; [ ]
     ("t" . outshine-todo)
-    ;; [ ]
+    ;; [X]
     ("," . outshine-priority)
-    ;; [ ]
+    ;; [X]
     ("0" . (outshine-use-outorg
 	    (lambda () (interactive) (org-priority ?\ ))))
-    ;; [ ]
+    ;; [X]
     ("1" . (outshine-use-outorg
 	    (lambda () (interactive) (org-priority ?A))))
-    ;; [ ]
+    ;; [X]
     ("2" . (outshine-use-outorg
 	    (lambda () (interactive) (org-priority ?B))))
-    ;; [ ]
+    ;; [X]
     ("3" . (outshine-use-outorg
 	    (lambda () (interactive) (org-priority ?C))))
-    ;; [ ]
+    ;; [X]
     (":" . outshine-set-tags-command)
-    ;; [ ]
+    ;; [X]
     ("e" . outshine-set-effort)
-    ;; [ ]
+    ;; [X]
     ("E" . outshine-inc-effort)
     ;; [ ]
     ;; ("W" . (lambda(m) (interactive "sMinutes before warning: ")
@@ -1444,7 +1436,8 @@ on the headline."
       (setq outorg-treat-buffer-as-modified-p t))
     (goto-char outorg-edit-buffer-point-marker)
     (if funargs
-	(funcall fun funargs)
+	;; (funcall fun funargs)
+	(apply fun funargs)
       (call-interactively fun))
     (outorg-copy-edits-and-exit))
 
@@ -2712,10 +2705,10 @@ marking subtree (and subsequently run the tex command)."
 ;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
 
 ;; ;; C-c ,		org-priority
-;; (defun outshine-priority ()
-;;   "Call outorg to trigger `org-priority'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-priority))
+(defun outshine-priority ()
+  "Call outorg to trigger `org-priority'."
+  (interactive)
+  (outshine-use-outorg 'org-priority))
 
 ;; ;; FIXME:
 ;; ;; - cursor moves to parent header
@@ -2808,13 +2801,11 @@ marking subtree (and subsequently run the tex command)."
 ;;   (outshine-use-outorg 'org-match-sparse-tree 'WHOLE-BUFFER-P))
 
 ;; ;; C-c ^		org-sort
-;; (defun outshine-sort ()
-;;   "Call outorg to trigger `org-sort'."
-;;   (interactive)
-;;   (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
-;;     (outshine-use-outorg
-;;      'org-sort 'WHOLE-BUFFER-P
-;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
+(defun outshine-sort ()
+  "Call outorg to trigger `org-sort'."
+  (interactive)
+  (outshine-use-outorg
+   'org-sort 'WHOLE-BUFFER-P))
 
 ;; ;; C-c `		org-table-edit-field
 ;; (defun outshine-table-edit-field ()
@@ -3399,10 +3390,10 @@ marking subtree (and subsequently run the tex command)."
 
 ;; ;; C-c C-x D	org-shiftmetadown
 ;; ;; C-c C-x E	org-inc-effort
-;; (defun outshine-inc-effort ()
-;;   "Call outorg to trigger `org-inc-effort'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-inc-effort))
+(defun outshine-inc-effort ()
+  "Call outorg to trigger `org-inc-effort'."
+  (interactive)
+  (outshine-use-outorg 'org-inc-effort))
 
 ;; ;; C-c C-x G	org-feed-goto-inbox
 ;; (defun outshine-feed-goto-inbox ()
@@ -3478,10 +3469,11 @@ marking subtree (and subsequently run the tex command)."
 ;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
 
 ;; ;; C-c C-x e	org-set-effort
-;; (defun outshine-set-effort ()
-;;   "Call outorg to trigger `org-set-effort'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-set-effort))
+(defun outshine-set-effort (&optional arg)
+  "Call outorg to trigger `org-set-effort'."
+  (interactive "p")
+  (outshine-use-outorg
+   'org-set-effort nil nil arg))
 
 ;; ;; C-c C-x f	org-footnote-action
 ;; (defun outshine-footnote-action ()
