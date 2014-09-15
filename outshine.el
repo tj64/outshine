@@ -383,9 +383,9 @@ Used to override any major-mode specific file-local settings")
     ("/" . outshine-sparse-tree)
     ;; [ ]
     ("Misc")
-    ;; [ ]
+    ;; [X]
     ("o" . outshine-open-at-point)
-    ;; [ ]
+    ;; [X]
     ("?" . outshine-speed-command-help)
     ;; [ ]
     ("<" . (outshine-agenda-set-restriction-lock))
@@ -2556,13 +2556,21 @@ marking subtree (and subsequently run the tex command)."
 ;; ;; C-c RET		org-ctrl-c-ret
 
 ;; ;; C-c C-o		org-open-at-point
-;; (defun outshine-open-at-point ()
-;;   "Call outorg to trigger `org-open-at-point'."
-;;   (interactive)
-;;   (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
-;;     (outshine-use-outorg
-;;      'org-open-at-point nil
-;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
+(defun outshine-open-at-point (&optional whole-buffer-p arg reference-buffer)
+  "Call3 outorg to trigger `org-open-at-point'.
+With one prefix argument, use whole buffer, with two prefix
+arguments, prompt user for function args WHOLE-BUFFER-P, ARG and
+REFERENCE-BUFFER."
+  (interactive
+   (cond
+    ((equal current-prefix-arg '(16))
+     (list (y-or-n-p "Use whole buffer ")
+	   (y-or-n-p "Provide ARG ")
+	   (read-buffer "Reference-buffer: ")))
+    (current-prefix-arg (list t))
+    (t nil)))
+  (outshine-use-outorg
+   'org-open-at-point whole-buffer-p nil arg reference-buffer))
 
 ;; C-c C-q		org-set-tags-command
 (defun outshine-set-tags-command ()
