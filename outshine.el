@@ -341,7 +341,7 @@ Used to override any major-mode specific file-local settings")
     ;; [X]
     ("m" . outline-mark-subtree)
     ;; [ ]
-    ;; ("#" . outshine-toggle-comment)
+    ("#" . outshine-toggle-comment)
     ;; [ ]
     ("Clock Commands")
     ;; FIXME need improvements!
@@ -349,7 +349,6 @@ Used to override any major-mode specific file-local settings")
     ("I" . outshine-clock-in)
     ;; [ ]
     ("O" . outshine-clock-out)
-    ;; [ ]
     ("Meta Data Editing")
     ;; [ ]
     ("t" . outshine-todo)
@@ -377,10 +376,14 @@ Used to override any major-mode specific file-local settings")
     ;; ("W" . (lambda(m) (interactive "sMinutes before warning: ")
     ;;       (outshine-entry-put (point) "APPT_WARNTIME" m)))
     ;; ("Agenda Views etc")
+    ;; [X]
+    ("y" . outshine-set-property)
+    ;; [X]
+    ("Y" . outshine-set-property-and-value)
     ;; [ ]
     ("v" . org-agenda)
-    ;; [ ]
-    ("/" . outshine-sparse-tree)
+    ;; ;; CANCELLED makes no sense
+    ;; ("/" . outshine-sparse-tree)
     ;; [ ]
     ("Misc")
     ;; [X]
@@ -2600,7 +2603,41 @@ REFERENCE-BUFFER."
 ;; (defun outshine-todo ()
 ;;   "Call outorg to trigger `org-todo'."
 ;;   (interactive)
-;;     (outshine-use-outorg 'org-todo))
+;;   (let ((org-log-buffer-setup-hook nil)
+;; 	(org-log-done nil)
+;; 	(org-log-done-with-time nil)
+;; 	(org-log-into-drawer nil)
+;; 	(org-log-note-clock-out nil)
+;; 	(org-log-note-effective-time nil)
+;; 	(org-log-note-extra nil)
+;; 	(org-log-note-headings nil)
+;; 	(org-log-note-how nil)
+;; 	(org-log-note-marker nil)
+;; 	(org-log-note-previous-state nil)
+;; 	(org-log-note-purpose nil)
+;; 	(org-log-note-return-to nil)
+;; 	(org-log-note-state nil)
+;; 	(org-log-note-window-configuration nil)
+;; 	(org-log-post-message nil)
+;; 	(org-log-redeadline nil)
+;; 	(org-log-refile nil)
+;; 	(org-log-repeat nil)
+;; 	(org-log-reschedule nil)
+;; 	(org-log-state-notes-insert-after-drawers nil)
+;; 	(org-log-state-notes-into-drawer nil)
+;; 	(org-log-states-order-reversed nil))
+;;     (outshine-use-outorg 'org-todo)))
+
+(defun outshine-todo ()
+  "Call outorg to trigger `org-todo'."
+  (interactive)
+  (outshine-use-outorg
+   (lambda ()
+     (interactive)
+     (remove-hook 'post-command-hook 'org-add-log-note)
+     (org-todo)
+     (add-hook 'post-command-hook 'org-add-log-note))))
+
 
 ;; ;; C-c C-v		Prefix Command
 
@@ -2739,6 +2776,7 @@ REFERENCE-BUFFER."
 ;;      'org-time-stamp nil
 ;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
 
+;; CANCELLED makes no sense
 ;; ;; C-c /		org-sparse-tree
 ;; (defun outshine-sparse-tree ()
 ;;   "Call outorg to trigger `org-sparse-tree'."
@@ -2754,11 +2792,11 @@ REFERENCE-BUFFER."
 ;;      'org-toggle-fixed-width nil
 ;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
 
-;; ;; C-c ;		org-toggle-comment
-;; (defun outshine-toggle-comment ()
-;;   "Call outorg to trigger `org-toggle-comment'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-toggle-comment))
+;; C-c ;		org-toggle-comment
+(defun outshine-toggle-comment ()
+  "Call outorg to trigger `org-toggle-comment'."
+  (interactive)
+  (outshine-use-outorg 'org-toggle-comment))
 
 ;; ;; C-c <		org-date-from-calendar
 ;; (defun outshine-date-from-calendar ()
@@ -3397,7 +3435,8 @@ REFERENCE-BUFFER."
 ;; 		       'WHOLE-BUFFER-P))
 
 ;; ;; C-c C-x D	org-shiftmetadown
-;; ;; C-c C-x E	org-inc-effort
+
+;; C-c C-x E	org-inc-effort
 (defun outshine-inc-effort ()
   "Call outorg to trigger `org-inc-effort'."
   (interactive)
@@ -3418,11 +3457,11 @@ REFERENCE-BUFFER."
 ;;   (outshine-use-outorg 'org-insert-todo-heading
 ;; 		       (= (prefix-numeric-value arg) 16)))
 
-;; ;; C-c C-x P	org-set-property-and-value
-;; (defun outshine-set-property-and-value ()
-;;   "Call outorg to trigger `org-set-property-and-value'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-set-property-and-value))
+;; C-c C-x P	org-set-property-and-value
+(defun outshine-set-property-and-value ()
+  "Call outorg to trigger `org-set-property-and-value'."
+  (interactive)
+  (outshine-use-outorg 'org-set-property-and-value))
 
 ;; ;; C-c C-x R	org-shiftmetaright
 ;; ;; C-c C-x U	org-shiftmetaup
@@ -3516,11 +3555,11 @@ REFERENCE-BUFFER."
 ;;   (interactive)
 ;;   (outshine-use-outorg 'org-toggle-ordered-property))
 
-;; ;; C-c C-x p	org-set-property
-;; (defun outshine-set-property ()
-;;   "Call outorg to trigger `org-set-property'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-set-property))
+;; C-c C-x p	org-set-property
+(defun outshine-set-property ()
+  "Call outorg to trigger `org-set-property'."
+  (interactive)
+  (outshine-use-outorg 'org-set-property))
 
 ;; ;; C-c C-x q	org-toggle-tags-groups
 ;; (defun outshine-toggle-tags-groups ()
@@ -3804,7 +3843,7 @@ REFERENCE-BUFFER."
   (define-key map (kbd ",") 'outshine-priority)
   (define-key map (kbd "-") 'outshine-ctrl-c-minus)
   (define-key map (kbd ".") 'outshine-time-stamp)
-  (define-key map (kbd "/") 'outshine-sparse-tree)
+  ;; (define-key map (kbd "/") 'outshine-sparse-tree)
   (define-key map (kbd ":") 'outshine-toggle-fixed-width)
   (define-key map (kbd ";") 'outshine-toggle-comment)
   (define-key map (kbd "<") 'outshine-date-from-calendar)
