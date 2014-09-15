@@ -1445,81 +1445,8 @@ on the headline."
     (goto-char outorg-edit-buffer-point-marker)
     (if funargs
 	(funcall fun funargs)
-      (call-interactively fun))))
-    ;; (when (equal (buffer-name) "*outorg-edit-buffer*")
-    ;;   (call-interactively 'outorg-copy-edits-and-exit))))
-
-    ;; (if (not (marker-buffer org-log-note-marker))
-    ;; 	(outorg-copy-edits-and-exit)
-    ;;   (org-add-log-note)
-    ;;   (org-set-local
-    ;;    'org-finish-function
-    ;;    'outshine-use-outorg-finish-store-log-note)
-    ;;   (message "org-finish-function: %s" org-finish-function)))))
-
-;; (defun outshine-use-outorg (fun &optional whole-buffer-p rgxps &rest funargs)
-;;   "Use outorg to call FUN with FUNARGS on subtree or thing at point.
-
-;; FUN should be an Org-mode function that acts on the subtree or
-;; org-element at point. Optionally, with WHOLE-BUFFER-P non-nil,
-;; `outorg-edit-as-org' can be called on the whole buffer.
-
-;; RGXPS should be a list of regexps as returned by
-;; `outshine-pt-rgxps', used to find the last buffer position of
-;; point in the source file when calling this function in the
-;; converted Org file. [TODO => replace this with markers]
-
-;; Sets the variable `outshine-use-outorg-last-headline-marker' so
-;; that it always contains a point-marker to the last headline this
-;; function was called upon. The old marker is removed first. Then a
-;; new point-marker is created before `outorg-edit-as-org' is called
-;; on the headline."
-;;   (save-excursion
-;;     (unless (outline-on-heading-p)
-;;       (outline-previous-heading))
-;;     (outshine--set-outorg-last-headline-marker)
-;;     (if whole-buffer-p
-;; 	(outorg-edit-as-org '(4))
-;;       (outorg-edit-as-org))
-
-;;     ;; FIXME replace this (regexp matching) with copied markers
-;;     (save-excursion
-;;       (if (org-on-heading-p)
-;; 	  (goto-char (point-at-bol))
-;; 	(outline-previous-heading))
-;;       ;; FIXME better use outline-end-of-subtree?
-;;       (let ((end-of-subtree
-;; 	     (org-element-property :end (org-element-at-point)))
-;; 	    found)
-;; 	(while (and rgxps (not found))
-;; 	  (if (and (car rgxps)
-;; 		   (re-search-forward
-;; 		    (car rgxps) end-of-subtree 'NOERROR))
-;; 	      (setq found t)
-;; 	    (pop rgxps))))
-
-;;       ;; (add-hook 'post-command-hook
-;;       ;; 		'outorg-copy-edits-and-exit
-;;       ;; 		 nil 'LOCAL)
-;;       (if funargs
-;; 	  (funcall fun funargs)
-;; 	(call-interactively fun))
-
-;;       ;; (message "marker-buf: %s" (marker-buffer org-log-note-marker))
-;;       ;; (message "marker-pos: %s" org-log-note-marker)
-;;       ;; (message "marker-buf: %s"
-;;       ;; 	       (marker-buffer org-log-note-return-to))
-;;       ;; (message "marker-pos: %s" org-log-note-return-to)
-
-;;       (if (not (marker-buffer org-log-note-marker))
-;; 	  (outorg-copy-edits-and-exit)
-;;       	(org-add-log-note)
-;; 	(org-set-local
-;; 	 'org-finish-function
-;; 	 'outshine-use-outorg-finish-store-log-note)
-;; 	(message "org-finish-function: %s" org-finish-function)))))
-
-;;       ;; (outorg-copy-edits-and-exit))))
+      (call-interactively fun))
+    (outorg-copy-edits-and-exit)))
 
 (defun outshine--set-outorg-last-headline-marker ()
   "Set a point-marker to current header and remove old marker.
@@ -2644,11 +2571,11 @@ marking subtree (and subsequently run the tex command)."
 ;;      'org-open-at-point nil
 ;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
 
-;; ;; C-c C-q		org-set-tags-command
-;; (defun outshine-set-tags-command ()
-;;   "Call outorg to trigger `org-set-tags-command'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-set-tags-command))
+;; C-c C-q		org-set-tags-command
+(defun outshine-set-tags-command ()
+  "Call outorg to trigger `org-set-tags-command'."
+  (interactive)
+  (outshine-use-outorg 'org-set-tags-command))
 
 ;; ;; C-c C-r		org-reveal
 ;; (defun outshine-reveal ()
