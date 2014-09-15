@@ -354,6 +354,13 @@ Used to override any major-mode specific file-local settings")
     ("." . outshine-time-stamp)
     ;; [X]
     ("!" . outshine-time-stamp-inactive)
+    ;; [X] TODO add up/down(day)
+    ("d" . outshine-deadline)
+    ;; [X]
+    ("s" . outshine-schedule)
+    ("Exporting")
+    ;; [X]
+    ("x" . outshine-export-dispatch)
     ("Meta Data Editing")
     ;; [ ]
     ("t" . outshine-todo)
@@ -2523,20 +2530,26 @@ marking subtree (and subsequently run the tex command)."
 ;;      'org-ctrl-c-ctrl-c arg
 ;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
 
-;; ;; C-c C-d		org-deadline
-;; (defun outshine-deadline ()
-;;   "Call outorg to trigger `org-deadline'."
-;;   (interactive) 
-;;   (outshine-use-outorg 'org-deadline))
+;; C-c C-d		org-deadline
+(defun outshine-deadline (&optional arg)
+  "Call outorg to trigger `org-deadline'."
+  (interactive "P") 
+  (outshine-use-outorg
+   (lambda ()
+     (interactive)
+     (let ((current-prefix-arg arg))
+       (call-interactively 'org-deadline)))))
 
-;; ;; C-c C-e		org-export-dispatch
-;; (defun outshine-export-dispatch (&optional arg)
-;;   "Call outorg to trigger `org-export-dispatch'."
-;;   (interactive "P")
-;;   (outshine-use-outorg 'org-export-dispatch
-;; 		       arg))
+;; C-c C-e		org-export-dispatch
+(defun outshine-export-dispatch (&optional arg)
+  "Call outorg to trigger `org-export-dispatch'."
+  (interactive "P")
+  (outshine-use-outorg 'org-export-dispatch
+		       (y-or-n-p "Use whole buffer ")
+		       nil arg))
 
 ;; ;; C-c C-f		org-forward-heading-same-level
+
 ;; C-c C-j		org-goto
 (defun outshine-goto ()
   "Call outorg to trigger `org-goto'."
@@ -2595,11 +2608,15 @@ REFERENCE-BUFFER."
 ;;      'org-reveal 'WHOLE-BUFFER-P
 ;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
 
-;; ;; C-c C-s		org-schedule
-;; (defun outshine-schedule ()
-;;   "Call outorg to trigger `org-schedule'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-schedule))
+;; C-c C-s		org-schedule
+(defun outshine-schedule (&optional arg)
+  "Call outorg to trigger `org-schedule'."
+  (interactive "P") 
+  (outshine-use-outorg
+   (lambda ()
+     (interactive)
+     (let ((current-prefix-arg arg))
+       (call-interactively 'org-schedule)))))
 
 ;; ;; FIXME
 ;; ;; Error in post-command-hook (org-add-log-note):
