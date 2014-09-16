@@ -506,6 +506,9 @@ them set by set, separated by a nil element.  See the example for
 (defvar outshine-agenda-files ()
   "List of absolute file names of outshine-agenda-files.")
 
+(defvar outshine-agenda-include-org-agenda-p nil
+  "Include Org Agenda files in Outshine Agenda when non-nil.")
+
 ;;;; Hooks
 
 (defvar outshine-hook nil
@@ -2486,45 +2489,76 @@ marking subtree (and subsequently run the tex command)."
 
 ;;;;; Outshine Agenda functions 
 
-(defun outshine-add-agenda-files (&optional append-p &rest files)
+(defun outshine-agenda-add-files (&optional append-p &rest files)
   "Prepend FILES to `outshine-agenda-files'.
 Append rather than prepend if APPEND-P is given or
 `current-prefix-arg' is non-nil."
   (interactive
-   (list
-    current-prefix-arg
-    (if (derived-mode-p 'dired-mode)
-	;; TODO write dired version!!
-	()
-      (read-file-name "New agenda file: ")
-      (while (y-or-n-p "Add more files ")
-	(read-file-name "New agenda file: ")))))
+   (let (file-lst)
+     (list
+      current-prefix-arg
+      (if (derived-mode-p 'dired-mode)
+	  (dired-get-marked-files)
+	(setq file-lst
+	      (cons
+	       (expand-file-name
+		(ido-read-file-name "New agenda file: "))
+	       file-lst))
+	(while (y-or-n-p "Add more files ")
+	  (setq file-lst
+		(cons (expand-file-name
+		       (ido-read-file-name "New agenda file: "))
+		      file-lst)))
+	file-lst))))
   (if append-p
       (setq outshine-agenda-files
-	    (append outshine-agenda-files files))
+	    (delq nil (append outshine-agenda-files
+			      (car-safe files))))
     (setq outshine-agenda-files
-	  (append files outshine-agenda-files))))
+	  (delq nil (append (car-safe files)
+			    outshine-agenda-files)))))
 
-(defun outshine-remove-agenda-files (&optional remove-all-p &rest files)
+(defun outshine-agenda-remove-files (&optional remove-all-p &rest files)
   "Remove FILES from `outshine-agenda-files'.
 Remove all agenda-files if REMOVE-ALL-P is given or
 `current-prefix-arg' is non-nil."
   (interactive
-   (list
-    current-prefix-arg
-    (list
-     (org-completing-read "Remove agenda file: ")
-     (while (y-or-n-p "Remove more files ")
-       (org-completing-read "Remove agenda file: ")))))
+   (let (file-lst)
+     (list
+      current-prefix-arg
+      (unless current-prefix-arg
+	(setq file-lst
+	      (cons
+	       (org-completing-read "Remove agenda file: "
+				    outshine-agenda-files)
+	       file-lst))
+	(while (y-or-n-p "Remove more files ")
+	  (setq file-lst
+		(cons
+		 (org-completing-read "Remove agenda file: "
+				      outshine-agenda-files)
+		 file-lst)))
+	file-lst))))
   (if remove-all-p
       (setq outshine-agenda-files nil)
     (mapc
      (lambda (--file)
        (setq outshine-agenda-files
 	     (remove --file outshine-agenda-files)))
-     files)))
+     (car-safe files))))
 
-
+(defun outshine-agenda-toggle-include-org-agenda (&optional arg)
+  "Toggle inclusion of Org Agenda files in Outshine Agenda.
+With prefix argument ARG, include if ARG is positive, otherwise
+exclude."
+  (interactive "P")
+  (setq outshine-agenda-include-org-agenda-p
+        (if (null arg)
+            (not outshine-agenda-include-org-agenda-p)
+          (> (prefix-numeric-value arg) 0)))
+  (message "Outshine Agenda: inclusion of Org Agenda files %s"
+           (if outshine-agenda-include-org-agenda-p
+	       "enabled" "disabled")))
 
 ;;;;; Use Outorg for calling Org
 
