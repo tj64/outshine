@@ -503,6 +503,9 @@ them set by set, separated by a nil element.  See the example for
 (make-variable-buffer-local
  'outshine-use-outorg-last-headline-marker)
 
+(defvar outshine-agenda-files ()
+  "List of absolute file names of outshine-agenda-files.")
+
 ;;;; Hooks
 
 (defvar outshine-hook nil
@@ -2480,6 +2483,48 @@ marking subtree (and subsequently run the tex command)."
     (outline-mark-subtree)
     (call-interactively 'TeX-command-region))
   (deactivate-mark))
+
+;;;;; Outshine Agenda functions 
+
+(defun outshine-add-agenda-files (&optional append-p &rest files)
+  "Prepend FILES to `outshine-agenda-files'.
+Append rather than prepend if APPEND-P is given or
+`current-prefix-arg' is non-nil."
+  (interactive
+   (list
+    current-prefix-arg
+    (if (derived-mode-p 'dired-mode)
+	;; TODO write dired version!!
+	()
+      (read-file-name "New agenda file: ")
+      (while (y-or-n-p "Add more files ")
+	(read-file-name "New agenda file: ")))))
+  (if append-p
+      (setq outshine-agenda-files
+	    (append outshine-agenda-files files))
+    (setq outshine-agenda-files
+	  (append files outshine-agenda-files))))
+
+(defun outshine-remove-agenda-files (&optional remove-all-p &rest files)
+  "Remove FILES from `outshine-agenda-files'.
+Remove all agenda-files if REMOVE-ALL-P is given or
+`current-prefix-arg' is non-nil."
+  (interactive
+   (list
+    current-prefix-arg
+    (list
+     (org-completing-read "Remove agenda file: ")
+     (while (y-or-n-p "Remove more files ")
+       (org-completing-read "Remove agenda file: ")))))
+  (if remove-all-p
+      (setq outshine-agenda-files nil)
+    (mapc
+     (lambda (--file)
+       (setq outshine-agenda-files
+	     (remove --file outshine-agenda-files)))
+     files)))
+
+
 
 ;;;;; Use Outorg for calling Org
 
