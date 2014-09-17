@@ -509,6 +509,20 @@ them set by set, separated by a nil element.  See the example for
 (defvar outshine-agenda-include-org-agenda-p nil
   "Include Org Agenda files in Outshine Agenda when non-nil.")
 
+(defvar outshine-agenda-old-org-agenda-files nil
+  "Storage for old value of `org-agenda-files'")
+
+;; copied and adapted from ob-core.el
+(defvar outshine-temporary-directory)    ; FIXME why this duplication?
+(unless (or noninteractive (boundp 'outshine-temporary-directory))
+  (defvar outshine-temporary-directory
+    (or (and (boundp 'outshine-temporary-directory)
+	     (file-exists-p outshine-temporary-directory)
+	     outshine-temporary-directory)
+	(make-temp-file "outshine-" t))
+    "Directory to hold outshine's temporary files.
+This directory will be removed on Emacs shutdown."))
+
 ;;;; Hooks
 
 (defvar outshine-hook nil
@@ -1359,65 +1373,88 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 
 ;;;;; Use outorg functions
 
-(defun outshine-pt-rgxps ()
-  "Return list with 5 regexps, like (rgx0 rgx1 rgx2 rgx3 rgx4).
+;; (defun outshine-pt-rgxps ()
+;;   "Return list with 5 regexps, like (rgx0 rgx1 rgx2 rgx3 rgx4).
 
-These regexps, if non-nil, match
- - rgx0 :: buffer-substring from bol to point
- - rgx1 :: buffer-substring from bol of previous line to point
- - rgx2 :: buffer-substring from bol of second previous line to point
- - rgx3 :: buffer-substring from bol of third previous line to point
- - rgx4 :: buffer-substring from bol of fourth previous line to point"
-  (let ((cur-buf (current-buffer))
-        (buf-mode major-mode)
-        beg end rgx0 rgx1 rgx2 rgx3 rgx4)
-    (save-excursion
+;; These regexps, if non-nil, match
+;;  - rgx0 :: buffer-substring from bol to point
+;;  - rgx1 :: buffer-substring from bol of previous line to point
+;;  - rgx2 :: buffer-substring from bol of second previous line to point
+;;  - rgx3 :: buffer-substring from bol of third previous line to point
+;;  - rgx4 :: buffer-substring from bol of fourth previous line to point"
+;;   (let ((cur-buf (current-buffer))
+;;         (buf-mode major-mode)
+;;         beg end rgx0 rgx1 rgx2 rgx3 rgx4)
+;;     (save-excursion
+;;       (save-restriction
+;;         (widen)
+;;         (setq end (point))
+;;         (save-excursion
+;;           (setq beg (outline-previous-heading)))
+;;         (with-temp-buffer
+;;           (insert-buffer-substring-no-properties
+;;            cur-buf beg end)
+;;           (funcall `,buf-mode)
+;;           (save-excursion
+;;             (uncomment-region (point-min) (point-max)))
+;;           (let ((pt (1- (point-max))))
+;;             (setq rgx0
+;;                   (regexp-opt
+;;                    (list
+;;                     (buffer-substring-no-properties
+;;                      (point-at-bol) pt))))
+;;             (when (= (save-excursion (forward-line -1)) 0)
+;;               (setq rgx1
+;;                     (regexp-opt
+;;                      (list
+;;                       (buffer-substring-no-properties
+;;                        (save-excursion (forward-line -1) (point))
+;;                        pt)))))
+;;             (when (= (save-excursion (forward-line -2)) 0)
+;;               (setq rgx2
+;;                     (regexp-opt
+;;                      (list
+;;                       (buffer-substring-no-properties
+;;                        (save-excursion (forward-line -2) (point))
+;;                        pt)))))
+;;             (when (= (save-excursion (forward-line -3)) 0)
+;;               (setq rgx3
+;;                     (regexp-opt
+;;                      (list
+;;                       (buffer-substring-no-properties
+;;                        (save-excursion (forward-line -3) (point))
+;;                        pt)))))
+;;             (when (= (save-excursion (forward-line -4)) 0)
+;;               (setq rgx4
+;;                     (regexp-opt
+;;                      (list
+;;                       (buffer-substring-no-properties
+;;                        (save-excursion (forward-line -4) (point))
+;;                        pt)))))))
+;;         (list rgx4 rgx3 rgx2 rgx1 rgx0)))))
+
+(defun outshine-get-outorg-edit-buffer-content (&optional buf-or-file)
+  "Get content of *outorg-edit-buffer*.
+Use current buffer for conversion, unless BUF-OR-FILE is given."
+  (let (buf-strg)
+    (with-current-buffer
+	(or (cond
+	        ((ignore-errors (file-exists-p buf-or-file))
+		 (find-file-noselect buf-or-file))
+		((ignore-errors (get-buffer buf-or-file))
+		 buf-or-file)
+		(t nil))
+	    (current-buffer))
       (save-restriction
-        (widen)
-        (setq end (point))
-        (save-excursion
-          (setq beg (outline-previous-heading)))
-        (with-temp-buffer
-          (insert-buffer-substring-no-properties
-           cur-buf beg end)
-          (funcall `,buf-mode)
-          (save-excursion
-            (uncomment-region (point-min) (point-max)))
-          (let ((pt (1- (point-max))))
-            (setq rgx0
-                  (regexp-opt
-                   (list
-                    (buffer-substring-no-properties
-                     (point-at-bol) pt))))
-            (when (= (save-excursion (forward-line -1)) 0)
-              (setq rgx1
-                    (regexp-opt
-                     (list
-                      (buffer-substring-no-properties
-                       (save-excursion (forward-line -1) (point))
-                       pt)))))
-            (when (= (save-excursion (forward-line -2)) 0)
-              (setq rgx2
-                    (regexp-opt
-                     (list
-                      (buffer-substring-no-properties
-                       (save-excursion (forward-line -2) (point))
-                       pt)))))
-            (when (= (save-excursion (forward-line -3)) 0)
-              (setq rgx3
-                    (regexp-opt
-                     (list
-                      (buffer-substring-no-properties
-                       (save-excursion (forward-line -3) (point))
-                       pt)))))
-            (when (= (save-excursion (forward-line -4)) 0)
-              (setq rgx4
-                    (regexp-opt
-                     (list
-                      (buffer-substring-no-properties
-                       (save-excursion (forward-line -4) (point))
-                       pt)))))))
-        (list rgx4 rgx3 rgx2 rgx1 rgx0)))))
+	(widen)
+	(outshine-use-outorg
+	 (lambda ()
+	   (interactive)
+	   (setq buf-strg
+		 (buffer-substring-no-properties
+		  (point-min) (point-max))))
+	 'WHOLE-BUFFER-P))
+      buf-strg)))
   
 ;; courtesy of Pascal Bourguignon
 (defun outshine-use-outorg-finish-store-log-note ()
@@ -1685,6 +1722,42 @@ latex-mode) and just use it."
 	  (re-search-forward outshine-latex-documentclass-regexp
 			     nil 'NOERROR 1)
 	  (org-no-properties (match-string 1))))))))
+
+;;;;; Agenda Functions
+
+(defun outshine-agenda-create-temporary-agenda-file ()
+  "Create a single temporary outshine agenda file.
+Concatenate all `outshine-agenda-files', after converting them to
+Org-mode, into a single Org file in the
+`outshine-temporary-directory'. Return that file's
+buffer-file-name."
+  (let* ((temporary-file-directory outshine-temporary-directory)
+	 (curr-agenda-file (make-temp-file "outshine-" nil ".org")))
+    (with-current-buffer (find-file-noselect curr-agenda-file)
+      (mapc
+       (lambda (--file)
+	 (insert
+	  (outshine-get-outorg-edit-buffer-content --file))
+	 (forward-line 2))
+       outshine-agenda-files)
+      (save-buffer)
+      (kill-buffer))
+    curr-agenda-file))
+
+;; rather obsolete - better use agenda restriction lock
+(defun outshine-agenda-set-org-agenda-files (&rest file-lst)
+  "Set `org-agenda-files' to FILE-LST.
+Store old value in `outshine-agenda-old-org-agenda-files'."
+  (setq outshine-agenda-old-org-agenda-files org-agenda-files)
+  (setq org-agenda-files file-lst))
+
+;; rather obsolete - better use agenda restriction lock
+(defun outshine-agenda-restore-org-agenda-files ()
+  "Restore `org-agenda-files'.
+The old value is stored in
+`outshine-agenda-old-org-agenda-files'."
+  (setq org-agenda-files outshine-agenda-old-org-agenda-files)
+  (setq outshine-agenda-old-org-agenda-files nil))
 
 ;;;; Commands
 ;;;;; Additional outline commands
@@ -2487,7 +2560,7 @@ marking subtree (and subsequently run the tex command)."
     (call-interactively 'TeX-command-region))
   (deactivate-mark))
 
-;;;;; Outshine Agenda functions 
+;;;;; Outshine Agenda 
 
 (defun outshine-agenda-add-files (&optional append-p &rest files)
   "Prepend FILES to `outshine-agenda-files'.
@@ -2559,6 +2632,23 @@ exclude."
   (message "Outshine Agenda: inclusion of Org Agenda files %s"
            (if outshine-agenda-include-org-agenda-p
 	       "enabled" "disabled")))
+
+(defun outshine-agenda (&optional arg)
+  "Create outshine agenda.
+Include Org Agenda files when ARG or `current-prefix-arg' is
+non-nil."
+  (interactive "P")
+  (let ((ag-file (outshine-agenda-create-temporary-agenda-file))
+	(include-org-p
+	 (or arg outshine-agenda-include-org-agenda-p)))
+    (if include-org-p
+	;; FIXME
+	(message "Sorry, this is not yet implemented.")
+      (org-agenda-remove-restriction-lock 'NOUPDATE)
+      (with-current-buffer (find-file-noselect ag-file)
+	(org-agenda-set-restriction-lock 'file)
+	(org-agenda)))))
+      
 
 ;;;;; Use Outorg for calling Org
 
