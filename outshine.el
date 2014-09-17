@@ -265,10 +265,10 @@
   "Maximal level of headlines recognized.")
 
 ;; copied from org-source.el
-(defconst outshine-level-faces
-  '(outshine-level-1 outshine-level-2 outshine-level-3 outshine-level-4
-                     outshine-level-5 outshine-level-6 outshine-level-7
-                     outshine-level-8))
+(defconst outshine-level-faces '(outshine-level-1
+  outshine-level-2 outshine-level-3 outshine-level-4
+  outshine-level-5 outshine-level-6 outshine-level-7
+  outshine-level-8))
 
 (defconst outshine-outline-heading-end-regexp "\n"
   "Global default value of `outline-heading-end-regexp'.
@@ -340,7 +340,7 @@ Used to override any major-mode specific file-local settings")
     ;;      'org-archive-subtree-default-with-confirmation))
     ;; [X]
     ("m" . outline-mark-subtree)
-    ;; [ ]
+    ;; [X]
     ("#" . outshine-toggle-comment)
     ;; [ ]
     ("Clock Commands")
@@ -393,15 +393,14 @@ Used to override any major-mode specific file-local settings")
     ;; [X]
     ("E" . outshine-inc-effort)
     ;; ("Agenda Views etc")
-    ;; [ ]
-    ("v" . org-agenda)
-    ;; [ ]
+    ;; [X]
+    ("v" . outshine-agenda)
+    ;; [X]
     ("<" . (outshine-agenda-set-restriction-lock))
-    ;; [ ]
+    ;; [X]
     (">" . (outshine-agenda-remove-restriction-lock))
     ;; ;; CANCELLED makes no sense
     ;; ("/" . outshine-sparse-tree)
-    ;; [ ]
     ("Misc")
     ;; [X]
     ("o" . outshine-open-at-point)
@@ -513,8 +512,9 @@ them set by set, separated by a nil element.  See the example for
   "Storage for old value of `org-agenda-files'")
 
 ;; copied and adapted from ob-core.el
-(defvar outshine-temporary-directory)    ; FIXME why this duplication?
+(defvar outshine-temporary-directory)
 (unless (or noninteractive (boundp 'outshine-temporary-directory))
+;; FIXME why this duplication?
   (defvar outshine-temporary-directory
     (or (and (boundp 'outshine-temporary-directory)
 	     (file-exists-p outshine-temporary-directory)
@@ -1438,23 +1438,20 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 Use current buffer for conversion, unless BUF-OR-FILE is given."
   (let (buf-strg)
     (with-current-buffer
-	(or (cond
-	        ((ignore-errors (file-exists-p buf-or-file))
-		 (find-file-noselect buf-or-file))
-		((ignore-errors (get-buffer buf-or-file))
-		 buf-or-file)
-		(t nil))
-	    (current-buffer))
-      (save-restriction
-	(widen)
-	(outshine-use-outorg
-	 (lambda ()
-	   (interactive)
-	   (setq buf-strg
-		 (buffer-substring-no-properties
-		  (point-min) (point-max))))
-	 'WHOLE-BUFFER-P))
-      buf-strg)))
+	(cond
+	 ((ignore-errors (file-exists-p buf-or-file))
+	  (find-file-noselect buf-or-file))
+	 ((ignore-errors (get-buffer buf-or-file))
+	  buf-or-file)
+	 (t (current-buffer)))
+      (outshine-use-outorg
+       (lambda ()
+	 (interactive)
+	 (setq buf-strg
+	       (buffer-substring-no-properties
+		(point-min) (point-max))))
+       'WHOLE-BUFFER-P))
+    buf-strg))
   
 ;; courtesy of Pascal Bourguignon
 (defun outshine-use-outorg-finish-store-log-note ()
@@ -1725,21 +1722,51 @@ latex-mode) and just use it."
 
 ;;;;; Agenda Functions
 
-(defun outshine-agenda-create-temporary-agenda-file ()
+(defun outshine-agenda-create-temporary-agenda-file (&optional restriction-lock buf-or-name pos)
   "Create a single temporary outshine agenda file.
+
 Concatenate all `outshine-agenda-files', after converting them to
 Org-mode, into a single Org file in the
 `outshine-temporary-directory'. Return that file's
-buffer-file-name."
+buffer-file-name.
+
+When RESTRICTION-LOCK is given, act conditional on its value:
+
+ - file :: (symbol) restrict to buffer
+ 
+ - t :: (any) restrict to subtree
+
+Use current-buffer and point position, unless BUF-OR-NAME and/or
+POS are non-nil."
   (let* ((temporary-file-directory outshine-temporary-directory)
-	 (curr-agenda-file (make-temp-file "outshine-" nil ".org")))
+	 (curr-agenda-file (make-temp-file "outshine-" nil ".org"))
+	 (buf (if (and buf-or-name (buffer-file-name buf-or-name))
+		  buf-or-name
+		(current-buffer)))
+	 (pos (if (and pos (integer-or-marker-p pos)
+		       (<= pos (buffer-size buf)))
+		  pos
+		(point))))
     (with-current-buffer (find-file-noselect curr-agenda-file)
-      (mapc
-       (lambda (--file)
-	 (insert
-	  (outshine-get-outorg-edit-buffer-content --file))
-	 (forward-line 2))
-       outshine-agenda-files)
+      (cond
+       ((eq restriction-lock 'file)
+	(insert
+	 (with-current-buffer buf
+	   (outshine-get-outorg-edit-buffer-content))))
+       (restriction-lock
+	(insert
+	 (with-current-buffer buf
+	   (save-excursion
+	     (goto-char pos)
+	     (save-restriction
+	       (outshine-narrow-to-subtree)
+	       (outshine-get-outorg-edit-buffer-content))))))
+       (t (mapc
+	   (lambda (--file)
+	     (insert
+	      (outshine-get-outorg-edit-buffer-content --file))
+	     (forward-line 2))
+	   outshine-agenda-files)))
       (save-buffer)
       (kill-buffer))
     curr-agenda-file))
@@ -2633,23 +2660,31 @@ exclude."
            (if outshine-agenda-include-org-agenda-p
 	       "enabled" "disabled")))
 
-(defun outshine-agenda (&optional arg)
-  "Create outshine agenda.
-Include Org Agenda files when ARG or `current-prefix-arg' is
-non-nil."
-  (interactive "P")
-  (let ((ag-file (outshine-agenda-create-temporary-agenda-file))
-	(include-org-p
-	 (or arg outshine-agenda-include-org-agenda-p)))
-    (if include-org-p
+(defun outshine-agenda (&optional agenda-file include-org-p)
+  "Create Outshine Agenda, i.e. Org Agenda on outshine files.
+
+Use org-file AGENDA-FILE instead of `outshine-agenda-files' when
+given. Include `org-agenda-files' when INCLUDE-ORG-P is non-nil.
+
+With `current-prefix-arg' prompt the user for argument values."
+  (interactive
+   (when current-prefix-arg
+     (list
+      (ido-read-file-name "Agenda file: "
+			  outshine-temporary-directory)
+      (y-or-n-p "Include `org-agenda-files' "))))
+  (let ((ag-file (or agenda-file
+		     (outshine-agenda-create-temporary-agenda-file)))
+	(with-org-agenda-files
+	 (or include-org-p outshine-agenda-include-org-agenda-p)))
+    (org-agenda-remove-restriction-lock)
+    (if with-org-agenda-files
 	;; FIXME
 	(message "Sorry, this is not yet implemented.")
-      (org-agenda-remove-restriction-lock 'NOUPDATE)
       (with-current-buffer (find-file-noselect ag-file)
 	(org-agenda-set-restriction-lock 'file)
 	(org-agenda)))))
       
-
 ;;;;; Use Outorg for calling Org
 
 ;; ;; TEMPLATE A
@@ -3626,17 +3661,23 @@ Similar semantics to `org-next-block'."
 
 ;; C-c C-x <	org-agenda-set-restriction-lock
 (defun outshine-agenda-set-restriction-lock (&optional arg)
-  "Call outorg to trigger `org-agenda-set-restriction-lock'."
+  "Call `outshine-agenda' with restriction.
+With prefix ARG given, restrict to current subtree, otherwise to
+current buffer(-file). "
   (interactive "P")
-  (outshine-use-outorg
-   'org-agenda-set-restriction-lock (equal arg '(4))) nil arg)
+  (let ((ag-file
+	 (if arg
+	     (outshine-agenda-create-temporary-agenda-file t)
+	   (outshine-agenda-create-temporary-agenda-file 'file))))
+    (outshine-agenda ag-file)))
 
 ;; C-c C-x >	org-agenda-remove-restriction-lock
-(defun outshine-agenda-remove-restriction-lock ()
-  "Call outorg to trigger `org-agenda-remove-restriction-lock'."
-  (interactive)
-  (outshine-use-outorg 'org-agenda-remove-restriction-lock
-		       'WHOLE-BUFFER-P))
+(defun outshine-agenda-remove-restriction-lock (&optional include-org-p)
+  "Call `outshine-agenda' without restriction.
+Use `outshine-agenda-files'. When INCLUDE-ORG-P is non-nil or prefix-arg is given, include `org-agenda-files'."
+  (interactive "P")
+  (outshine-agenda nil include-org-p))
+  
 
 ;; ;; C-c C-x A	org-archive-to-archive-sibling
 ;; (defun outshine-archive-to-archive-sibling ()
