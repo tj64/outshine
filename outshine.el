@@ -3468,11 +3468,11 @@ Similar semantics to `org-next-block'."
 ;;      'org-emphasize nil
 ;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
 
-;; ;; C-c C-x TAB	org-clock-in
-;; (defun outshine-clock-in ()
-;;   "Call outorg to trigger `org-clock-in'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-clock-in))
+;; C-c C-x TAB	org-clock-in
+(defun outshine-clock-in ()
+  "Call outorg to trigger `org-clock-in'."
+  (interactive)
+  (outshine-use-outorg 'org-clock-in))
 
 ;; ;; C-c C-x C-j	org-clock-goto
 ;; (defun outshine-clock-goto ()
@@ -3500,11 +3500,11 @@ Similar semantics to `org-next-block'."
 ;;      'org-next-link 'WHOLE-BUFFER-P
 ;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
 
-;; ;; ;; C-c C-x C-o	org-clock-out
-;; ;; (defun outshine-clock-out ()
-;; ;;   "Call outorg to trigger `org-clock-out'."
-;; ;;   (interactive)
-;; ;;   (outshine-use-outorg 'org-clock-out 'WHOLE-BUFFER-P))
+;; C-c C-x C-o	org-clock-out
+(defun outshine-clock-out ()
+  "Call outorg to trigger `org-clock-out'."
+  (interactive)
+  (outshine-use-outorg 'org-clock-out 'WHOLE-BUFFER-P))
 
 ;; ;; C-c C-x C-o	org-clock-out
 ;; (defun outshine-clock-out ()
@@ -4075,7 +4075,6 @@ Use `outshine-agenda-files'. When INCLUDE-ORG-P is non-nil or prefix-arg is give
 ;; before loading outline-mode 
 (let ((map (lookup-key outline-minor-mode-map outline-minor-mode-prefix)))
   ;; define sub-prefix
-  ;; 1st sub-prefix for 'C-c' prefix, 2nd for 'M-#' prefix
   ;; (define-key map (kbd "C-v") nil)
   (define-key map (kbd "M-+") nil)
   ;; (define-key map (kbd "C-x") nil)
