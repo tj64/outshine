@@ -301,10 +301,10 @@ Used to override any major-mode specific file-local settings")
     ("F" . outshine-next-block)
     ;; [X] similar semantics
     ("B" . outshine-previous-block)
-    ;; [X]
+    ;; [X] similar semantics org-goto
     ("j" . outshine-navi)
-    ;; [X]
-    ("J" . outshine-goto)
+    ;; [X] similar semantics org-goto
+    ("J" . outshine-imenu)
     ;; [ ]
     ("g" . outshine-refile)
     ("Outline Visibility")
@@ -320,8 +320,8 @@ Used to override any major-mode specific file-local settings")
     ("r" . outshine-narrow-to-subtree)
     ;; [X]
     ("w" . widen)
-    ;; [ ]
-    ("=" . outshine-columns)
+    ;; ;; [ ]
+    ;; ("=" . outshine-columns)
     ("Outline Structure Editing")
     ;; [X] FIXME error with oldschool elisp headers
     ("U" . outline-move-subtree-up)
@@ -335,19 +335,18 @@ Used to override any major-mode specific file-local settings")
     ("i" . outshine-insert-heading)
     ;; [X] FIXME handle markers, special cases
     ("^" . outshine-sort-entries)
-    ;; [ ]
+    ;; ;; [ ]
     ;; ("a" . (outshine-use-outorg
     ;;      'org-archive-subtree-default-with-confirmation))
     ;; [X]
     ("m" . outline-mark-subtree)
     ;; [X]
     ("#" . outshine-toggle-comment)
-    ;; [ ]
     ("Clock Commands")
     ;; FIXME need improvements!
-    ;; [ ]
+    ;; [X]
     ("I" . outshine-clock-in)
-    ;; [ ]
+    ;; [X]
     ("O" . outshine-clock-out)
     ("Date & Time Commands")
     ;; [X]
@@ -380,7 +379,7 @@ Used to override any major-mode specific file-local settings")
 	    (lambda () (interactive) (org-priority ?C))))
     ;; [X]
     (":" . outshine-set-tags-command)
-    ;; [ ]
+    ;; ;; [ ]
     ;; ("W" . (lambda(m) (interactive "sMinutes before warning: ")
     ;;       (outshine-entry-put (point) "APPT_WARNTIME" m)))
     ("Properties and Effort")
@@ -2735,7 +2734,7 @@ With `current-prefix-arg' prompt the user for argument values."
 
 ;; ;; C-c C-f		org-forward-heading-same-level
 
-;; FIXME rewrite
+;; CANCELLED use `outshine-imenu' instead
 ;; ;; C-c C-j		org-goto
 ;; (defun outshine-goto ()
 ;;   "Call outorg to trigger `org-goto'."
@@ -2744,14 +2743,11 @@ With `current-prefix-arg' prompt the user for argument values."
 
 ;; ;; C-c C-k		org-kill-note-or-show-branches
 
-;; ;; C-c C-l		org-insert-link
-;; (defun outshine-insert-link ()
-;;   "Call outorg to trigger `org-insert-link'."
-;;   (interactive)
-;;   (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
-;;     (outshine-use-outorg
-;;      'org-insert-link nil
-;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
+;; C-c C-l		org-insert-link
+(defun outshine-insert-link ()
+  "Call outorg to trigger `org-insert-link'."
+  (interactive)
+  (outshine-use-outorg 'org-insert-link))
 
 ;; ;; C-c RET		org-ctrl-c-ret
 
@@ -3102,11 +3098,11 @@ With prefix ARG, use whole buffer."
   (interactive)
   (forward-comment 10000))
 
-;; ;; C-c M-l		org-insert-last-stored-link
-;; (defun outshine-insert-last-stored-link ()
-;;   "Call outorg to trigger `org-insert-last-stored-link'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-insert-last-stored-link))
+;; C-c M-l		org-insert-last-stored-link
+(defun outshine-insert-last-stored-link ()
+  "Call outorg to trigger `org-insert-last-stored-link'."
+  (interactive)
+  (outshine-use-outorg 'org-insert-last-stored-link))
 
 ;; ;; C-c M-o		tj/mail-subtree
 
@@ -3328,11 +3324,15 @@ With prefix ARG, use whole buffer."
      (org-clock-in)
      (remove-hook 'kill-buffer-hook 'org-check-running-clock))))
 
-;; ;; C-c C-x C-j	org-clock-goto
-;; (defun outshine-clock-goto ()
-;;   "Call outorg to trigger `org-clock-goto'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-clock-goto 'WHOLE-BUFFER-P))
+;; C-c C-x C-j	org-clock-goto
+(defun outshine-clock-goto ()
+  "Similar semantics to `org-clock-goto'."
+  (interactive)
+  (switch-to-buffer
+   (condition-case err
+       (marker-buffer outshine-use-outorg-last-headline-marker)
+     (error "Can't find header with running clock: %s" err)))
+   (goto-char outshine-use-outorg-last-headline-marker))
 
 ;; ;; C-c C-x C-l	org-preview-latex-fragment
 ;; (defun outshine-preview-latex-fragment ()
@@ -3342,11 +3342,13 @@ With prefix ARG, use whole buffer."
 
 ;; ;; C-c C-x RET	Prefix Command
 
-;; ;; C-c C-x C-n	org-next-link
-;; (defun outshine-next-link ()
-;;   "Call outorg to trigger `org-next-link'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-next-link 'WHOLE-BUFFER-P))
+;; reimplementation
+;; C-c C-x C-n	org-next-link
+(defun outshine-next-link ()
+  "Similar semantics to `org-next-link'."
+  (interactive)
+  (re-search-forward org-link-re-with-space nil t 1)
+  (goto-char (match-beginning 0)))
 
 ;; C-c C-x C-o	org-clock-out
 (defun outshine-clock-out ()
@@ -3359,30 +3361,13 @@ With prefix ARG, use whole buffer."
     (goto-char outshine-use-outorg-last-headline-marker)
     (outshine-use-outorg 'org-clock-out)))
 
-;; ;; C-c C-x C-o	org-clock-out
-;; (defun outshine-clock-out ()
-;;   "Stop Org-mode clock started with `outshine-use-outorg'."
-;;   (interactive)
-;;   (if (integer-or-marker-p
-;;        outshine-use-outorg-last-headline-marker)
-;;       (save-excursion
-;;         (goto-char
-;;          (marker-position
-;;           outshine-use-outorg-last-headline-marker))
-;;         (outshine-use-outorg
-;;          (lambda ()
-;; 	   (interactive)
-;; 	   (ignore-errors (org-clock-cancel))
-;;            (org-clock-in)
-;; 	   (org-clock-out))
-;; 	 'WHOLE-BUFFER-P))))
-
-;; ;; C-c C-x C-p	org-previous-link
-;; (defun outshine-previous-link ()
-;;   "Call outorg to trigger `org-previous-link'."
-;;   (interactive)
-;;   (outshine-use-outorg
-;;    'org-previous-link 'WHOLE-BUFFER-P))
+;; reimplementation
+;; C-c C-x C-p	org-previous-link
+(defun outshine-previous-link ()
+  "Similar semantics to `org-previous-link'."
+  (interactive)
+  (re-search-backward org-link-re-with-space nil t 1)
+  (goto-char (match-beginning 0)))
 
 ;; ;; C-c C-x C-q	org-clock-cancel
 ;; (defun outshine-clock-cancel ()
@@ -3987,7 +3972,8 @@ Use `outshine-agenda-files'. When INCLUDE-ORG-P is non-nil or prefix-arg is give
   ;; USE OUTORG TO CALL ORG
   ;; 1st binding for 'C-c' prefix, 2nd for 'M-#' prefix
   ;; (define-key map (kbd "C-j") 'outshine-goto)
-  (define-key map (kbd "M-j") 'outshine-goto)
+  ;; (define-key map (kbd "M-j") 'outshine-goto)
+  (define-key map (kbd "M-j") 'outshine-imenu)
   ;; (define-key map (kbd "C-o") 'outshine-open-at-point)
   (define-key map (kbd "M-o") 'outshine-open-at-point)
   ;; (define-key map (kbd "C-a") 'outshine-attach)
@@ -4002,7 +3988,7 @@ Use `outshine-agenda-files'. When INCLUDE-ORG-P is non-nil or prefix-arg is give
   ;;   'outshine-kill-note-or-show-branches)
   (define-key map (kbd "M-k") 'outshine-kill-note-or-show-branches)
   ;; (define-key map (kbd "C-l") 'outshine-insert-link)
-  (define-key map (kbd "M-l") 'outshine-insert-link)
+  (define-key map (kbd "M-l") 'outshine-insert-link) ; FIXME
   ;; (define-key map (kbd "RET") 'outshine-ctrl-c-ret)
   ;; (define-key map (kbd "C-q") 'outshine-set-tags-command)
   (define-key map (kbd "M-q") 'outshine-set-tags-command)
@@ -4026,6 +4012,7 @@ Use `outshine-agenda-files'. When INCLUDE-ORG-P is non-nil or prefix-arg is give
   (define-key map (kbd "C-M-l") 'outshine-insert-all-links)
   (define-key map (kbd "M-b") 'outshine-previous-block)
   (define-key map (kbd "M-f") 'outshine-next-block)
+  ;; FIXME overrides keybinding
   (define-key map (kbd "M-l") 'outshine-insert-last-stored-link)
   ;; C-c M-o		tj/mail-subtree
   (define-key map (kbd "M-w") 'outshine-copy)
