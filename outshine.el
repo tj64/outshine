@@ -1474,7 +1474,8 @@ that it always contains a point-marker to the last headline this
 function was called upon."
   (save-excursion
     (unless (outline-on-heading-p)
-      (outline-previous-heading))
+      (or (outline-previous-heading)
+	  (outline-next-heading)))
     (move-marker outshine-use-outorg-last-headline-marker (point)))
   (if whole-buffer-p
       (outorg-edit-as-org '(4))
@@ -1486,16 +1487,6 @@ function was called upon."
     (call-interactively fun))
   (outorg-copy-edits-and-exit))
 
-;; (defun outshine--set-outorg-last-headline-marker ()
-;;   "Set a point-marker to current header and remove old marker.
-
-;; Sets the variable `outshine-use-outorg-last-headline-marker'."
-;;   (if (integer-or-marker-p
-;;        outshine-use-outorg-last-headline-marker)
-;;       (move-marker outshine-use-outorg-last-headline-marker (point))
-;;     (setq outshine-use-outorg-last-headline-marker
-;;           (point-marker))))
-    
 ;;;;; Hook function
 
 (defun outshine-hook-function ()
@@ -3331,7 +3322,11 @@ With prefix ARG, use whole buffer."
 (defun outshine-clock-in ()
   "Call outorg to trigger `org-clock-in'."
   (interactive)
-  (outshine-use-outorg 'org-clock-in))
+  (outshine-use-outorg
+   (lambda ()
+     (interactive)
+     (org-clock-in)
+     (remove-hook 'kill-buffer-hook 'org-check-running-clock))))
 
 ;; ;; C-c C-x C-j	org-clock-goto
 ;; (defun outshine-clock-goto ()
@@ -3357,7 +3352,12 @@ With prefix ARG, use whole buffer."
 (defun outshine-clock-out ()
   "Call outorg to trigger `org-clock-out'."
   (interactive)
-  (outshine-use-outorg 'org-clock-out 'WHOLE-BUFFER-P))
+  (with-current-buffer
+      (condition-case err
+	  (marker-buffer outshine-use-outorg-last-headline-marker)
+	(error "Can't find header with running clock: %s" err))
+    (goto-char outshine-use-outorg-last-headline-marker)
+    (outshine-use-outorg 'org-clock-out)))
 
 ;; ;; C-c C-x C-o	org-clock-out
 ;; (defun outshine-clock-out ()
