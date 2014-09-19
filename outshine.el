@@ -305,8 +305,9 @@ Used to override any major-mode specific file-local settings")
     ("j" . outshine-navi)
     ;; [X] similar semantics org-goto
     ("J" . outshine-imenu)
-    ;; [ ]
-    ("g" . outshine-refile)
+    ;; [X] similar semantics (org-refile t)
+    ;; ("g" . outshine-refile)
+    ("g" . outshine-imenu)
     ("Outline Visibility")
     ;; [X]
     ("c" . outline-cycle)
@@ -2678,24 +2679,6 @@ With `current-prefix-arg' prompt the user for argument values."
 ;;   (interactive "P")
 ;;   (outshine-use-outorg 'org- nil arg))
 
-;; ;; TEMPLATE C
-;; (defun outshine- ()
-;;   "Call outorg to trigger `org-'."
-;;   (interactive)
-;;   (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
-;;     (outshine-use-outorg
-;;      'org- nil
-;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
-
-;; ;; TEMPLATE D
-;; (defun outshine- (&optional arg)
-;;   "Call outorg to trigger `org-'."
-;;   (interactive "P")
-;;   (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
-;;     (outshine-use-outorg
-;;      'org- nil
-;;      (unless beg-of-header-p (outshine-pt-rgxps)) arg)))
-
 ;; ;; C-c C-a		org-attach
 ;; (defun outshine-attach ()
 ;;   "Call outorg to trigger `org-attach'."
@@ -2704,15 +2687,11 @@ With `current-prefix-arg' prompt the user for argument values."
 
 ;; ;; C-c C-b		org-backward-heading-same-level
 
-
 ;; ;; C-c C-c		org-ctrl-c-ctrl-c
 ;; (defun outshine-ctrl-c-ctrl-c (&optional arg)
 ;;   "Call outorg to trigger `org-ctrl-c-ctrl-c'."
 ;;   (interactive "P")
-;;   (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
-;;     (outshine-use-outorg
-;;      'org-ctrl-c-ctrl-c arg
-;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
+;;   (outshine-use-outorg 'org-ctrl-c-ctrl-c arg))
 
 ;; C-c C-d		org-deadline
 (defun outshine-deadline (&optional arg)
@@ -2774,14 +2753,12 @@ REFERENCE-BUFFER."
   (interactive)
   (outshine-use-outorg 'org-set-tags-command))
 
+;; TODO reimplement for outshine
 ;; ;; C-c C-r		org-reveal
 ;; (defun outshine-reveal ()
 ;;   "Call outorg to trigger `org-reveal'."
 ;;   (interactive)
-;;   (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
-;;     (outshine-use-outorg
-;;      'org-reveal 'WHOLE-BUFFER-P
-;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
+;;   (outshine-use-outorg 'org-reveal 'WHOLE-BUFFER-P))
 
 ;; C-c C-s		org-schedule
 (defun outshine-schedule (&optional arg)
@@ -2838,6 +2815,7 @@ REFERENCE-BUFFER."
 
 ;; ;; C-c C-v		Prefix Command
 
+;; CANCELLED use outshine-imenu for (org-refile t)
 ;; ;; C-c C-w		org-refile
 ;; (defun outshine-refile ()
 ;;   "Call outorg to trigger `org-refile'."
@@ -2852,6 +2830,7 @@ REFERENCE-BUFFER."
 ;;   (interactive)
 ;;   (outshine-use-outorg 'org-evaluate-time-range))
 
+;; FIXME post-command-hook
 ;; ;; C-c C-z		org-add-note
 ;; (defun outshine-add-note ()
 ;;   "Call outorg to trigger `org-add-note'."
@@ -2974,11 +2953,11 @@ REFERENCE-BUFFER."
 ;;   (interactive)
 ;;   (outshine-use-outorg 'org-sparse-tree))
 
-;; ;; C-c :		org-toggle-fixed-width
-;; (defun outshine-toggle-fixed-width ()
-;;   "Call outorg to trigger `org-toggle-fixed-width'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-toggle-fixed-width))
+;; C-c :		org-toggle-fixed-width
+(defun outshine-toggle-fixed-width ()
+  "Call outorg to trigger `org-toggle-fixed-width'."
+  (interactive)
+  (outshine-use-outorg 'org-toggle-fixed-width))
 
 ;; C-c ;		org-toggle-comment
 (defun outshine-toggle-comment ()
@@ -3010,6 +2989,7 @@ REFERENCE-BUFFER."
 ;;   (interactive)
 ;;   (outshine-use-outorg 'org-table-field-info))
 
+;; CANCELLED use `outline-mark-subtree' instead
 ;; ;; C-c @		org-mark-subtree
 ;; (defun outshine-mark-subtree ()
 ;;   "Call outorg to trigger `org-mark-subtree'."
@@ -3290,11 +3270,11 @@ With prefix ARG, use whole buffer."
 ;;   (interactive)
 ;;   (outshine-use-outorg 'org-archive-subtree-default))
 
-;; ;; C-c C-x C-b	org-toggle-checkbox
-;; (defun outshine-toggle-checkbox ()
-;;   "Call outorg to trigger `org-toggle-checkbox'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-toggle-checkbox))
+;; C-c C-x C-b	org-toggle-checkbox
+(defun outshine-toggle-checkbox (&optional arg)
+  "Call outorg to trigger `org-toggle-checkbox'."
+  (interactive "P")
+  (outshine-use-outorg 'org-toggle-checkbox nil arg))
 
 ;; ;; C-c C-x C-c	org-columns
 ;; (defun outshine-columns ()
@@ -3308,6 +3288,7 @@ With prefix ARG, use whole buffer."
 ;;   (interactive)
 ;;   (outshine-use-outorg 'org-clock-display 'WHOLE-BUFFER-P))
 
+;; CANCELLED simply call `org-emphasize'
 ;; ;; C-c C-x C-f	org-emphasize
 ;; (defun outshine-emphasize ()
 ;;   "Call outorg to trigger `org-emphasize'."
@@ -3369,17 +3350,22 @@ With prefix ARG, use whole buffer."
   (re-search-backward org-link-re-with-space nil t 1)
   (goto-char (match-beginning 0)))
 
-;; ;; C-c C-x C-q	org-clock-cancel
-;; (defun outshine-clock-cancel ()
-;;   "Call outorg to trigger `org-clock-cancel'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-clock-cancel 'WHOLE-BUFFER-P))
+;; C-c C-x C-q	org-clock-cancel
+(defun outshine-clock-cancel ()
+  "Call outorg to trigger `org-clock-cancel'."
+  (interactive)
+  (with-current-buffer
+      (condition-case err
+	  (marker-buffer outshine-use-outorg-last-headline-marker)
+	(error "Can't find header with running clock: %s" err))
+    (goto-char outshine-use-outorg-last-headline-marker)
+    (outshine-use-outorg 'org-clock-cancel)))
 
-;; ;; C-c C-x C-r	org-clock-report
-;; (defun outshine-clock-report ()
-;;   "Call outorg to trigger `org-clock-report'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-clock-report 'WHOLE-BUFFER-P))
+;; C-c C-x C-r	org-clock-report
+(defun outshine-clock-report (&optional arg)
+  "Call outorg to trigger `org-clock-report'."
+  (interactive)
+  (outshine-use-outorg 'org-clock-report 'WHOLE-BUFFER-P arg))
 
 ;; ;; C-c C-x C-s	org-advertized-archive-subtree
 ;; (defun outshine-advertized-archive-subtree (&optional arg)
@@ -3413,12 +3399,17 @@ With prefix ARG, use whole buffer."
 ;;   (interactive)
 ;;   (outshine-use-outorg 'org-cut-special 'WHOLE-BUFFER-P))
 
-;; ;; FIXME: whole buffer?
+;; FIXME
 ;; ;; C-c C-x C-x	org-clock-in-last
-;; (defun outshine-clock-in-last ()
+;; (defun outshine-clock-in-last (&optional arg)
 ;;   "Call outorg to trigger `org-clock-in-last'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-clock-in-last))
+;;   (interactive "P")
+;;   (with-current-buffer
+;;       (condition-case err
+;; 	  (marker-buffer outshine-use-outorg-last-headline-marker)
+;; 	(error "Can't find header with running clock: %s" err))
+;;     (goto-char outshine-use-outorg-last-headline-marker)
+;;     (outshine-use-outorg 'org-clock-in-last nil arg)))
 
 ;; ;; C-c C-x C-y	org-paste-special
 ;; (defun outshine-paste-special ()
@@ -3438,42 +3429,43 @@ With prefix ARG, use whole buffer."
 ;; (defun outshine-reload ()
 ;;   "Call outorg to trigger `org-reload'."
 ;;   (interactive)
-;;   (outshine-use-outorg 'org-reload))
+;;   (otshine-use-outorg 'org-reload))
 
-;; ;; FIXME: does not exist?
-;; ;; C-c C-x ,	org-timer-pause-or-continue
-;; ;; C-c C-x -	org-timer-item
-;; (defun outshine-timer-item ()
-;;   "Call outorg to trigger `org-timer-item'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-timer-item))
+;; C-c C-x ,	org-timer-pause-or-continue
+(defun outshine-timer-pause-or-continue (&optional arg)
+  "Call outorg to trigger `org-timer-item'."
+  (interactive "P")
+  (outshine-use-outorg 'org-timer-pause-or-continue nil arg))
 
-;; ;; C-c C-x .	org-timer
-;; (defun outshine-timer ()
-;;   "Call outorg to trigger `org-timer'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-timer))
+;; C-c C-x -	org-timer-item
+(defun outshine-timer-item ()
+  "Call outorg to trigger `org-timer-item'."
+  (interactive)
+  (outshine-use-outorg 'org-timer-item))
 
-;; ;; FIXME: whole buffer?
-;; ;; C-c C-x 0	org-timer-start
-;; (defun outshine-timer-start ()
-;;   "Call outorg to trigger `org-timer-start'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-timer-start))
+;; C-c C-x .	org-timer
+(defun outshine-timer ()
+  "Call outorg to trigger `org-timer'."
+  (interactive)
+  (outshine-use-outorg 'org-timer))
 
-;; ;; FIXME: whole buffer?
-;; ;; C-c C-x :	org-timer-cancel-timer
-;; (defun outshine-timer-cancel-timer ()
-;;   "Call outorg to trigger `org-timer-cancel-timer'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-timer-cancel-timer))
+;; C-c C-x 0	org-timer-start
+(defun outshine-timer-start ()
+  "Call outorg to trigger `org-timer-start'."
+  (interactive)
+  (outshine-use-outorg 'org-timer-start))
 
-;; ;; FIXME: whole buffer?
-;; ;; C-c C-x ;	org-timer-set-timer
-;; (defun outshine-timer-set-timer ()
-;;   "Call outorg to trigger `org-timer-set-timer'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-timer-set-timer))
+;; C-c C-x :	org-timer-cancel-timer
+(defun outshine-timer-cancel-timer ()
+  "Call outorg to trigger `org-timer-cancel-timer'."
+  (interactive)
+  (outshine-use-outorg 'org-timer-cancel-timer))
+
+;; C-c C-x ;	org-timer-set-timer
+(defun outshine-timer-set-timer ()
+  "Call outorg to trigger `org-timer-set-timer'."
+  (interactive)
+  (outshine-use-outorg 'org-timer-set-timer))
 
 ;; C-c C-x <	org-agenda-set-restriction-lock
 (defun outshine-agenda-set-restriction-lock (&optional arg)
@@ -3554,11 +3546,11 @@ Use `outshine-agenda-files'. When INCLUDE-ORG-P is non-nil or prefix-arg is give
 ;;   (interactive)
 ;;   (outshine-use-outorg 'org-timer-stop))
 
-;; ;; C-c C-x a	org-toggle-archive-tag
-;; (defun outshine-toggle-archive-tag ()
-;;   "Call outorg to trigger `org-toggle-archive-tag'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-toggle-archive-tag))
+;; C-c C-x a	org-toggle-archive-tag
+(defun outshine-toggle-archive-tag ()
+  "Call outorg to trigger `org-toggle-archive-tag'."
+  (interactive)
+  (outshine-use-outorg 'org-toggle-archive-tag))
 
 ;; ;; C-c C-x b	org-tree-to-indirect-buffer
 ;; (defun outshine-tree-to-indirect-buffer (&optional arg)
@@ -3572,14 +3564,11 @@ Use `outshine-agenda-files'. When INCLUDE-ORG-P is non-nil or prefix-arg is give
 ;;   (interactive)
 ;;   (outshine-use-outorg 'org-clone-subtree-with-time-shift))
 
-;; ;; C-c C-x d	org-insert-drawer
-;; (defun outshine-insert-drawer ()
-;;   "Call outorg to trigger `org-insert-drawer'."
-;;   (interactive)
-;;   (let ((beg-of-header-p (and (outline-on-heading-p) (bolp))))
-;;     (outshine-use-outorg
-;;      'org-insert-drawer nil
-;;      (unless beg-of-header-p (outshine-pt-rgxps)))))
+;; C-c C-x d	org-insert-drawer
+(defun outshine-insert-drawer ()
+  "Call outorg to trigger `org-insert-drawer'."
+  (interactive)
+  (outshine-use-outorg 'org-insert-drawer))
 
 ;; ;; C-c C-x e	org-set-effort
 (defun outshine-set-effort (&optional arg)
@@ -3588,11 +3577,12 @@ Use `outshine-agenda-files'. When INCLUDE-ORG-P is non-nil or prefix-arg is give
   (outshine-use-outorg
    'org-set-effort nil arg))
 
-;; ;; C-c C-x f	org-footnote-action
-;; (defun outshine-footnote-action ()
-;;   "Call outorg to trigger `org-footnote-action'."
-;;   (interactive)
-;;   (outshine-use-outorg 'org-footnote-action 'WHOLE-BUFFER-P))
+;; C-c C-x f	org-footnote-action
+(defun outshine-footnote-action (&optional special)
+  "Call outorg to trigger `org-footnote-action'."
+  (interactive "P")
+  (outshine-use-outorg
+   'org-footnote-action 'WHOLE-BUFFER-P special))
 
 ;; ;; C-c C-x g	org-feed-update-all
 ;; (defun outshine-feed-update-all ()
@@ -4000,7 +3990,8 @@ Use `outshine-agenda-files'. When INCLUDE-ORG-P is non-nil or prefix-arg is give
   (define-key map (kbd "M-t") 'outshine-todo)
   ;; (define-key map (kbd "C-v") 'Prefix Command)
   ;; (define-key map (kbd "C-w") 'outshine-refile)
-  (define-key map (kbd "M-w") 'outshine-refile)
+  ;; (define-key map (kbd "M-w") 'outshine-refile)
+  (define-key map (kbd "M-w") 'outshine-imenu)
   ;; (define-key map (kbd "C-x") 'Prefix Command)
   ;; (define-key map (kbd "C-y") 'outshine-evaluate-time-range)
   (define-key map (kbd "M-y") 'outshine-evaluate-time-range)
@@ -4138,8 +4129,8 @@ Use `outshine-agenda-files'. When INCLUDE-ORG-P is non-nil or prefix-arg is give
   (define-key map (kbd "M-# M-c") 'outshine-columns)
   ;; (define-key map (kbd "C-x C-d") 'outshine-clock-display)
   (define-key map (kbd "M-# M-d") 'outshine-clock-display)
-  ;; (define-key map (kbd "C-x C-f") 'outshine-emphasize)
-  (define-key map (kbd "M-# M-f") 'outshine-emphasize)
+  ;; (define-key map (kbd "C-x C-f") 'org-emphasize)
+  (define-key map (kbd "M-# M-f") 'org-emphasize)
   ;; (define-key map (kbd "C-x C-j") 'outshine-clock-goto)
   (define-key map (kbd "M-# M-j") 'outshine-clock-goto)
   ;; (define-key map (kbd "C-x C-l")
