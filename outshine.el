@@ -2770,48 +2770,12 @@ REFERENCE-BUFFER."
      (let ((current-prefix-arg arg))
        (call-interactively 'org-schedule)))))
 
-;; ;; FIXME
-;; ;; Error in post-command-hook (org-add-log-note):
-;; ;; (error "Marker does not point anywhere")
+;; FIXME -> org-store-log-note _outcommented_!
 ;; ;; C-c C-t		org-todo
-;; (defun outshine-todo ()
-;;   "Call outorg to trigger `org-todo'."
-;;   (interactive)
-;;   (let ((org-log-buffer-setup-hook nil)
-;; 	(org-log-done nil)
-;; 	(org-log-done-with-time nil)
-;; 	(org-log-into-drawer nil)
-;; 	(org-log-note-clock-out nil)
-;; 	(org-log-note-effective-time nil)
-;; 	(org-log-note-extra nil)
-;; 	(org-log-note-headings nil)
-;; 	(org-log-note-how nil)
-;; 	(org-log-note-marker nil)
-;; 	(org-log-note-previous-state nil)
-;; 	(org-log-note-purpose nil)
-;; 	(org-log-note-return-to nil)
-;; 	(org-log-note-state nil)
-;; 	(org-log-note-window-configuration nil)
-;; 	(org-log-post-message nil)
-;; 	(org-log-redeadline nil)
-;; 	(org-log-refile nil)
-;; 	(org-log-repeat nil)
-;; 	(org-log-reschedule nil)
-;; 	(org-log-state-notes-insert-after-drawers nil)
-;; 	(org-log-state-notes-into-drawer nil)
-;; 	(org-log-states-order-reversed nil))
-;;     (outshine-use-outorg 'org-todo)))
-
-(defun outshine-todo ()
+(defun outshine-todo (&optional arg)
   "Call outorg to trigger `org-todo'."
-  (interactive)
-  (outshine-use-outorg
-   (lambda ()
-     (interactive)
-     (remove-hook 'post-command-hook 'org-add-log-note)
-     (org-todo)
-     (add-hook 'post-command-hook 'org-add-log-note))))
-
+  (interactive "P")
+  (outshine-use-outorg 'org-todo nil arg))
 
 ;; ;; C-c C-v		Prefix Command
 
