@@ -913,6 +913,23 @@ section are given (with section title in submatch 1)."
 
 
 ;;; Defuns
+;;;; Advices
+
+(defadvice org-store-log-note (around org-store-log-note-around activate)
+  "Outcomment inserted log-note in Outshine buffers."
+  (let ((outshine-log-note-beg-marker
+	 ;; stay before inserted text
+	 (copy-marker org-log-note-marker nil))
+	(outshine-log-note-end-marker
+	 ;; stay after inserted text
+	 (copy-marker org-log-note-marker t)))
+    ad-do-it
+    (unless (derived-mode-p 'org-mode)
+      (comment-region outshine-log-note-beg-marker
+		      outshine-log-note-end-marker))
+    (move-marker outshine-log-note-beg-marker nil)
+    (move-marker outshine-log-note-end-marker nil)))
+
 ;;;; Functions
 ;;;;; Define keys with fallback
 
