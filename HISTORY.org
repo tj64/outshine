@@ -15,6 +15,8 @@ navi-regexps as items to fold.
 
 * TODO Version 2.0
 
+** TODO improve MELPA-package
+
 ** TODO delete tj-outshine branch
 ** TODO merge trunk in master
 ** DONE quite byte-compiler
@@ -42,7 +44,6 @@ use 'outshine-use-outorg' for calling many Org cmds from outshine.
 
 ** DONE update README
    - State "DONE"       from "TODO"       [2014-09-20 Sa 12:55]
-** TODO improve MELPA-package
 ** DONE set version number
    - State "DONE"       from "TODO"       [2014-09-20 Sa 12:55]
 ** TODO announce in org-mode mailing-list
