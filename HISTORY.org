@@ -18,7 +18,8 @@ navi-regexps as items to fold.
 ** TODO improve MELPA-package
 
 ** TODO delete tj-outshine branch
-** TODO merge trunk in master
+** DONE merge trunk in master
+   - State "DONE"       from "TODO"       [2014-09-21 So 01:10]
 ** DONE quite byte-compiler
    - State "DONE"       from "TODO"       [2014-09-20 Sa 23:48]
 ** DONE introduce outshine-agenda functionality (read-only for now)
