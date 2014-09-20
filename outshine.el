@@ -247,13 +247,10 @@
 ;;; Requires
 
 (require 'outline)
-
-;; (require 'easymenu)
-;; soft-dependency on outorg
-;; FIXME introducing cyclic dependencies?
-;; (require 'outorg nil 'NOERROR)
+(require 'outorg)
 ;; necessary before Emacs 24.3
 (require 'newcomment)
+;; (require 'easymenu)
 
 ;;; Declarations
 
