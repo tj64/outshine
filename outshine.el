@@ -204,7 +204,7 @@
 ;; extra functionality to show the number of hidden lines in folded
 ;; headlines (`outshine-show-hidden-lines-cookies'). There are a few
 ;; utility commands for latex-mode too
-;; (`outshine-latex-insert-header`,
+;; (`outshine-latex-insert-header',
 ;; `outshine-latex-insert-headers-in-buffer' and
 ;; `outshine-TeX-command-region-on-subtree')
 
@@ -362,7 +362,7 @@ Used to override any major-mode specific file-local settings")
     ;; [X]
     ("x" . outshine-export-dispatch)
     ("Meta Data Editing")
-    ;; [ ]
+    ;; [X]
     ("t" . outshine-todo)
     ;; [X]
     ("," . outshine-priority)
