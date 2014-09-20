@@ -37,9 +37,11 @@ all Outshine libraries.
 
 use 'outshine-use-outorg' for calling many Org cmds from outshine.
 
-** TODO update README
+** DONE update README
+   - State "DONE"       from "TODO"       [2014-09-20 Sa 12:55]
 ** TODO improve MELPA-package
-** TODO set version number
+** DONE set version number
+   - State "DONE"       from "TODO"       [2014-09-20 Sa 12:55]
 ** TODO announce in org-mode mailing-list
 ** TODO announce in emacs-user mailing-list
 

@@ -259,7 +259,7 @@
 ;;; Variables
 ;;;; Consts
 
-(defconst outshine-version "1.0"
+(defconst outshine-version "2.0"
   "outshine version number.")
 
 (defconst outshine-max-level 8
