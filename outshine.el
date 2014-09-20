@@ -30,7 +30,7 @@
 ;; outline-minor-mode (Org-mode itself derives from outline-mode), so
 ;; there is no such thing like an 'outshine mode', only
 ;; `outline-minor-mode' with outshine extensions loaded.
- 
+
 ;; Outshine is major-mode agnostic. At least in theory, it should work
 ;; out-of-the-box with all major-modes, even those not yet written, as
 ;; long as these modes have comment syntax defined. In real life there
@@ -125,7 +125,7 @@
 
 ;;  3. Simply download the raw .el files from github and copy them to a
 ;;     location where Emacs can find. This is not really recommended,
-;;     since easy updating is not possible this way. 
+;;     since easy updating is not possible this way.
 
 ;; Put this in your init.el or '.emacs' to get started:
 
@@ -249,12 +249,19 @@
 (require 'outline)
 
 ;; (require 'easymenu)
-;; soft-dependency on outorg 
+;; soft-dependency on outorg
 ;; FIXME introducing cyclic dependencies?
-
 ;; (require 'outorg nil 'NOERROR)
 ;; necessary before Emacs 24.3
 (require 'newcomment)
+
+;;; Declarations
+
+(declare-function outorg-edit-as-org "outorg")
+(declare-function outorg-copy-edits-and-exit "outorg")
+(declare-function navi-map-keyboard-to-key "navi-mode")
+(declare-function navi-get-regexp "navi-mode")
+(declare-function idomenu "idomenu")
 
 ;;; Variables
 ;;;; Consts
@@ -502,6 +509,9 @@ them set by set, separated by a nil element.  See the example for
   "Marker for last headline edited with outorg.")
 (make-variable-buffer-local
  'outshine-use-outorg-last-headline-marker)
+
+(defvar outshine-imenu-preliminary-generic-expression nil
+  "Imenu variable.")
 
 (defvar outshine-agenda-files ()
   "List of absolute file names of outshine-agenda-files.")
@@ -780,7 +790,7 @@ t      Everywhere except in headlines"
 
 
 ;; old regexp: "[*]+"
-(defvar outshine-default-outline-regexp-base 
+(defvar outshine-default-outline-regexp-base
   (format "[%s]\\{1,%d\\}"
           outshine-regexp-base-char outshine-max-level)
   "Default base for calculating the outline-regexp")
@@ -910,7 +920,7 @@ For each class, the outline level and a regexp matching the latex
 section are given (with section title in submatch 1)."
   :group 'outshine
   :type '(alist :key-type string
-                :value-type alist)) 
+                :value-type alist))
 
 
 ;;; Defuns
@@ -1470,7 +1480,7 @@ Use current buffer for conversion, unless BUF-OR-FILE is given."
 		(point-min) (point-max))))
        'WHOLE-BUFFER-P))
     buf-strg))
-  
+
 ;; courtesy of Pascal Bourguignon
 (defun outshine-use-outorg-finish-store-log-note ()
   "Finish store-log-note and exit recursive edit"
@@ -1731,7 +1741,7 @@ buffer-file-name.
 When RESTRICTION-LOCK is given, act conditional on its value:
 
  - file :: (symbol) restrict to buffer
- 
+
  - t :: (any) restrict to subtree
 
 Use current-buffer and point position, unless BUF-OR-NAME and/or
@@ -2267,7 +2277,7 @@ overwritten, and the table is not marked as requiring realignment."
      ((and outshine-speed-command (listp outshine-speed-command))
       (eval outshine-speed-command))
      (t (let (outshine-use-speed-commands)
-          (call-interactively 'outshine-self-insert-command)))))   
+          (call-interactively 'outshine-self-insert-command)))))
    (t
     (self-insert-command N)
     (if outshine-self-insert-cluster-for-undo
@@ -2306,7 +2316,7 @@ Switch to associated read-only *Navi* buffer for fast and
 convenient buffer navigation without changing visibility state of
 original buffer. Type 'o' (M-x navi-goto-occurrence-other-window)
 to switch from the new position in the *Navi* buffer to the same
-position in the original buffer. 
+position in the original buffer.
 
 This function is the outshine replacement for `org-goto'."
   (interactive)
@@ -2361,7 +2371,7 @@ registered major-mode languages and their single-key commands can
 be found in the customizable variable `navi-key-mappings'. The
 regexps that define the keyword-searches associated with these
 keyboard-keys can be found in the customizable variable
-`navi-keywords'. 
+`navi-keywords'.
 
 Note that all printable ASCII characters are predefined as
 single-key commands in navi-mode, i.e. you can define
@@ -2464,7 +2474,7 @@ PT-OR-MARKER first if given."
   (catch 'exit-let
     (let* ((buf (cond
 		 ((and buf-or-name
-		       (buffer-live-p (get-buffer buf-or-name)) 
+		       (buffer-live-p (get-buffer buf-or-name))
 		       (with-current-buffer buf-or-name
 			 (eq major-mode 'latex-mode)))
 		  buf-or-name)
@@ -2519,7 +2529,7 @@ preamble header unless NO-PREAMBLE-P is non-nil."
   (catch 'exit-let
     (let* ((buf (cond
 		 ((and buf-or-name
-		       (buffer-live-p (get-buffer buf-or-name)) 
+		       (buffer-live-p (get-buffer buf-or-name))
 		       (with-current-buffer buf-or-name
 			 (eq major-mode 'latex-mode)))
 		  buf-or-name)
@@ -2540,7 +2550,7 @@ preamble header unless NO-PREAMBLE-P is non-nil."
 		(outshine-calc-outline-string-at-level 1)
 		"Preamble\n")))
 	    (while (re-search-forward
-		    (concat 
+		    (concat
 		     "\\("
 		     "\\\\part{\\|"
 		     "\\\\chapter{\\|"
@@ -2585,7 +2595,7 @@ marking subtree (and subsequently run the tex command)."
     (call-interactively 'TeX-command-region))
   (deactivate-mark))
 
-;;;;; Outshine Agenda 
+;;;;; Outshine Agenda
 
 (defun outshine-agenda-add-files (&optional append-p &rest files)
   "Prepend FILES to `outshine-agenda-files'.
@@ -2682,7 +2692,7 @@ With `current-prefix-arg' prompt the user for argument values."
       (with-current-buffer (find-file-noselect ag-file)
 	(org-agenda-set-restriction-lock 'file)
 	(org-agenda)))))
-      
+
 ;;;;; Use Outorg for calling Org
 
 ;; ;; TEMPLATE A
@@ -2714,7 +2724,7 @@ With `current-prefix-arg' prompt the user for argument values."
 ;; C-c C-d		org-deadline
 (defun outshine-deadline (&optional arg)
   "Call outorg to trigger `org-deadline'."
-  (interactive "P") 
+  (interactive "P")
   (outshine-use-outorg
    (lambda ()
      (interactive)
@@ -2735,7 +2745,7 @@ With `current-prefix-arg' prompt the user for argument values."
 ;; ;; C-c C-j		org-goto
 ;; (defun outshine-goto ()
 ;;   "Call outorg to trigger `org-goto'."
-;;   (interactive) 
+;;   (interactive)
 ;;   (outshine-use-outorg 'org-goto t))
 
 ;; ;; C-c C-k		org-kill-note-or-show-branches
@@ -2781,7 +2791,7 @@ REFERENCE-BUFFER."
 ;; C-c C-s		org-schedule
 (defun outshine-schedule (&optional arg)
   "Call outorg to trigger `org-schedule'."
-  (interactive "P") 
+  (interactive "P")
   (outshine-use-outorg
    (lambda ()
      (interactive)
@@ -2833,13 +2843,13 @@ REFERENCE-BUFFER."
 (defun outshine-time-stamp-inactive (&optional arg)
   "Call outorg to trigger `org-time-stamp-inactive'."
   (interactive "P")
-  (outshine-use-outorg 
+  (outshine-use-outorg
    (lambda ()
      (interactive)
      (if (not (org-on-heading-p))
 	 	 (if arg
 		     (org-time-stamp-inactive arg)
-		   (org-time-stamp))
+		   (org-time-stamp-inactive))
        (or
 	(and
 	 (re-search-forward org-element--timestamp-regexp nil t)
@@ -2913,7 +2923,7 @@ REFERENCE-BUFFER."
 (defun outshine-time-stamp (&optional arg)
   "Call outorg to trigger `org-time-stamp'."
   (interactive "P")
-  (outshine-use-outorg 
+  (outshine-use-outorg
    (lambda ()
      (interactive)
      (if (not (org-on-heading-p))
@@ -3116,7 +3126,7 @@ With prefix ARG, use whole buffer."
 ;;   (interactive)
 ;;   (outshine-use-outorg 'org-babel-view-src-block-info))
 
-;; ;; FIXME:  
+;; ;; FIXME:
 ;; ;; split-string: Wrong type argument: stringp, nil
 ;; ;; C-c C-v C-j	org-babel-insert-header-arg
 ;; (defun outshine-babel-insert-header-arg ()
@@ -3467,7 +3477,7 @@ current buffer(-file). "
 Use `outshine-agenda-files'. When INCLUDE-ORG-P is non-nil or prefix-arg is given, include `org-agenda-files'."
   (interactive "P")
   (outshine-agenda nil include-org-p))
-  
+
 
 ;; ;; C-c C-x A	org-archive-to-archive-sibling
 ;; (defun outshine-archive-to-archive-sibling ()
@@ -3759,7 +3769,7 @@ Use `outshine-agenda-files'. When INCLUDE-ORG-P is non-nil or prefix-arg is give
 
 ;;;; Keybindings
 ;;;;; Principal Keybindings
- 
+
 ;; from
 ;; http://stackoverflow.com/questions/4351044/binding-m-up-m-down-in-emacs-23-1-1
 (define-key input-decode-map "\e\eOA" [(meta up)])
@@ -3842,7 +3852,7 @@ Use `outshine-agenda-files'. When INCLUDE-ORG-P is non-nil or prefix-arg is give
 ;;;;;; [Subprefix]
 
 ;; Set the outline-minor-mode-prefix key in your init-file
-;; before loading outline-mode 
+;; before loading outline-mode
 (let ((map (lookup-key outline-minor-mode-map outline-minor-mode-prefix)))
   ;; define sub-prefix
   ;; (define-key map (kbd "C-v") nil)
