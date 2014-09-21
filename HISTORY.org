@@ -47,8 +47,10 @@ use 'outshine-use-outorg' for calling many Org cmds from outshine.
    - State "DONE"       from "TODO"       [2014-09-20 Sa 12:55]
 ** DONE set version number
    - State "DONE"       from "TODO"       [2014-09-20 Sa 12:55]
-** TODO announce in org-mode mailing-list
-** TODO announce in emacs-user mailing-list
+** DONE announce in org-mode mailing-list
+   - State "DONE"       from "TODO"       [2014-09-21 So 13:07]
+** DONE announce in emacs-user mailing-list
+   - State "DONE"       from "TODO"       [2014-09-21 So 13:07]
 
 
 * DONE Version 1.0
