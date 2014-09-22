@@ -14,7 +14,7 @@ He had the initial idea, wrote most of the new code in outshine.el, as
 well as the libraries outorg.el and navi-mode.el, and maintains the
 whole project. 
 
-* Casten Dominik 
+* Carsten Dominik 
   :PROPERTIES:
   :roles:    contributor
   :email:    <dominik AT uva DOT nl>
