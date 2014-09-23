@@ -89,7 +89,7 @@ Wiki]] and merged into outshine.el. Its author is unknown.
 To avoid the legal issues introduced by this anonymous code, commit
 b812d4550c1257cc48bd4296c323eba4fe5dd113 would have to been splitted
 in parts and partly reversed. outline-mode-easy-bindings.el could then
-be used as a soft requirement of outshine.el.
+be used as a soft (external) requirement of outshine.el.
 
 * Jonathan Leech-Pepin
   :PROPERTIES:
