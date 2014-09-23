@@ -2262,9 +2262,15 @@ overwritten, and the table is not marked as requiring realignment."
   ;; (outshine-check-before-invisible-edit 'insert)
   (cond
    ((and outshine-use-speed-commands
-         (setq outshine-speed-command
-               (run-hook-with-args-until-success
-                'outshine-speed-command-hook (this-command-keys))))
+	 (let ((kv (this-command-keys-vector)))
+	   (setq outshine-speed-command
+		 (run-hook-with-args-until-success
+		  'outshine-speed-command-hook
+		  (make-string 1 (aref kv (1- (length kv))))))))
+    ;; (setq outshine-speed-command
+    ;;       (run-hook-with-args-until-success
+    ;;        'outshine-speed-command-hook
+    ;; 	(this-command-keys)))
     (cond
      ((commandp outshine-speed-command)
       (setq this-command outshine-speed-command)

@@ -47,7 +47,7 @@ His library outline-magic.el was merged into outshine.el.
   :PROPERTIES:
   :roles:    contributor
   :email:    <abraham AT iesd DOT auc DOT dk>
-  :FSF:      ?
+  :FSF:      yes
   :contributions: outshine.el
   :nontrivial: yes
   :END:
@@ -86,11 +86,16 @@ Wiki]] and merged into outshine.el. Its author is unknown.
 ;; Copied from: http://emacswiki.org/emacs/OutlineMinorMode
 #+end_quote
 
+To avoid the legal issues introduced by this anonymous code, commit
+b812d4550c1257cc48bd4296c323eba4fe5dd113 would have to been splitted
+in parts and partly reversed. outline-mode-easy-bindings.el could then
+be used as a soft requirement of outshine.el.
+
 * Jonathan Leech-Pepin
   :PROPERTIES:
   :roles:    contributor
   :email:    <jonathan.leechpepin AT gmail DOT com>
-  :FSF:      ?
+  :FSF:      yes
   :contributions: outorg-export.el
   :nontrivial: yes
   :END:
@@ -121,12 +126,12 @@ New library [[https://github.com/jleechpe/outorg-export][outorg-export]].
   :PROPERTIES:
   :roles:    contributor
   :email:  <alexander DOT vorobiev AT gmail DOT com>
-  :FSF:      ?
+  :FSF:      no
   :contributions: outshine.el
-  :nontrivial: yes
+  :nontrivial: no
   :END:
 
-Macro for condition keybindings in outshine.el.
+Macro for conditional keybindings in outshine.el:
 
 #+begin_quote
 ;; copied and adapted from Alexander Vorobiev
@@ -134,11 +139,17 @@ Macro for condition keybindings in outshine.el.
 (defmacro outshine-define-key-with-fallback [...]
 #+end_quote
 
+Of course this macro isn't trivial from a programmers point of view,
+its a rather sophisticated contribution. But since its just a few
+lines of code, signing of FSF papers isn't necessary (its a trivial
+contribution from a legal point of view).
+
+
 * Fabrice Niessen
   :PROPERTIES:
   :roles:    contributor
   :email:  <fni AT mygooglest DOT com>
-  :FSF:      ?
+  :FSF:      yes
   :contributions: outshine.el
   :nontrivial: ?
   :END:
@@ -149,7 +160,7 @@ Modified snippets of his (old) [[http://www.mygooglest.com/fni/dot-emacs.html][d
   :PROPERTIES:
   :roles:    bug-reporter
   :email:  <jonas AT bernoul DOT li>
-  :FSF:      ?
+  :FSF:      yes
   :contributions: outshine.el
   :nontrivial: no
   :END:
