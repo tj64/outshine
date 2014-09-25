@@ -144,7 +144,6 @@ its a rather sophisticated contribution. But since its just a few
 lines of code, signing of FSF papers isn't necessary (its a trivial
 contribution from a legal point of view).
 
-
 * Fabrice Niessen
   :PROPERTIES:
   :roles:    contributor

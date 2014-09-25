@@ -932,7 +932,7 @@ section are given (with section title in submatch 1)."
 	 ;; stay after inserted text
 	 (copy-marker org-log-note-marker t)))
     ad-do-it
-    (unless (derived-mode-p 'org-mode)
+    (unless (derived-mode-p 'org-mode 'org-agenda-mode)
       (comment-region outshine-log-note-beg-marker
 		      outshine-log-note-end-marker))
     (move-marker outshine-log-note-beg-marker nil)
