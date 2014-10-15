@@ -166,3 +166,13 @@ Modified snippets of his (old) [[http://www.mygooglest.com/fni/dot-emacs.html][d
 
 Several bugs and issues reported.
 
+* hanche
+  :PROPERTIES:
+  :roles:    contributor
+  :github:   https://github.com/hanche
+  :FSF:      no
+  :contributions: outshine.el
+  :nontrivial: no
+  :END:
+
+Bugfix.
