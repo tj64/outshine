@@ -1,3 +1,21 @@
+;; # <<<*** BEGIN EXPORT TEMPLATE [edits will be lost at exit] ***>>>
+
+;; #+TITLE: outshine
+;; #+LANGUAGE: en
+;; #+AUTHOR: Thorsten Jolitz
+;; #+EMAIL: tjolitz@gmail.com
+;; #+OPTIONS:   H:3 num:t   toc:3 \n:nil @:t ::t |:t ^:nil -:t f:t *:t <:nil  prop:t
+;; #+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
+;; #+OPTIONS:   author:t creator:t timestamp:t email:t
+;; # #+DESCRIPTION: <<add description here>>
+;; # #+KEYWORDS:  <<add keywords here>>
+;; # #+SEQ_TODO: <<add TODO keywords here>>
+;; #+INFOJS_OPT: view:nil toc:t ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+;; #+EXPORT_SELECT_TAGS: export
+;; #+EXPORT_EXCLUDE_TAGS: noexport
+
+;; # <<<*** END EXPORT TEMPLATE ***>>>
+
 ;;; outshine.el --- outline with outshine outshines outline
 
 ;; Author: Thorsten Jolitz <tjolitz AT gmail DOT com>
@@ -121,11 +139,19 @@
 ;;  1. Clone the git repos or fork them on github
 ;;     (https://github.com/tj64)
 
-;;  2. Use the package manager to install them (from MELPA).
+;;  2. Use the package manager to install them (from MELPA). 
 
 ;;  3. Simply download the raw .el files from github and copy them to a
 ;;     location where Emacs can find. This is not really recommended,
 ;;     since easy updating is not possible this way.
+
+;; Note that since version 2.0, outshine.el depends on outorg.el and
+;; navi-mode.el depends on both, outshine.el and outorg.el. So the order
+;; of installation should be 
+
+;;  1. outorg
+;;  2. outshine
+;;  3. navi-mode (optional)
 
 ;; Put this in your init.el or '.emacs' to get started:
 

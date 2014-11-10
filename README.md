@@ -149,6 +149,14 @@ libraries):
     location where Emacs can find. This is not really recommended,
     since easy updating is not possible this way.
 
+Note that since version 2.0, outshine.el depends on outorg.el and
+navi-mode.el depends on both, outshine.el and outorg.el. So the order
+of installation should be 
+
+1.  outorg
+2.  outshine
+3.  navi-mode (optional)
+
 Put this in your init.el or '.emacs' to get started:
 
     #+begin_src emacs-lisp
