@@ -3,6 +3,7 @@
 ;; Author: Thorsten Jolitz <tjolitz AT gmail DOT com>
 ;; Version: 2.0
 ;; URL: https://github.com/tj64/outshine
+;; Package-Requires: ((outorg "2.0"))
 
 ;;;; MetaData
 ;;   :PROPERTIES:
