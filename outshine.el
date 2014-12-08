@@ -4309,6 +4309,7 @@ Use `outshine-agenda-files'. When INCLUDE-ORG-P is non-nil or prefix-arg is give
 ;; Local Variables:
 ;; coding: utf-8
 ;; ispell-local-dictionary: "en_US"
+;; indent-tabs-mode: nil
 ;; End:
 
 ;;; outshine.el ends here
