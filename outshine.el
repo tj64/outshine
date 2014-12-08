@@ -266,8 +266,11 @@
 (declare-function outorg-edit-as-org "outorg")
 (declare-function outorg-copy-edits-and-exit "outorg")
 (declare-function navi-map-keyboard-to-key "navi-mode")
+(declare-function navi-search-and-switch "navi-mode")
 (declare-function navi-get-regexp "navi-mode")
 (declare-function idomenu "idomenu")
+(declare-function imenu-choose-buffer-index "imenu")
+(declare-function org-agenda-remove-restriction-lock "org-agenda")
 
 ;;; Variables
 ;;;; Consts
@@ -2444,6 +2447,7 @@ i.e. the text following the regexp match until the next space character."
                  (not PREFER-IMENU-P))
             (funcall 'idomenu)
           ;; else call imenu
+          (require 'imenu)
           (funcall 'imenu
                    (imenu-choose-buffer-index
                     (concat (car
@@ -2700,6 +2704,7 @@ With `current-prefix-arg' prompt the user for argument values."
 		     (outshine-agenda-create-temporary-agenda-file)))
 	(with-org-agenda-files
 	 (or include-org-p outshine-agenda-include-org-agenda-p)))
+    (require 'org-agenda)
     (org-agenda-remove-restriction-lock)
     (if with-org-agenda-files
 	;; FIXME
