@@ -931,7 +931,16 @@ section are given (with section title in submatch 1)."
   :type '(alist :key-type string
                 :value-type alist))
 
-
+(defcustom outshine-preserve-delimiter-whitespace nil
+  "Non-nil means that whitespace present at the start or end of
+`comment-start' is preserved when matching headline syntax. By
+default, such space is removed to support language modes which
+erroneously include it in `comment-start', but for other
+languages, such as Haskell, the trailing whitespace is
+significant."
+  :group 'outshine
+  :type 'boolean)
+  
 ;;; Defuns
 ;;;; Advices
 
@@ -1021,7 +1030,9 @@ recover it by stripping off \"-map\" from KEYMAP name."
   "Chomp leading and trailing whitespace from outline regexps."
   (and comment-start
        (setq outshine-normalized-comment-start
-             (outshine-chomp comment-start)))
+             (if outshine-preserve-delimiter-whitespace
+                 comment-start
+                 (outshine-chomp comment-start))))
   (and comment-end
        (setq outshine-normalized-comment-end
              (outshine-chomp comment-end)))
