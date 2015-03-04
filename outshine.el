@@ -122,7 +122,7 @@
 ;;  1. Clone the git repos or fork them on github
 ;;     (https://github.com/tj64)
 
-;;  2. Use the package manager to install them (from MELPA). 
+;;  2. Use the package manager to install them (from MELPA).
 
 ;;  3. Simply download the raw .el files from github and copy them to a
 ;;     location where Emacs can find. This is not really recommended,
@@ -130,7 +130,7 @@
 
 ;; Note that since version 2.0, outshine.el depends on outorg.el and
 ;; navi-mode.el depends on both, outshine.el and outorg.el. So the order
-;; of installation should be 
+;; of installation should be
 
 ;;  1. outorg
 ;;  2. outshine
@@ -940,7 +940,7 @@ languages, such as Haskell, the trailing whitespace is
 significant."
   :group 'outshine
   :type 'boolean)
-  
+
 ;;; Defuns
 ;;;; Advices
 
@@ -1826,12 +1826,14 @@ The old value is stored in
   (setq keep-levels (1- keep-levels))
   (save-excursion
     (goto-char (point-min))
+    ;; Skip the prelude, if any.
+    (unless (outline-on-heading-p t) (outline-next-heading))
     (hide-subtree)
     (show-children keep-levels)
     (condition-case err
-      (while (outline-get-next-sibling)
-        (hide-subtree)
-        (show-children keep-levels))
+        (while (outline-get-next-sibling)
+          (hide-subtree)
+          (show-children keep-levels))
       (error nil))))
 
 (defun outline-hide-other ()
