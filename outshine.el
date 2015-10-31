@@ -3,7 +3,7 @@
 ;; Author: Thorsten Jolitz <tjolitz AT gmail DOT com>
 ;; Version: 2.0
 ;; URL: https://github.com/tj64/outshine
-;; Package-Requires: ((outorg "2.0"))
+;; Package-Requires: ((outorg "2.0") (cl-lib "0.5"))
 
 ;;;; MetaData
 ;;   :PROPERTIES:
@@ -260,6 +260,7 @@
 ;; necessary before Emacs 24.3
 (require 'newcomment)
 ;; (require 'easymenu)
+(require 'cl-lib)
 
 ;;; Declarations
 
@@ -2616,7 +2617,7 @@ subtree, with two prefix ARGs, try to move up two levels before
 marking subtree (and subsequently run the tex command)."
   (interactive "p")
   (save-excursion
-    (case arg
+    (cl-case arg
       (4 (ignore-errors
 	   (outline-up-heading 1 t)))
       (16 (ignore-errors
