@@ -255,6 +255,8 @@
 
 ;;; Requires
 
+(eval-when-compile
+  (require 'cl))
 (require 'outline)
 (require 'outorg)
 ;; necessary before Emacs 24.3
