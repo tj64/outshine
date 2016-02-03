@@ -947,14 +947,25 @@ significant."
 ;;; Defuns
 ;;;; Advices
 
+(defun outshine-mimic-org-log-note-marker ()
+  ;; (if (< (org-version) ?? )
+  ;;     org-log-note-marker
+    (with-current-buffer (marker-buffer org-log-note-marker)
+      (goto-char org-log-note-marker)
+      (copy-marker (org-log-beginning))))
+  ;; )
+
+
 (defadvice org-store-log-note (around org-store-log-note-around activate)
   "Outcomment inserted log-note in Outshine buffers."
   (let ((outshine-log-note-beg-marker
 	 ;; stay before inserted text
-	 (copy-marker org-log-note-marker nil))
+	 ;; (copy-marker org-log-note-marker nil))
+	 (copy-marker (outshine-mimic-org-log-note-marker) nil))
 	(outshine-log-note-end-marker
 	 ;; stay after inserted text
-	 (copy-marker org-log-note-marker t)))
+	 ;; (copy-marker org-log-note-marker t)))
+	 (copy-marker (outshine-mimic-org-log-note-marker) t)))
     ad-do-it
     (unless (derived-mode-p 'org-mode 'org-agenda-mode)
       (comment-region outshine-log-note-beg-marker
