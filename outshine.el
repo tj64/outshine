@@ -968,7 +968,7 @@ significant."
 	 (copy-marker (outshine-mimic-org-log-note-marker) t)))
     ad-do-it
     (unless (derived-mode-p 'org-mode 'org-agenda-mode)
-      (comment-region outshine-log-note-beg-marker
+      (outshine-comment-region outshine-log-note-beg-marker
 		      outshine-log-note-end-marker))
     (move-marker outshine-log-note-beg-marker nil)
     (move-marker outshine-log-note-end-marker nil)))
@@ -1494,6 +1494,17 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 ;;                        (save-excursion (forward-line -4) (point))
 ;;                        pt)))))))
 ;;         (list rgx4 rgx3 rgx2 rgx1 rgx0)))))
+
+(defun outshine-comment-region (beg end &optional arg)
+       "Use comment-style that always inserts at BOL.
+Call `comment-region' with a comment-style that guarantees
+   insertion of comment-start markers at beginning-of-line."
+       (interactive "r")
+       (let ((comment-style
+              (if (member comment-style '(indent-or-triple indent))
+                  'plain
+                comment-style)))
+         (comment-region beg end arg)))
 
 (defun outshine-get-outorg-edit-buffer-content (&optional buf-or-file)
   "Get content of buffer `outorg-edit-buffer-name.'
