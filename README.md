@@ -8,9 +8,6 @@
     - [Emacs Version](#emacs-version)
   - [ChangeLog](#changelog)
 
-
-DISCLAIMER: Unfortunately in the very moment when interest in Outshine sharply increased (for whatever reasons I'm not aware of) events in my life forced me away from Emacs and have me super busy right now, so I cannot really keep up with the issues and feature requests here. I hope the situation will normalize again in the future, until then I won't have the time to fix issues or code new features (though I will apply patches).  
-
 # outshine.el &#x2014; outline with outshine outshines outline<a id="sec-1"></a>
 
 Author: Thorsten Jolitz <tjolitz AT gmail DOT com>
