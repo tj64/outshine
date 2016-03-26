@@ -2353,7 +2353,7 @@ overwritten, and the table is not marked as requiring realignment."
              'self-insert-uses-region-functions))))
 
 ;; trigger company idle completion like namesake command
-(put 'outshine-self-insert-command 'company-begin t))
+(put 'outshine-self-insert-command 'company-begin t)
 
 ;;;;; Other Commands
 
