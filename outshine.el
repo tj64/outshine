@@ -2351,6 +2351,9 @@ overwritten, and the table is not marked as requiring realignment."
        (not (run-hook-with-args-until-success
              'self-insert-uses-region-functions))))
 
+;; trigger company idle completion like namesake command
+(put 'outshine-self-insert-command 'company-begin t))
+
 ;;;;; Other Commands
 
 (defun outshine-narrow-to-subtree ()
