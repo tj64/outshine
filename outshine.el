@@ -1563,6 +1563,7 @@ function was called upon."
 
 ;;;;; Hook function
 
+;;;###autoload
 (defun outshine-hook-function ()
   "Add this function to outline-minor-mode-hook"
   (outshine-set-outline-regexp-base)
