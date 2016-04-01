@@ -255,7 +255,7 @@ keybindings:
     an outshine buffer. Not all work out-of-the-box. Since there are
     many Org commands, it will take some time to check them one-by-one
     and filter out those that make sense with outshine (and fix them if
-    neccessary).
+    necessary).
 
 ### Emacs Version<a id="sec-1-2-5"></a>
 
