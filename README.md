@@ -144,7 +144,7 @@ libraries):
 2.  Use the package manager to install them (from MELPA).
 
 3.  Simply download the raw .el files from github and copy them to a
-    location where Emacs can find. This is not really recommended,
+    location where Emacs can find them. This is not really recommended,
     since easy updating is not possible this way.
 
 Note that since version 2.0, outshine.el depends on outorg.el and
@@ -255,7 +255,7 @@ keybindings:
     an outshine buffer. Not all work out-of-the-box. Since there are
     many Org commands, it will take some time to check them one-by-one
     and filter out those that make sense with outshine (and fix them if
-    neccessary).
+    necessary).
 
 ### Emacs Version<a id="sec-1-2-5"></a>
 
