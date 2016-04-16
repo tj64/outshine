@@ -1125,8 +1125,8 @@ Based on `comment-start' and `comment-add'."
   outshine-outline-regexp"
   (save-excursion
     (save-match-data
-      ;; (and
-      ;;  (looking-at (outshine-calc-outline-regexp))
+      (and
+       (looking-at (outshine-calc-outline-regexp))
        ;; ;; FIXME this works?
        ;; (looking-at outline-regexp)
        (let ((m-strg (match-string-no-properties 0)))
@@ -1153,7 +1153,7 @@ Based on `comment-start' and `comment-add'."
                'OMIT-NULLS)))
            m-strg
            "")))
-       )))
+       ))))
 
 ;;;;; Set outline-regexp und outline-level
 
