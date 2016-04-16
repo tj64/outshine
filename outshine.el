@@ -2358,6 +2358,21 @@ overwritten, and the table is not marked as requiring realignment."
 
 ;;;;; Other Commands
 
+(defun outshine-eval-lisp-subtree ()
+  "Mark subtree at point and call `eval-region' on it."
+  (interactive)
+  (save-excursion
+    (outline-mark-subtree)
+    (call-interactively 'eval-region)))
+
+(defun outshine-comment-subtree-content ()
+  "Mark subtree at point and call `comment-dwim' on its content."
+  (interactive)
+  (save-excursion
+    (outline-mark-subtree)
+    (forward-line)
+    (call-interactively 'comment-dwim)))
+
 (defun outshine-narrow-to-subtree ()
   "Narrow buffer to subtree at point."
   (interactive)
