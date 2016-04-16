@@ -1125,8 +1125,8 @@ Based on `comment-start' and `comment-add'."
   outshine-outline-regexp"
   (save-excursion
     (save-match-data
-      ;; (and
-      ;;  (looking-at (outshine-calc-outline-regexp))
+      (and
+       (looking-at (outshine-calc-outline-regexp))
        ;; ;; FIXME this works?
        ;; (looking-at outline-regexp)
        (let ((m-strg (match-string-no-properties 0)))
@@ -1153,7 +1153,7 @@ Based on `comment-start' and `comment-add'."
                'OMIT-NULLS)))
            m-strg
            "")))
-       )))
+       ))))
 
 ;;;;; Set outline-regexp und outline-level
 
@@ -2357,6 +2357,21 @@ overwritten, and the table is not marked as requiring realignment."
 (put 'outshine-self-insert-command 'company-begin t)
 
 ;;;;; Other Commands
+
+(defun outshine-eval-lisp-subtree ()
+  "Mark subtree at point and call `eval-region' on it."
+  (interactive)
+  (save-excursion
+    (outline-mark-subtree)
+    (call-interactively 'eval-region)))
+
+(defun outshine-comment-subtree-content ()
+  "Mark subtree at point and call `comment-dwim' on its content."
+  (interactive)
+  (save-excursion
+    (outline-mark-subtree)
+    (forward-line)
+    (call-interactively 'comment-dwim)))
 
 (defun outshine-narrow-to-subtree ()
   "Narrow buffer to subtree at point."
