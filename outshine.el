@@ -1580,7 +1580,7 @@ function was called upon."
     (and outshine-imenu-show-headlines-p
          (set (make-local-variable
                'outshine-imenu-preliminary-generic-expression)
-               `(("Outline" ,(concat out-regexp "\\(.*$\\)") 1)))
+               `((nil ,(concat out-regexp "\\(.*$\\)") 1)))
 	 (if imenu-generic-expression
 	     (add-to-list 'imenu-generic-expression
                           (car outshine-imenu-preliminary-generic-expression))
