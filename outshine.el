@@ -949,13 +949,12 @@ significant."
 ;;;; Advices
 
 (defun outshine-mimic-org-log-note-marker ()
-  ;; (if (< (org-version) ?? )
-  ;;     org-log-note-marker
+  (if (version< (org-version) "8.3")
+      ;; `org-log-beginning' added in Org 8.3
+      org-log-note-marker
     (with-current-buffer (marker-buffer org-log-note-marker)
       (goto-char org-log-note-marker)
-      (copy-marker (org-log-beginning))))
-  ;; )
-
+      (copy-marker (org-log-beginning)))))
 
 (defadvice org-store-log-note (around org-store-log-note-around activate)
   "Outcomment inserted log-note in Outshine buffers."
